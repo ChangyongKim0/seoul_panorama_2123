@@ -1,0 +1,54 @@
+@import "../util/style.scss";
+
+.wrapper {
+  position: absolute;
+  width: 100vw;
+  height: var(--100vh, 100vh);
+  // max-width: 640px;
+  overflow-x: hidden;
+  background-color: $bgd-black;
+}
+
+.frame {
+  &-image {
+    height: 150px;
+  }
+  &-button {
+    position: absolute;
+    bottom: 1.75rem;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.text {
+  &-center {
+    font-family: "Charriot Deluxe";
+    font-size: 1.5rem;
+    line-height: 1.5rem;
+    color: $txt-white;
+    text-align: center;
+  }
+}
+
+.frame {
+  &-btn {
+    font-family: "Charriot Deluxe";
+    font-size: 1.5rem;
+    line-height: 1.5rem;
+    color: $txt-white;
+    text-align: center;
+    height: 1.5rem;
+    padding: 0.75rem 0rem;
+    width: 3rem;
+
+    &.left {
+      margin-left: 3rem;
+      margin-right: 1rem;
+    }
+    &.right {
+      margin-left: 1rem;
+      margin-right: 3rem;
+    }
+  }
+}

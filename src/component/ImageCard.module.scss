@@ -1,0 +1,53 @@
+@import "../util/style.scss";
+
+.wrapper {
+  width: #{"min(calc(100vw - 4rem), calc(var(--new100vh) - 272px))"};
+  height: #{"min(calc(100vw - 4rem), calc(var(--new100vh) - 272px))"};
+  max-height: 400px;
+  background-color: $bgd-white;
+  overflow: hidden;
+  @include shd-south-bold;
+  border: 1px solid $txt-black;
+}
+
+.type {
+  &-disabled {
+    filter: brightness(0.5);
+  }
+}
+
+.title {
+  color: $txt-white;
+  font-family: "Charriot Deluxe";
+  font-size: 1.5rem;
+  line-height: 1.5rem;
+  text-shadow: 0 1px #000, 0 -1px #000, 1px 0 #000, -1px 0 #000, 1px 1px #000,
+    -1px 1px #000, 1px -1px #000, -1px -1px #000;
+  white-space: nowrap;
+  @include shd-fourway-bold;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.frame {
+  &-image {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  &-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: -1;
+  }
+  &-blank {
+    width: 100%;
+    max-width: 10rem;
+  }
+}

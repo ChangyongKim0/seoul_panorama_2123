@@ -1,0 +1,95 @@
+@import "../util/style.scss";
+
+.wrapper {
+  position: relative;
+  @include row(auto, auto, 0rem);
+  justify-content: center;
+  border-radius: 100px;
+  box-sizing: border-box;
+  // > * {
+  //   // width: 100%;
+  // }
+}
+
+.frame {
+  &-tooltip {
+    position: absolute;
+    bottom: 0;
+    transform: translate(0, calc(100% + 0.2rem));
+    width: 100%;
+    z-index: 2;
+    background-color: $col-g2;
+    padding: 0.2rem 0.75rem;
+    border-radius: 0.5rem;
+    display: hidden;
+  }
+}
+
+.text {
+  &-tooltip {
+    font-size: 0.75rem;
+    color: $col-w;
+  }
+}
+
+.color {
+  &-outlined {
+    * {
+      fill: $col-g7;
+      // stroke: $col-g8;
+    }
+    border: 1px solid $col-g7;
+  }
+  &-default {
+    * {
+      fill: $col-g7;
+      // stroke: $col-g8;
+    }
+  }
+  &-white {
+    * {
+      fill: $col-w;
+      // stroke: $col-w;
+    }
+  }
+  &-primary {
+    * {
+      fill: $col-1;
+      // stroke: $col-1;
+    }
+  }
+  &-black {
+    * {
+      fill: $col-g3;
+      // stroke: $col-b;
+    }
+  }
+}
+
+.disable {
+  * {
+    border: none;
+    fill: $col-g9;
+    // stroke: $col-b;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+  transition: all 100ms;
+  &:hover {
+    background-color: $col-g9;
+    // @include shd-2;
+  }
+}
+
+.full {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 600px) {
+  .clickable {
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,107 @@
+@import "../util/style.scss";
+
+.wrapper {
+  // position: relative;
+  width: 100vw;
+  height: var(--100vh, 100vh);
+  // max-width: 640px;
+  overflow-x: hidden;
+  background-color: $bgd-primary;
+}
+
+.test {
+  width: 200px;
+  height: 200px;
+  background-color: $bgd-white;
+}
+
+.frame {
+  &-slider {
+    display: flex;
+    width: 100%;
+    height: calc(var(--100vh, 100vh) - 264px);
+    justify-content: center;
+    align-items: center;
+    & > * {
+      flex-shrink: 0;
+    }
+  }
+  &-ai {
+    display: flex;
+    width: calc(200% - 3rem);
+    height: calc(var(--100vh, 100vh) - 264px);
+    justify-content: center;
+    align-items: center;
+    & > * {
+      flex-shrink: 0;
+    }
+  }
+  &-content {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    &.scrollable {
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+    &.not-scrollable {
+      overflow: hidden;
+    }
+  }
+  &-image {
+    width: 100%;
+    box-shadow: 0 0 0 1px inset $txt-black;
+  }
+  &-map {
+    position: absolute;
+    width: 100%;
+    height: var(--100vh, 100vh);
+    // background-color: aqua;
+    // z-index: 0;
+  }
+  &-overlay {
+    display: flex;
+    width: calc(100% - 2rem);
+    padding: 1rem;
+    height: calc(100% - 2rem);
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  &-nav-sheet {
+    width: 100vw;
+    height: var(--100vh, 100vh);
+    pointer-events: all;
+    background-color: $bgd-lightgrey;
+    @include shd-fourway-medium;
+    z-index: 500;
+    position: absolute;
+  }
+  &-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 2rem;
+    background-color: $bgd-white;
+    pointer-events: all;
+    @include shd-fourway-light;
+    transition: all 0.3s;
+    &.emph {
+      background-color: $bgd-secondary;
+    }
+  }
+  &-chart-button {
+    position: relative;
+    width: calc(100% - 2rem);
+    padding: 1rem;
+    // background-color: #00d3ba;
+    pointer-events: auto;
+    cursor: pointer;
+    overflow: visible;
+  }
+}
+
+.image {
+  width: 100%;
+  // height: 100%;
+}

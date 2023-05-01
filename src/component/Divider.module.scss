@@ -1,0 +1,25 @@
+@import "../util/style.scss";
+
+.wrapper {
+  text-align: center;
+  overflow-x: hidden;
+  white-space: nowrap;
+  width: 100%;
+  text-overflow: clip;
+  color: $txt-white;
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  font-family: "Galmuri9";
+}
+
+.black {
+  color: $txt-black;
+}
+.emph {
+  font-family: "Galmuri11";
+  font-weight: bold;
+}
+
+.opaque {
+  opacity: 0.01;
+}

@@ -1,0 +1,39 @@
+@import "../util/style.scss";
+
+.wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  @include column(100%, auto, 0px);
+  height: calc(var(--newvh, 1vh) * 100);
+  width: 100vw;
+  justify-content: center;
+}
+
+.frame {
+  &-logo {
+    height: 7.5rem;
+    @include column(auto, auto, 0.1rem);
+    justify-content: center;
+  }
+}
+
+.logo {
+  width: 4rem;
+  &-title {
+    font-family: "Noto Sans KR";
+    font-size: 1.5rem;
+    color: $col-g8;
+    font-weight: bolder;
+  }
+}
+
+.text {
+  font-weight: bold;
+  line-height: 1.5;
+  text-align: center;
+  &.emph {
+    color: $col-g8;
+    font-weight: $font-e;
+  }
+}

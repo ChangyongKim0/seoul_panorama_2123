@@ -1,0 +1,19 @@
+.wrapper {
+  width: 100%;
+  height: 100%;
+  &.tight {
+    width: auto;
+    height: auto;
+  }
+}
+
+.absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+}

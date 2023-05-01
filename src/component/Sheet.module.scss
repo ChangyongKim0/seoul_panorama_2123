@@ -1,0 +1,54 @@
+@import "../util/style.scss";
+
+.wrapper {
+  padding-left: 0rem;
+  z-index: 1;
+}
+
+.frame {
+  @include column(100%, auto, 0px);
+  width: 21rem;
+  max-width: 40vw;
+  height: --100vh;
+  border-right: 1.5px solid $col-g8;
+  background-color: $col-g95;
+  z-index: 2;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
+
+  &-top {
+    background-color: $col-w;
+    border-bottom: 1px solid $col-g8;
+    &-content {
+      min-height: 5rem;
+    }
+  }
+  &-content {
+    position: relative;
+    overflow: auto;
+    scroll-behavior: smooth;
+    &::-webkit-scrollbar {
+      width: 0.3rem;
+      height: 0.25rem;
+      &-thumb {
+        height: 10%;
+        background-color: $col-bgd-g7;
+        border-radius: 10px;
+        &:hover {
+          background-color: $col-bgd-g3;
+        }
+      }
+      &-track {
+        // background-color: $col-bgd-g9;
+      }
+      &:hover {
+        width: 0.5rem;
+      }
+    }
+  }
+}
+
+// .type {
+//   &-dark {
+//     background-color: $col-g3;
+//   }
+// }

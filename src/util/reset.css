@@ -1,0 +1,56 @@
+li {
+  list-style: none;
+  padding-left: 0px;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+button {
+  border-width: 0;
+  border-style: none;
+  cursor: pointer;
+}
+button:active {
+  border-style: none;
+}
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-style: none;
+  background-color: rgba(255, 255, 255, 0);
+  padding: none;
+}
+input:focus {
+  border-style: none;
+  outline: none;
+}
+p {
+  margin: 0px;
+}
+h1 {
+  margin: 0px;
+}
+h2 {
+  margin: 0px;
+}
+h3 {
+  margin: 0px;
+  font-weight: 400;
+}
+body {
+  font-size: 16px;
+  font-family: "Noto Sans KR";
+  line-height: 1;
+}
+input,
+select,
+textarea,
+button,
+a,
+label,
+div {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  /* box-sizing: border-box; */
+}

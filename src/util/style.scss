@@ -1,0 +1,477 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&family=Noto+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import "../util/reset.css";
+// $col-txt-1: #7b8692;
+
+@font-face {
+  font-family: "KoPubDotumMedium";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/KoPubDotumMedium.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@import url(//fonts.googleapis.com/earlyaccess/nanumgothic.css);
+
+@import url("https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css");
+
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@import url("https://fonts.cdnfonts.com/css/charriot-deluxe");
+@import url("https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css");
+
+$font-primary: "Noto Sans";
+$font-l: 200;
+$font-sr: 400;
+$font-r: 500;
+$font-b: 700;
+$font-e: 900;
+
+// @font-face {
+//   font-family: "Charriot Deluxe";
+//   src: url("https://fonts.cdnfonts.com/css/charriot-deluxe");
+//   unicode-range: U+0041-005A, U+0061-007A;
+// }
+
+// @font-face {
+//   font-family: "Galmuri11";
+//   src: url("https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css");
+//   unicode-range: U+AC00-D7A3;
+// }
+
+body {
+  // font-family: "Nanum Gothic", sans-serif;
+  // font-family: "KoPubDotumMedium";
+  // font-family: "NanumSquare";
+  margin: 0;
+  padding: 0;
+  font-family: "Galmuri11", sans-serif;
+  font-weight: 400;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  // position: fixed;
+}
+
+$col-dark: #3c3c3c;
+$col-light: #e0e0e0;
+$col-verylight: #f2f2f2;
+$col-verylight-nongrey: #f1f3f4;
+$col-grey: #787878;
+$col-lightgrey: #a0a0a0;
+$col-semilight: #dadce0;
+
+// seoul panorama 2123 styles
+
+$bgd-primary: #758a79;
+$btn-primary: #70a979;
+$bgd-secondary: #dd580e;
+$bgd-warning: #c42727;
+$bgd-black: #000000;
+$bgd-darkgrey: #272727;
+$bgd-grey: #d7d7d7;
+$bgd-lightgrey: #ededed;
+$bgd-white: #ffffff;
+
+$txt-primary: #758a79;
+$txt-secondary: #dd580e;
+$txt-warning: #c42727;
+$txt-black: #000000;
+$txt-grey: #757575;
+$txt-lightgrey: #bcbcbc;
+$txt-white: #ffffff;
+
+$font-kor: "Galmuri11";
+$font-eng: "Charriot Deluxe";
+$font-eng-r: 600;
+$font-eng-b: 700;
+$font-kor-m: 500;
+$font-kor-b: 700;
+
+@mixin font-eng-18 {
+  font-family: $font-eng;
+  font-size: 18px;
+  line-height: 16px;
+}
+
+@mixin font-eng-16 {
+  font-family: $font-eng;
+  font-size: 16px;
+  line-height: 16px;
+}
+
+@mixin font-eng-14 {
+  font-family: $font-eng;
+  font-size: 14px;
+  line-height: 14px;
+}
+
+@mixin font-kor-16 {
+  font-family: $font-kor;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: bold;
+}
+
+@mixin font-kor-12 {
+  font-family: $font-kor;
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: bold;
+}
+
+@mixin txt-border {
+  text-shadow: 0 1px #000, 0 -1px #000, 1px 0 #000, -1px 0 #000, 1px 1px #000,
+    -1px 1px #000, 1px -1px #000, -1px -1px #000;
+}
+
+@mixin shd-south-bold {
+  filter: drop-shadow(0px 10px 8px rgba(0, 0, 0, 0.25));
+}
+@mixin shd-fourway-light {
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.05));
+}
+@mixin shd-fourway-medium {
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.15));
+}
+@mixin shd-fourway-bold {
+  filter: drop-shadow(0px 0px 4px rgba(0, 0, 0, 0.5));
+}
+@mixin shd-fourway-bolder {
+  filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 1));
+}
+@mixin shd-fourway-bold-wide {
+  filter: drop-shadow(0px 0px 32px rgba(0, 0, 0, 0.25));
+}
+
+//
+
+$col-k: #000000;
+$col-g1: #1a1a1a;
+$col-g2: #333333;
+$col-g25: #404040;
+$col-g3: #4d4d4d;
+$col-g4: #666666;
+$col-g5: #808080;
+$col-g6: #999999;
+$col-g7: #b3b3b3;
+$col-g8: #cccccc;
+$col-g9: #e6e6e6;
+$col-g95: #f2f2f2;
+$col-w: #ffffff;
+$col-1: #6821ff;
+$col-1-hover: #6721ffee;
+$col-1-dark: #420cb6fd;
+$col-1-transparent: rgba(144, 104, 255, 0.3);
+$col-1-dark: #000000;
+$col-r: #d32f2f;
+$col-y: #f9a825;
+$col-y-faint: #fff8ee;
+$col-g: #4caf50;
+$col-b: #0091ea;
+$col-b-transparent: rgba(0, 145, 234, 0.3);
+
+$shd-1: 0 0 5px rgba(0, 0, 0, 0.25);
+$shd-w: 0 0 2px rgba(255, 255, 255, 1);
+
+$shd-border-w: -1px 0 2px #fff, 0 1px 2px #fff, 1px 0 2px #fff, 0 -1px 2px #fff;
+
+@mixin shd-1 {
+  box-shadow: 0 0 0.25rem $col-shd-b;
+}
+
+@mixin shd-2 {
+  box-shadow: 0 0 1rem $col-shd-b;
+}
+
+$col-txt-b: #000000;
+$col-txt-g1: #1a1a1a;
+$col-txt-g2: #333333;
+$col-txt-g25: #404040;
+$col-txt-g3: #4d4d4d;
+$col-txt-g4: #666666;
+$col-txt-g5: #808080;
+$col-txt-g6: #999999;
+$col-txt-g7: #b3b3b3;
+$col-txt-g8: #cccccc;
+$col-txt-g9: #e6e6e6;
+$col-txt-g95: #f2f2f2;
+$col-txt-w: #ffffff;
+$col-txt-1: #b74bdd;
+$col-txt-2: #7c4dff;
+$col-txt-grey: #787878;
+
+$col-bgd-b: #000000;
+$col-bgd-g1: #1a1a1a;
+$col-bgd-g2: #333333;
+$col-bgd-g25: #404040;
+$col-bgd-g3: #4d4d4d;
+$col-bgd-g4: #666666;
+$col-bgd-g5: #808080;
+$col-bgd-g6: #999999;
+$col-bgd-g7: #b3b3b3;
+$col-bgd-g8: #cccccc;
+$col-bgd-g9: #e6e6e6;
+$col-bgd-g95: #f2f2f2;
+$col-bgd-w: #ffffff;
+$col-bgd-1: #b74bdd;
+$col-bgd-1-hover: #a726a2;
+$col-bgd-1-pressed: #850180;
+$col-bgd-2: #7c4dff;
+$col-bgd-3: #f0ebff;
+$col-bgd-4: #c6b3ff;
+
+$col-brd-b: #000000;
+$col-brd-g1: #1a1a1a;
+$col-brd-g2: #333333;
+$col-brd-g25: #404040;
+$col-brd-g3: #4d4d4d;
+$col-brd-g4: #666666;
+$col-brd-g5: #808080;
+$col-brd-g6: #999999;
+$col-brd-g7: #b3b3b3;
+$col-brd-g8: #cccccc;
+$col-brd-g9: #e6e6e6;
+$col-brd-g95: #f2f2f2;
+$col-brd-w: #ffffff;
+$col-brd-2: #7c4dff;
+
+$col-shd-b: rgba(0, 0, 0, 0.25);
+$eff-shd-1: 4px 6px 22px rgba(0, 0, 0, 0.03);
+$col-shd-w: #ffffff;
+
+$font-xs: 0.75rem;
+$font-sm: 0.875rem;
+$font-base: 1rem;
+$font-lg: 1.125rem;
+$font-xl: 1.25rem;
+
+@mixin txt-stl-1 {
+  font-weight: 500;
+  font-size: 2rem;
+  line-height: 2rem;
+  margin: 0px;
+}
+
+@mixin txt-stl-2 {
+  font-weight: 400;
+  font-size: $font-base;
+  line-height: $font-base;
+  margin: 0px;
+}
+
+@mixin txt-head {
+  font-style: normal;
+  font-weight: bold;
+  margin: 0px;
+}
+
+@mixin txt-body {
+  font-style: normal;
+  font-weight: 300;
+  margin: 0px;
+}
+
+@mixin txt-head-h1 {
+  @include txt-head;
+  font-size: 21px;
+  line-height: 30px;
+}
+
+@mixin txt-head-h15 {
+  @include txt-head;
+  font-size: 19px;
+  line-height: 28px;
+}
+
+@mixin txt-body-h2 {
+  @include txt-head;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@mixin txt-head-h3 {
+  @include txt-head;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+@mixin txt-head-h4 {
+  @include txt-head;
+  font-size: 9px;
+  line-height: 13px;
+}
+
+@mixin txt-body-h1 {
+  @include txt-body;
+  font-size: 21px;
+  line-height: 30px;
+}
+
+@mixin txt-body-h2 {
+  @include txt-body;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@mixin txt-body-h3 {
+  @include txt-body;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+@mixin txt-body-h4 {
+  @include txt-body;
+  font-size: 9px;
+  line-height: 13px;
+}
+
+@mixin txt-body-h5 {
+  @include txt-body;
+  font-size: 7px;
+  line-height: 10px;
+}
+
+@mixin txt-bold {
+  font-style: normal;
+  font-weight: bold;
+  margin: 0px;
+}
+
+@mixin txt-medium {
+  font-style: normal;
+  font-weight: 500;
+  margin: 0px;
+}
+
+@mixin txt-regular {
+  font-style: normal;
+  font-weight: normal;
+  margin: 0px;
+}
+
+@mixin txt-light {
+  font-style: normal;
+  font-weight: 300;
+  margin: 0px;
+}
+
+@mixin txt-28 {
+  font-size: 28px;
+  line-height: 28px;
+  // line-height: 41px;
+}
+
+@mixin txt-21 {
+  font-size: 21px;
+  line-height: 21px;
+  // line-height: 30px;
+}
+
+@mixin txt-19 {
+  font-size: 19px;
+  line-height: 19px;
+  // line-height: 28px;
+}
+
+@mixin txt-17 {
+  font-size: 17px;
+  line-height: 17px;
+  // line-height: 25px;
+}
+
+@mixin txt-14 {
+  font-size: 14px;
+  line-height: 14px;
+  // line-height: 20px;
+}
+
+@mixin txt-12 {
+  font-size: 12px;
+  line-height: 12px;
+  // line-height: 17px;
+}
+
+@mixin txt-11 {
+  font-size: 11px;
+  line-height: 11px;
+  // line-height: 16px;
+}
+
+@mixin txt-9 {
+  font-size: 9px;
+  line-height: 9px;
+  // line-height: 13px;
+}
+
+@mixin txt-7 {
+  font-size: 7px;
+  line-height: 7px;
+  // line-height: 10px;
+}
+
+@mixin column($w, $h, $gap) {
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+  align-items: center;
+  box-sizing: content-box;
+  // box-sizing: border-box;
+  > * {
+    width: $w;
+    height: $h;
+    // text-align: center;
+  }
+}
+
+@mixin row($w, $h, $gap) {
+  display: flex;
+  flex-direction: row;
+  gap: $gap;
+  align-items: center;
+  box-sizing: content-box;
+  // box-sizing: border-box;
+  > * {
+    width: $w;
+    height: $h;
+  }
+}
+
+@mixin box($w, $h, $r, $col-border, $col-fill) {
+  box-sizing: border-box;
+  color: $col-txt-b;
+  width: $w;
+  height: $h;
+  background: $col-fill;
+  border: solid $col-border 1px;
+  border-radius: $r;
+}
+
+@mixin textBox($w, $h, $r, $col-border, $col-fill) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: $col-txt-b;
+  width: $w;
+  height: $h;
+  background: $col-fill;
+  border: solid $col-border 1px;
+  border-radius: $r;
+}
+
+@mixin columnWithBorder($w, $h, $gap, $col-border) {
+  @include column($w, $h, 0px);
+  > * {
+    border-top: 1px solid $col-border;
+    padding-top: ($gap / 2);
+    padding-bottom: ($gap / 2);
+  }
+  > :first-child {
+    border-top: none;
+    padding-top: 0px;
+  }
+}
+
+.map {
+  height: auto;
+}

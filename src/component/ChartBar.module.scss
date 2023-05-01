@@ -1,0 +1,148 @@
+@import "../util/style.scss";
+
+.wrapper {
+  width: 100%;
+  position: relative;
+  &.type {
+    &-small,
+    &-small-emph {
+      height: 1rem;
+    }
+    &-normal,
+    &-emph {
+      height: 2rem;
+    }
+  }
+  // border-radius: 2rem;
+  overflow: hidden;
+  &.type {
+    &-normal,
+    &-emph {
+      @include shd-fourway-medium;
+    }
+  }
+}
+
+.frame {
+  &-back {
+    &-background {
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+      &.border {
+        box-shadow: 0 0 0 1px inset $txt-black;
+      }
+      &.type {
+        &-small,
+        &-small-emph {
+          width: calc(100% - 1rem);
+          padding: 0 0.5rem;
+          background-color: #d7d7d7;
+        }
+        &-normal,
+        &-emph {
+          width: calc(100% - 2rem);
+          padding: 0 1rem;
+          background-color: $bgd-white;
+          &.right {
+            background-color: #d7d7d7;
+          }
+        }
+      }
+    }
+    &-text {
+      &.type {
+        &-small,
+        &-small-emph {
+          @include font-eng-16;
+          color: $txt-white;
+        }
+        &-normal {
+          @include font-kor-16;
+          color: $txt-primary;
+        }
+        &-emph {
+          @include font-kor-16;
+          color: $txt-secondary;
+          &.right {
+            @include font-eng-18;
+            color: $txt-black;
+          }
+        }
+      }
+    }
+  }
+  &-front {
+    &-bar {
+      position: absolute;
+      overflow: hidden;
+      height: 100%;
+      @include shd-fourway-medium;
+      &.right {
+        right: 0;
+      }
+      // transition: all 0.3s;
+      // transition-timing-function: cubic-bezier(0.19, 0.69, 0.64, 1.2);
+    }
+    &-background {
+      position: absolute;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100%;
+      &.border {
+        box-shadow: 0 0 0 1px inset $txt-black;
+      }
+      &.right {
+        right: 0;
+      }
+      &.type {
+        &-small {
+          background-color: #a3a3a3;
+          padding: 0 0.5rem;
+        }
+        &-small-emph {
+          background-color: $bgd-secondary;
+          padding: 0 0.5rem;
+        }
+        &-normal {
+          background-color: $bgd-primary;
+          padding: 0 1rem;
+        }
+        &-emph {
+          background-color: $bgd-secondary;
+          padding: 0 1rem;
+          &.right {
+            background-color: $bgd-warning;
+          }
+        }
+      }
+    }
+    &-text {
+      &.type {
+        &-small {
+          @include font-eng-16;
+          color: $txt-white;
+        }
+        &-small-emph {
+          @include font-eng-16;
+          color: $txt-white;
+        }
+        &-normal {
+          @include font-kor-16;
+          color: $txt-white;
+        }
+        &-emph {
+          @include font-kor-16;
+          color: $txt-white;
+          &.right {
+            @include font-eng-18;
+            @include txt-border;
+          }
+        }
+      }
+    }
+  }
+}
