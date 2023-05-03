@@ -75,9 +75,9 @@ yarn
 yarn start
 ```
 
-### 프론트엔드 개발 서버 배포하기
+### 방화벽 설정 및 서버 호스팅 시도
 
-> 위에서 연결한 도메인에서 들어오는 요청에 따라 응답하는 프론트엔드 개발 서버를 배포해본다.
+> EC2 방화벽 설정을 통해 HTTP, HTTPS 요청을 허용하고, `nginx`를 이용하여 샘플 서버를 호스팅한다.
 
 - `nginx` 설치
   - 설치시 모두 `Y`, `OK` 누르면 됨
@@ -86,7 +86,32 @@ yarn start
 sudo apt-get install nginx
 ```
 
-> EC2는 사용자가 `root` 권한이 없기 때문에, 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
+- 방화벽 설정에서 HTTP, HTTPS 접근 허용
+  - EC2에서 `보안 그룹 > launch-wizard > 인바운드 규칙` 접근
+  - `인바운드 규칙 편집`클릭
+  - `규칙 추가` 클릭
+  - `사용자 유형` `HTTP`로 선택, `소스` `Anywhere-IPv4`로 선택
+  - HTTP, HTTPS에 대해 Anywhere-IPv4, Anywhere IPv6, 총 4개 조합의 규칙 생성
+  - `규칙 저장` 클릭
+- `nginx` 시작
+
+```bash
+sudo service nginx start
+```
+
+- 웹 브라우저에서 공개 IP 주소 접속
+  - HTTP 주소 : `[인스턴스 퍼블릭 IPv4 주소]:80`
+  - HTTPS 주소 : `[인스턴스 퍼블릭 IPv4 주소]:80`
+
+> HTTP 주소 접속 시 `Welcome to nginx!`라는 문구가 보이면 성공이다!
+
+> HTTPS는 `nginx` 기본 설정내용에 없기 때문에 접속이 불가능할 것이다.
+
+### 프론트엔드 개발 서버 배포하기
+
+> 위에서 연결한 HTTP 주소로 들어오는 요청에 따라 응답하는 프론트엔드 개발 서버를 배포해본다.
+
+> EC2는 SSH 연결 사용자가 `root` 권한이 없기 때문에, 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
 
 - `root`권한 얻기
 
@@ -134,13 +159,21 @@ server {
 sudo ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enabled/[서버 별칭].conf
 ```
 
-- `nginx` 시작
+- 기존 기본 설정 파일 비활성화
 
 ```bash
-sudo service nginx start
+rm -f /etc/nginx/sites-enabled/default
 ```
 
-> 이제 도메인에 접근하면 개발 서버가 응답한다.
+- `nginx` 재시작
+
+```bash
+nginx -s reload
+```
+
+> 이제 HTTP 주소로 접근하면 개발 서버가 응답한다.
+
+> 단, `yarn start`를 통해 개발 서버가 열려 있는 상황이어야 한다.
 
 ### 프론트엔드 본 서버 배포하기
 
