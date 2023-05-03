@@ -7,6 +7,9 @@
 1. [새로운 EC2 인스턴스에서 시작하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%EC%83%88%EB%A1%9C%EC%9A%B4-ec2-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4%EC%97%90%EC%84%9C-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)
    1. [vscode에서 ssh로 접속하기](https://github.com/ChangyongKim0/seoul_panorama_2123#vscode%EC%97%90%EC%84%9C-ssh%EB%A1%9C-%EC%A0%91%EC%86%8D%ED%95%98%EA%B8%B0)
    1. [github 파일 내려받아서 실행해보기](https://github.com/ChangyongKim0/seoul_panorama_2123#github-%ED%8C%8C%EC%9D%BC-%EB%82%B4%EB%A0%A4%EB%B0%9B%EC%95%84%EC%84%9C-%EC%8B%A4%ED%96%89%ED%95%B4%EB%B3%B4%EA%B8%B0)
+   1. [방화벽 설정 및 서버 호스팅 시도](https://github.com/ChangyongKim0/seoul_panorama_2123#%EB%B0%A9%ED%99%94%EB%B2%BD-%EC%84%A4%EC%A0%95-%EB%B0%8F-%EC%84%9C%EB%B2%84-%ED%98%B8%EC%8A%A4%ED%8C%85-%EC%8B%9C%EB%8F%84)
+   1. [도메인 연결하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%97%B0%EA%B2%B0%ED%95%98%EA%B8%B0)
+   1. [HTTP SSL 인증서 발급받기](https://github.com/ChangyongKim0/seoul_panorama_2123#http-ssl-%EC%9D%B8%EC%A6%9D%EC%84%9C-%EB%B0%9C%EA%B8%89%EB%B0%9B%EA%B8%B0)
    1. [프론트엔드 개발 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
    1. [프론트엔드 본 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EB%B3%B8-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
 
