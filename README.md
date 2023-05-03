@@ -74,14 +74,9 @@ yarn
 yarn start
 ```
 
-## 프론트엔드 서버 배포하기
+## 프론트엔드 개발 서버 배포하기
 
-- 프론트엔드 빌드 버전 생성
-
-```bash
-cd ~/Developing/seoul_panorama_2123/
-yarn build
-```
+> 위에서 연결한 도메인에서 들어오는 요청에 따라 응답하는 프론트엔드 개발 서버를 배포해본다.
 
 - `nginx` 설치
 
@@ -98,10 +93,18 @@ server {
     listen 80;
     server_name [도메인 이름];
 
-    root /home/ubuntu/Developing/seoul_panorama_2123/build;
-    index index.html index.htm index.nginx-debian.html;
     location / {
-        try_files $uri	$uri/	/index.html;
+        proxy_pass http://localhost:3400;
+        proxy_set_header    Host              $host;
+        proxy_set_header    X-Real-IP         $remote_addr;
+        proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Client-Verify   SUCCESS;
+        proxy_set_header    X-Client-DN       $ssl_client_s_dn;
+        proxy_set_header    X-SSL-Subject     $ssl_client_s_dn;
+        proxy_set_header    X-SSL-Issuer      $ssl_client_i_dn;
+        proxy_set_header    X-Forwarded-Proto http;
+        proxy_read_timeout 1800;
+        proxy_connect_timeout 1800;
     }
 }
 ```
@@ -116,4 +119,32 @@ sudo ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enab
 
 ```bash
 sudo service nginx start
+```
+
+## 프론트엔드 본 서버 배포하기
+
+> 프론트엔드 빌드를 거쳐 본 서버를 배포한다.
+
+- 프론트엔드 빌드 버전 생성
+
+```bash
+cd ~/Developing/seoul_panorama_2123/
+yarn build
+```
+
+- `[서버 별칭].conf` 파일 안에 아래 내용 추가
+  - 참고 : `/home/ubuntu/Developing/seoul_panorama_2123/build` 는 빌드 파일의 위치를 가리킴
+  - 참고 : 위에서 사용한 도메인 외에 새로운 도메인이 필요
+
+```text
+server {
+    listen 80;
+    server_name [도메인 이름];
+
+    root /home/ubuntu/Developing/seoul_panorama_2123/build;
+    index index.html index.htm index.nginx-debian.html;
+    location / {
+        try_files $uri	$uri/	/index.html;
+    }
+}
 ```
