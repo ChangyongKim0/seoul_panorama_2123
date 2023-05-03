@@ -80,7 +80,7 @@ yarn start
 > 위에서 연결한 도메인에서 들어오는 요청에 따라 응답하는 프론트엔드 개발 서버를 배포해본다.
 
 - `nginx` 설치
-   - 설치시 모두 `Y`, `OK` 누르면 됨
+  - 설치시 모두 `Y`, `OK` 누르면 됨
 
 ```bash
 sudo apt-get install nginx
@@ -89,15 +89,18 @@ sudo apt-get install nginx
 > EC2는 사용자가 `root` 권한이 없기 때문에, 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
 
 - `root`권한 얻기
+
 ```bash
 sudo su
 ```
 
 - `/etc/nginx/sites-available/` 폴더 안에 `[서버 별칭].conf` 파일 생성
+
 ```bash
 cd /etc/nginx/sites-available/
 > [서버 별칭].conf
 ```
+
 - `[서버 별칭].conf` 파일 안에 아래 내용 입력
 
 ```text
@@ -120,7 +123,9 @@ server {
     }
 }
 ```
+
 ```bash
+
 ```
 
 - 서버 `conf` 파일 활성화
