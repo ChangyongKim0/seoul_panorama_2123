@@ -79,6 +79,16 @@ yarn start
 
 > EC2 방화벽 설정을 통해 HTTP, HTTPS 요청을 허용하고, `nginx`를 이용하여 샘플 서버를 호스팅한다.
 
+- `22`, `80`, `443`번 포트 열고 방화벽 활성화하기
+  - 묻는 질문에 `y`로 답변 진행
+
+```bash
+ufw allow 22 # SSH 연결 포트
+ufw allow 80 # HTTP 연결 포트
+ufw allow 443 # HTTPS 연결 포트
+ufw enable
+```
+
 - `nginx` 설치
   - 설치시 모두 `Y`, `OK` 누르면 됨
 
@@ -107,16 +117,44 @@ sudo service nginx start
 
 > HTTPS는 `nginx` 기본 설정내용에 없기 때문에 접속이 불가능할 것이다.
 
+### 도메인 연결하기
+
+### HTTP SSL 인증서 발급받기
+
+> 서버 IP와 연결된 도메인을 대상으로만 발급이 가능하다.
+
+> 각종 웹브라우저와 React는 HTTPS 통신을 기본으로 하기 때문에, SSL 인증서를 받지 않고 실제 배포 서버와 연결하면, 여러가지 오류가 생긴다...
+
+y 누르면 됨
+좀 오래 걸릴 수 있음
+
+```bash
+sudo apt-get install letsencrypt -y
+```
+
+``
+
+```bash
+sudo nginx -s stop
+```
+
+email, y, y, 오래걸릴 수 있음
+
+```bash
+sudo certbot certonly --standalone -d [도메인 이름]
+```
+
 ### 프론트엔드 개발 서버 배포하기
 
 > 위에서 연결한 HTTP 주소로 들어오는 요청에 따라 응답하는 프론트엔드 개발 서버를 배포해본다.
 
 > EC2는 SSH 연결 사용자가 `root` 권한이 없기 때문에, 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
 
-- `root`권한 얻기
+- `root`권한 얻기 및 파일 실행 권한 부여
 
 ```bash
 sudo su
+chmod 711 /home/ubuntu
 ```
 
 - `/etc/nginx/sites-available/` 폴더 안에 `[서버 별칭].conf` 파일 생성
@@ -150,7 +188,7 @@ server {
 ```
 
 ```bash
-
+cd
 ```
 
 - 서버 `conf` 파일 활성화
@@ -174,6 +212,8 @@ nginx -s reload
 > 이제 HTTP 주소로 접근하면 개발 서버가 응답한다.
 
 > 단, `yarn start`를 통해 개발 서버가 열려 있는 상황이어야 한다.
+
+> 개발 서버는 포트 `3400`번으로 열려 있어야 한다. 만약 다른 서버가 `3400`번으로 열려 있었다면, 이 개발 서버는 `340X`번으로 열려서 연결이 불가능할 것이다.
 
 ### 프론트엔드 본 서버 배포하기
 
