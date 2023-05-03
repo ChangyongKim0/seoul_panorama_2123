@@ -1,11 +1,13 @@
 ## SEOUL PANORAMA 2123
 
+---
+
 ### 목차
 
 1. [새로운 EC2 인스턴스에서 시작하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%EC%83%88%EB%A1%9C%EC%9A%B4-ec2-%EC%9D%B8%EC%8A%A4%ED%84%B4%EC%8A%A4%EC%97%90%EC%84%9C-%EC%8B%9C%EC%9E%91%ED%95%98%EA%B8%B0)
-   1. [1. vscode에서 ssh로 접속하기](https://github.com/ChangyongKim0/seoul_panorama_2123#vscode%EC%97%90%EC%84%9C-ssh%EB%A1%9C-%EC%A0%91%EC%86%8D%ED%95%98%EA%B8%B0)
+   1. [vscode에서 ssh로 접속하기](https://github.com/ChangyongKim0/seoul_panorama_2123#vscode%EC%97%90%EC%84%9C-ssh%EB%A1%9C-%EC%A0%91%EC%86%8D%ED%95%98%EA%B8%B0)
    1. [github 파일 내려받아서 실행해보기](https://github.com/ChangyongKim0/seoul_panorama_2123#github-%ED%8C%8C%EC%9D%BC-%EB%82%B4%EB%A0%A4%EB%B0%9B%EC%95%84%EC%84%9C-%EC%8B%A4%ED%96%89%ED%95%B4%EB%B3%B4%EA%B8%B0)
-   1. [프론트엔드 서버 배포하기]()
+   1. [프론트엔드 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#github-%ED%8C%8C%EC%9D%BC-%EB%82%B4%EB%A0%A4%EB%B0%9B%EC%95%84%EC%84%9C-%EC%8B%A4%ED%96%89%ED%95%B4%EB%B3%B4%EA%B8%B0)
 
 ---
 
@@ -33,13 +35,11 @@ Host [별명]
 
 ### github 파일 내려받아서 실행해보기
 
-> 터미널 상의 위치가 `ubuntu(~)`인지 확인하고, 아래 있는 명령어의 경우 터미널창에 입력하면 된다.
-
 - `ubuntu` 폴더 안에 `Developing` 폴더 생성
 - 깃허브 코드 복제
 
 ```bash
-cd Developing/
+cd ~/Developing/
 git clone https://github.com/ChangyongKim0/seoul_panorama_2123.git
 ```
 
@@ -75,3 +75,45 @@ yarn start
 ```
 
 ## 프론트엔드 서버 배포하기
+
+- 프론트엔드 빌드 버전 생성
+
+```bash
+cd ~/Developing/seoul_panorama_2123/
+yarn build
+```
+
+- `nginx` 설치
+
+```bash
+sudo apt-get install nginx
+```
+
+- `/etc/nginx/sites-available/` 폴더 안에 `[서버 별칭].conf` 파일 생성
+- `[서버 별칭].conf` 파일 안에 아래 내용 입력
+  - 참고 : `/home/ubuntu/Developing/seoul_panorama_2123/build` 는 빌드 파일의 위치를 가리킴
+
+```text
+server {
+    listen 80;
+    server_name [도메인 이름];
+
+    root /home/ubuntu/Developing/seoul_panorama_2123/build;
+    index index.html index.htm index.nginx-debian.html;
+    location / {
+        try_files $uri	$uri/	/index.html;
+    }
+}
+```
+
+- 서버 `conf` 파일 활성화
+
+```bash
+sudo ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enabled/[서버 별칭].conf
+```
+
+- `nginx` 시작
+
+```bash
+sudo service nginx start
+```
