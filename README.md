@@ -1,4 +1,4 @@
-## SEOUL PANORAMA 2123
+# SEOUL PANORAMA 2123
 
 ---
 
@@ -11,7 +11,7 @@
 
 ---
 
-## 새로운 EC2 인스턴스에서 시작하기
+# 새로운 EC2 인스턴스에서 시작하기
 
 ### vscode에서 ssh로 접속하기
 
