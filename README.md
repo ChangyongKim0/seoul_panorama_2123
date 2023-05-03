@@ -86,7 +86,6 @@ sudo apt-get install nginx
 
 - `/etc/nginx/sites-available/` 폴더 안에 `[서버 별칭].conf` 파일 생성
 - `[서버 별칭].conf` 파일 안에 아래 내용 입력
-  - 참고 : `/home/ubuntu/Developing/seoul_panorama_2123/build` 는 빌드 파일의 위치를 가리킴
 
 ```text
 server {
@@ -121,6 +120,8 @@ sudo ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enab
 sudo service nginx start
 ```
 
+> 이제 도메인에 접근하면 개발 서버가 응답한다.
+
 ## 프론트엔드 본 서버 배포하기
 
 > 프론트엔드 빌드를 거쳐 본 서버를 배포한다.
@@ -148,3 +149,11 @@ server {
     }
 }
 ```
+
+- `nginx` 재시작
+
+```bash
+sudo nginx -s reload
+```
+
+> 이제 새 도메인에 접근하면 본 서버가 응답한다.
