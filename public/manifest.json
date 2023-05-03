@@ -1,6 +1,6 @@
 {
-  "short_name": "Calculator",
-  "name": "모바일로 쉽고 빠르게 계산해요.",
+  "short_name": "메니페스토 숏네임",
+  "name": "메니페스토 이름",
   "icons": [
     {
       "src": "favicon.ico",
