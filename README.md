@@ -122,30 +122,64 @@ sudo service nginx start
 
 ### 도메인 연결하기
 
+> 도메인 주소를 입력할 때 서버 IP로 연결해주는 작업을 진행한다.
+
+> 여러 도메인 주소를 하나의 서버 IP로 연결이 가능하며, 이 경우 아래에서와 같이 설정파일로 도메인 주소별로 다른 작업을 할 수 있도록 해준다.
+
+- 각자 구매한 도메인 호스팅 사이트에 접속하여 도메인 관리 페이지로 이동
+
+- DNS 정보 설정 페이지로 이동
+
+- DNS 레코드 추가를 통해 서브도메인 등록
+
+  - 유형은 `A` 레코드로 선택
+  - 서브도메인 주소는 `[host 값].[도메인 주소]`로 정해지므로, 이를 고려하여 `host` 값 입력
+    - `@` 를 입력하면 본 도메인을 의미함
+  - IP 주소는 서버 public IP 입력
+  - `TTL` 은 기본값으로 두기
+
+- DNS 레코드 추가를 통해 도메인별명 등록
+  - 유형은 `CNAME` 레코드로 선택
+  - 도메인별명은 `[host 값].[도메인 주소]`로 정해지므로, 이를 고려하여 `host` 값 입력
+    - `www.[서브도메인 host 값]` 등을 입력
+  - 값 또는 위치에는 연결할 서브도메인 주소 입력
+  - `TTL` 은 기본값으로 두기
+
+> 이제 (서브)도메인 주소나 도메인별명을 입력하면, 입력한 서버 IP로 연결된다.
+
+> HTTP(S)를 생략하고 주소만 입력하면, 기본적으로 HTTP(80번 포트)로 접근한다. HTTPS(443번 포트)로 접근하고 싶으면 `https://[주소]` 또는 `[주소]:443` 을 입력하면 된다.
+
 ### HTTP SSL 인증서 발급받기
 
 > 서버 IP와 연결된 도메인을 대상으로만 발급이 가능하다.
 
 > 각종 웹브라우저와 React는 HTTPS 통신을 기본으로 하기 때문에, SSL 인증서를 받지 않고 실제 배포 서버와 연결하면, 여러가지 오류가 생긴다...
 
-y 누르면 됨
-좀 오래 걸릴 수 있음
+- `letsencrypt` 설치
+  - 설치시 `y` 선택, 오래 걸릴 수 있음
 
 ```bash
 sudo apt-get install letsencrypt -y
 ```
 
-``
+- `nginx` 정지시키기
+  - 이후 인증서 발급 방식에서 `80`번 포트가 열려있어야 하므로, `nginx`를 정지시켜 비워줘야 함
 
 ```bash
 sudo nginx -s stop
 ```
 
-email, y, y, 오래걸릴 수 있음
+- 인증서 발급하기
+  - 중간에 `email` 입력 필요하며, 이후 `y` 선택
+  - 오래걸릴 수 있음
 
 ```bash
 sudo certbot certonly --standalone -d [도메인 이름]
 ```
+
+> 이제 `/etc/letsencrypt/live/[도메인 이름]/` 안에 인증서 키가 위치하게 된다.
+
+> 약 3개월 정도의 유효기간이 있어, 마지막 1 ~ 2주 전 쯤에 갱신이 필요하다.
 
 ### 프론트엔드 개발 서버 배포하기
 
@@ -153,7 +187,7 @@ sudo certbot certonly --standalone -d [도메인 이름]
 
 > EC2는 SSH 연결 사용자가 `root` 권한이 없기 때문에, 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
 
-- `root`권한 얻기 및 파일 실행 권한 부여
+- `root` 권한 얻기 및 파일 실행 권한 부여
 
 ```bash
 sudo su
@@ -167,12 +201,35 @@ cd /etc/nginx/sites-available/
 > [서버 별칭].conf
 ```
 
-- `[서버 별칭].conf` 파일 안에 아래 내용 입력
+- `[서버 별칭].conf` 파일 안에 도메인 연결 설정내용 입력
+
+```bash
+# 1. 설정파일 열기
+vi /etc/nginx/site-available/[서버 별칭].conf
+
+# 2. 명령모드에서 입력모드로 전환
+i
+
+# 3. 아래 내용 ctrl + C 후 커맨드창에서 우클릭(붙여넣기)
+
+# 4. 입력모드에서 esc 키 눌러 명령모드로 전환
+
+# 5. 쓰기 후 나가기 처리
+:wq
+```
 
 ```text
 server {
     listen 80;
     server_name [도메인 이름];
+    return 301 https://[도메인 이름];
+}
+
+server {
+    listen 443 ssl;
+    server_name [도메인 이름];
+    ssl_certificate /etc/letsencrypt/live/calculator.moohae.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/calculator.moohae.net/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3400;
@@ -190,14 +247,10 @@ server {
 }
 ```
 
-```bash
-cd
-```
-
 - 서버 `conf` 파일 활성화
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enabled/[서버 별칭].conf
+ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enabled/[서버 별칭].conf
 ```
 
 - 기존 기본 설정 파일 비활성화
@@ -212,7 +265,15 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -s reload
 ```
 
-> 이제 HTTP 주소로 접근하면 개발 서버가 응답한다.
+- `root` 권한에서 나가기
+
+```bash
+exit
+```
+
+> 이제 HTTP(S) 주소로 접근하면 개발 서버가 응답한다.
+
+> 또한 HTTPS로 접근 시 SSL 인증서가 유효하므로 브라우저 진입 시 주소창에 잠금(안전) 표시가 뜬다.
 
 > 단, `yarn start`를 통해 개발 서버가 열려 있는 상황이어야 한다.
 
@@ -222,6 +283,8 @@ nginx -s reload
 
 > 프론트엔드 빌드를 거쳐 본 서버를 배포한다.
 
+> 위와 동일하게 임시로 터미널에서 권한을 얻어서 진행하는 것으로 작성하였다...
+
 - 프론트엔드 빌드 버전 생성
 
 ```bash
@@ -229,14 +292,43 @@ cd ~/Developing/seoul_panorama_2123/
 yarn build
 ```
 
-- `[서버 별칭].conf` 파일 안에 아래 내용 추가
+- `root` 권한 얻기
+
+```bash
+sudo su
+```
+
+- `[서버 별칭].conf` 파일 안에 도메인 연결 설정내용 입력
   - 참고 : `/home/ubuntu/Developing/seoul_panorama_2123/build` 는 빌드 파일의 위치를 가리킴
   - 참고 : 위에서 사용한 도메인 외에 새로운 도메인이 필요
+
+```bash
+# 1. 설정파일 열기
+vi /etc/nginx/site-available/[서버 별칭].conf
+
+# 2. 명령모드에서 입력모드로 전환
+i
+
+# 3. 아래 내용 ctrl + C 후 커맨드창에서 우클릭(붙여넣기)
+
+# 4. 입력모드에서 esc 키 눌러 명령모드로 전환
+
+# 5. 쓰기 후 나가기 처리
+:wq
+```
 
 ```text
 server {
     listen 80;
     server_name [도메인 이름];
+    return 301 https://[도메인 이름];
+}
+
+server {
+    listen 443 ssl;
+    server_name [도메인 이름];
+    ssl_certificate /etc/letsencrypt/live/calculator.moohae.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/calculator.moohae.net/privkey.pem;
 
     root /home/ubuntu/Developing/seoul_panorama_2123/build;
     index index.html index.htm index.nginx-debian.html;
@@ -250,6 +342,12 @@ server {
 
 ```bash
 sudo nginx -s reload
+```
+
+- `root` 권한에서 나가기
+
+```bash
+exit
 ```
 
 > 이제 새 도메인에 접근하면 본 서버가 응답한다.
