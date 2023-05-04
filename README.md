@@ -12,6 +12,9 @@
    1. [HTTP SSL 인증서 발급받기](https://github.com/ChangyongKim0/seoul_panorama_2123#http-ssl-%EC%9D%B8%EC%A6%9D%EC%84%9C-%EB%B0%9C%EA%B8%89%EB%B0%9B%EA%B8%B0)
    1. [프론트엔드 개발 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
    1. [프론트엔드 본 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EB%B3%B8-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
+1. [EC2 재부팅 시 진행 필요 사항]()
+   1. [Remote-SSH 세팅 변경]()
+   1. [`tmux` 세팅하기]()
 
 ---
 
@@ -28,7 +31,7 @@
 
 ```
 Host [별명]
-  HostName [public pv4 주소(XX.XX.XX.XX 형식)]
+  HostName [public IPv4 주소(XX.XX.XX.XX 형식)]
   User ubuntu
   IdentityFile [키 위치(C:\Users\XX\XX.pem 형식)]
 ```
@@ -351,3 +354,93 @@ exit
 ```
 
 > 이제 새 도메인에 접근하면 본 서버가 응답한다.
+
+## EC2 재부팅 시 수행 필요 사항
+
+### Remote-SSH 세팅 변경
+
+> 재부팅 시 공개 IP 주소가 변경되므로, SSH 접속을 위해 주소 변경이 필요하다.
+
+- `vscode Remote Explorer` 탭에서 `REMOTE > SSH` 위에 마우스 올리고, 설정 버튼 클릭해서 설정 파일 열기
+- 설정사항 중 `HostName` 만 아래와 같이 변경
+
+```
+  HostName [새 public IPv4 주소(XX.XX.XX.XX 형식)]
+```
+
+> 이제 SSH 접속이 가능하다.
+
+### `tmux` 세팅하기
+
+> `tmux`는 내 vscode SSH 터미널 창으로부터 떼어 내 사용자 간 공유할 수 있는 터미널 창을 생성할 수 있다.
+
+> 이 터미널 창은 vscode를 닫아도 독립적으로 유지되므로, 지속적인 서버 연결 등에 사용하면 좋은 것 같다.
+
+> 단, 서버 재부팅 시 `tmux`로 생성한 창이 모두 날아가니, 다시 설정하고 공유할 필요가 있어 공통적으로 유지할 몇개 창을 정리해 보았다.
+
+#### `tmux` 생성 및 사용 개괄
+
+- `tmux` 가 작동하지 않는 경우 설치
+
+```bash
+sudo apt-get install tmux
+```
+
+- `tmux` 새 창 생성
+
+```bash
+tmux new -s [창 이름]
+```
+
+- `tmux` 기존 생성 창 접근
+
+```bash
+tmux attach -t [창 이름]
+```
+
+- `tmux` 창 외 추가 터미널 창 만들기
+
+  - vscode terminal 필드 우상단에 `+` 버튼 클릭
+  - 또는 바로 옆의 `v` 버튼 클릭 후 `bash` 선택
+  - 바로 터미널이 뜨지 않는 경우 팝업 창에서 원하는 작업경로 선택
+
+- `tmux` 창에서 나가기
+
+  - 그냥 vscode terminal 필드 우측의 해당 탭에 마우스 올린 후 휴지통 버튼 클릭하면 됨
+  - 또는 `ctrl + B` 입력 후 `D` 입력
+
+- `tmux` 창 삭제하기
+
+```bash
+# 해당 tmux 안에서
+exit
+```
+
+#### 재부팅 시 만들 `tmux` 창
+
+> `tmux` 바깥에서는 사용자끼리 충돌할 수 있으니 아래 명령들을 지양하고 해당 `tmux` 창에서만 쓰자.
+
+- `top` : 모니터링용 창
+
+```bash
+tmux new -s top
+top
+```
+
+- `seoul` : 프론트 개발 창
+
+```bash
+tmux new -s top
+cd ~/Developing/seoul_panorama_2123/
+yarn start
+```
+
+- `seoulbuild` : 프론트 본 서버 업로드 창
+
+```bash
+tmux new -s top
+cd ~/Developing/seoul_panorama_2123/
+
+# 빌드 필요한 경우 수시로 입력
+yarn build
+```
