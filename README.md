@@ -430,7 +430,7 @@ top
 - `seoul` : 프론트 개발 창
 
 ```bash
-tmux new -s top
+tmux new -s seoul
 cd ~/Developing/seoul_panorama_2123/
 yarn start
 ```
@@ -438,9 +438,16 @@ yarn start
 - `seoulbuild` : 프론트 본 서버 업로드 창
 
 ```bash
-tmux new -s top
+tmux new -s seoulbuild
 cd ~/Developing/seoul_panorama_2123/
 
 # 빌드 필요한 경우 수시로 입력
 yarn build
+```
+
+- `sudo` : `nginx`, `letsencrypt` 관련 사용자 상위 폴더를 조작하는 행위용 창
+
+```bash
+tmux new -s sudo
+sudo su
 ```
