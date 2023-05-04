@@ -114,7 +114,7 @@ sudo service nginx start
 
 - 웹 브라우저에서 공개 IP 주소 접속
   - HTTP 주소 : `[인스턴스 퍼블릭 IPv4 주소]:80`
-  - HTTPS 주소 : `[인스턴스 퍼블릭 IPv4 주소]:80`
+  - HTTPS 주소 : `[인스턴스 퍼블릭 IPv4 주소]:443`
 
 > HTTP 주소 접속 시 `Welcome to nginx!`라는 문구가 보이면 성공이다!
 
@@ -259,10 +259,10 @@ ln -s /etc/nginx/sites-available/[서버 별칭].conf /etc/nginx/sites-enabled/[
 rm -f /etc/nginx/sites-enabled/default
 ```
 
-- `nginx` 재시작
+- `nginx` 시작
 
 ```bash
-nginx -s reload
+service nginx start
 ```
 
 - `root` 권한에서 나가기
@@ -338,10 +338,10 @@ server {
 }
 ```
 
-- `nginx` 재시작
+- `nginx` 시작
 
 ```bash
-sudo nginx -s reload
+service nginx start
 ```
 
 - `root` 권한에서 나가기
