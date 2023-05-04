@@ -223,30 +223,30 @@ i
 
 ```text
 server {
-	listen 80;
-	server_name [도메인 이름];
-	return 301 https://[도메인 이름];
+listen 80;
+server_name [도메인 이름];
+return 301 https://[도메인 이름];
 }
 
 server {
-	listen 443 ssl;
-	server_name [도메인 이름];
-	ssl_certificate /etc/letsencrypt/live/[도메인 이름]/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/[도메인 이름]/privkey.pem;
+listen 443 ssl;
+server_name [도메인 이름];
+ssl_certificate /etc/letsencrypt/live/[도메인 이름]/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/[도메인 이름]/privkey.pem;
 
-	location / {
-		proxy_pass http://localhost:3400;
-		proxy_set_header    Host              $host;
-		proxy_set_header    X-Real-IP         $remote_addr;
-		proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
-		proxy_set_header    X-Client-Verify   SUCCESS;
-		proxy_set_header    X-Client-DN       $ssl_client_s_dn;
-		proxy_set_header    X-SSL-Subject     $ssl_client_s_dn;
-		proxy_set_header    X-SSL-Issuer      $ssl_client_i_dn;
-		proxy_set_header    X-Forwarded-Proto http;
-		proxy_read_timeout 1800;
-		proxy_connect_timeout 1800;
-	}
+location / {
+proxy_pass http://localhost:3400;
+proxy_set_header    Host              $host;
+proxy_set_header    X-Real-IP         $remote_addr;
+proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+proxy_set_header    X-Client-Verify   SUCCESS;
+proxy_set_header    X-Client-DN       $ssl_client_s_dn;
+proxy_set_header    X-SSL-Subject     $ssl_client_s_dn;
+proxy_set_header    X-SSL-Issuer      $ssl_client_i_dn;
+proxy_set_header    X-Forwarded-Proto http;
+proxy_read_timeout 1800;
+proxy_connect_timeout 1800;
+}
 }
 ```
 
@@ -322,22 +322,22 @@ i
 
 ```text
 server {
-	listen 80;
-	server_name [도메인 이름];
-	return 301 https://[도메인 이름];
+listen 80;
+server_name [도메인 이름];
+return 301 https://[도메인 이름];
 }
 
 server {
-	listen 443 ssl;
-	server_name [도메인 이름];
-	ssl_certificate /etc/letsencrypt/live/[도메인 이름]/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/[도메인 이름]/privkey.pem;
+listen 443 ssl;
+server_name [도메인 이름];
+ssl_certificate /etc/letsencrypt/live/[도메인 이름]/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/[도메인 이름]/privkey.pem;
 
-	root /home/ubuntu/Developing/seoul_panorama_2123/build;
-	index index.html index.htm index.	nginx-debian.html;
-	location / {
-		try_files $uri	$uri/	/index.html;
-	}
+root /home/ubuntu/Developing/seoul_panorama_2123/build;
+index index.html index.htm index.	nginx-debian.html;
+location / {
+try_files $uri	$uri/	/index.html;
+}
 }
 ```
 
