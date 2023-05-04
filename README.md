@@ -231,8 +231,8 @@ server {
 server {
 	listen 443 ssl;
 	server_name [도메인 이름];
-	ssl_certificate /etc/letsencrypt/live/calculator.moohae.net/fullchain.pem;
-	ssl_certificate_key /etc/letsencrypt/live/calculator.moohae.net/privkey.pem;
+	ssl_certificate /etc/letsencrypt/live/[도메인 이름]/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/[도메인 이름]/privkey.pem;
 
 	location / {
 		proxy_pass http://localhost:3400;
