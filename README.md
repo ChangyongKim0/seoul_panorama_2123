@@ -208,7 +208,7 @@ cd /etc/nginx/sites-available/
 
 ```bash
 # 1. 설정파일 열기
-vi /etc/nginx/site-available/[서버 별칭].conf
+vi [서버 별칭].conf
 
 # 2. 명령모드에서 입력모드로 전환
 i
@@ -307,7 +307,7 @@ sudo su
 
 ```bash
 # 1. 설정파일 열기
-vi /etc/nginx/site-available/[서버 별칭].conf
+vi [서버 별칭].conf
 
 # 2. 명령모드에서 입력모드로 전환
 i
