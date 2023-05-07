@@ -38,16 +38,40 @@ const TorturingMountainPage = ({ match }) => {
       }}
     >
       <Header black />
-      <Link to={page_idx < 5 ? undefined : "/nicknaming"}>
-        <AutoLayout type="column" gap={0} attach="center" align="center" fill>
-          <div className={cx("frame-blank")}></div>
+
+      <AutoLayout type="column" gap={0} attach="center" align="center" fill>
+        <div className={cx("frame-blank")}></div>
+        <div className={cx("frame-image")}>
           <img
-            className={cx("frame-image")}
+            className={cx("image")}
             src={"./img/torturing_mountain/0" + (page_idx + 1) + ".png"}
           />
-          <div className={cx("frame-blank")}>
-            <AutoLayout padding={1} gap={1} fillX>
-              <TextBox type="narration" align="center">
+          {
+            <div
+              className={cx(
+                "frame-image-overlay",
+                page_idx === 5 ? "visible" : ""
+              )}
+            >
+              <AutoLayout fill attach="center">
+                <TextBox type="narration" align="center">
+                  {[
+                    "서울의 경계를 이루는 <대모산-구룡산>은 은폐와 무관심 속에서 가장 많은 침식을 당한 산입니다.",
+                    "",
+                    "우리는 향후 100년동안 산에 새로운 욕망이 투사될 수 있다는 사실을 인지해야 합니다! ",
+                  ]}
+                </TextBox>
+              </AutoLayout>
+            </div>
+          }
+        </div>
+        <div className={cx("frame-blank")}>
+          <AutoLayout padding={1} gap={1} fillX>
+            <Link to={page_idx < 5 ? undefined : "/nicknaming"}>
+              <TextBox
+                type={page_idx === 5 ? "subtitle" : "narration"}
+                align="center"
+              >
                 {page_idx === 0
                   ? ["....."]
                   : page_idx === 1
@@ -59,22 +83,13 @@ const TorturingMountainPage = ({ match }) => {
                   : page_idx === 4
                   ? ["으으윽....!"]
                   : page_idx === 5
-                  ? [
-                      "서울의 경계를 이루는 <대모산-구룡산>은 은폐와 무관심 속에서 가장 많은 침식을 당한 산입니다.",
-                      "",
-                      "우리는 향후 100년동안 산에 새로운 욕망이 투사될 수 있다는 사실을 인지해야 합니다! ",
-                    ]
+                  ? [">>> 다음 >>>"]
                   : []}
-              </TextBox>
-              {page_idx === 5 && (
-                <TextBox type="subtitle" align="center">
-                  {[">>> 다음 >>>"]}
-                </TextBox>
-              )}
-            </AutoLayout>
-          </div>
-        </AutoLayout>
-      </Link>
+              </TextBox>{" "}
+            </Link>
+          </AutoLayout>
+        </div>
+      </AutoLayout>
     </div>
   );
 };

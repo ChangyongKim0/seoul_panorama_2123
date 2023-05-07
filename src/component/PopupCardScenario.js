@@ -22,6 +22,7 @@ import Button from "../component/Button";
 import ChartBar from "./ChartBar";
 import Divider from "../component/Divider";
 import Histogram from "./Histogram";
+import ScoreGraph from "./ScoreGraph";
 
 const cx = classNames.bind(styles);
 
@@ -568,6 +569,7 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
                   "12% 비율일 때를 기준으로 두고, 더 많은 공원과 녹지를 만들어 주실수록 더 많은 점수를 드리려고 해요.",
                 ]}
               </TextBox>
+              <ScoreGraph />
               <TextBox type="sentence">
                 {["그럼 다시 디자인하러 돌아가 볼까요?"]}
               </TextBox>

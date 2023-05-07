@@ -1,0 +1,40 @@
+@import "../util/style.scss";
+
+.wrapper {
+  position: relative;
+  min-height: 10rem;
+  width: calc(100% - 1px);
+  padding: 0.5px;
+  box-shadow: 0 0 0 1px inset $txt-black;
+  // overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.frame {
+  &-bar {
+    width: 100%;
+    box-shadow: 0 0 0 0.5px $txt-black;
+    &-inside {
+      width: 100%;
+      height: 100%;
+      box-shadow: 0 0 0 0.5px inset $txt-black;
+      background-color: $bgd-primary;
+    }
+  }
+  &-average {
+    position: absolute;
+    height: 100%;
+    width: 0px;
+    border-right: dashed 1.5px $bgd-black;
+    & > * {
+      @include font-eng-14;
+      position: absolute;
+      bottom: -1rem;
+    }
+  }
+}
+
+.graph {
+  width: 100%;
+  height: 100%;
+}
