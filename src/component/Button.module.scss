@@ -27,7 +27,7 @@
 
 .type {
   &-normal {
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-size: 1rem;
     line-height: 1rem;
     color: $txt-black;
@@ -39,7 +39,7 @@
     @include shd-fourway-medium;
   }
   &-emph {
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-size: 1rem;
     line-height: 1rem;
     color: $txt-white;
@@ -51,7 +51,7 @@
     @include shd-fourway-medium;
   }
   &-emph_white {
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1.5rem;
     line-height: 1.5rem;
     color: $txt-white;
@@ -64,7 +64,7 @@
   &-download {
     padding: 0.625rem 0;
     & > .frame {
-      font-family: "Charriot Deluxe";
+      font-family: $font-eng;
       font-size: 1.5rem;
       line-height: 1.5rem;
       color: $txt-white;
@@ -76,7 +76,7 @@
     }
   }
   &-warning {
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1.5rem;
     line-height: 1.5rem;
     color: $txt-white;

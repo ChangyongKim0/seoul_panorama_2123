@@ -23,7 +23,7 @@
 
 .text {
   &-center {
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1.5rem;
     line-height: 1.5rem;
     color: $txt-white;
@@ -33,7 +33,7 @@
 
 .frame {
   &-btn {
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1.5rem;
     line-height: 1.5rem;
     color: $txt-white;

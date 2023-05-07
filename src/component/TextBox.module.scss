@@ -13,12 +13,12 @@
 .type {
   &-title {
     color: $txt-white;
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1.5rem;
     line-height: 1.5rem;
   }
   &-title-fill {
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     width: fit-content;
     background-color: $bgd-black;
     padding: 0.375rem;
@@ -28,14 +28,14 @@
   }
   &-subtitle {
     color: $txt-white;
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-weight: bold;
     font-size: 0.875rem;
     line-height: 0.875rem;
   }
   &-section {
     color: $txt-white;
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-weight: bold;
     font-size: 1rem;
     line-height: 1rem;
@@ -43,7 +43,7 @@
   &-sentence {
     color: $txt-grey;
     word-break: keep-all;
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-weight: bold;
     font-size: 1rem;
     line-height: 1.25rem;
@@ -67,13 +67,13 @@
   }
   &-wrap {
     color: $txt-white;
-    font-family: "Charriot Deluxe";
+    font-family: $font-eng;
     font-size: 1rem;
     line-height: 1rem;
   }
   &-warning {
     color: $txt-white;
-    font-family: "Galmuri11";
+    font-family: $font-kor;
     font-weight: bold;
     font-size: 1rem;
     line-height: 1rem;
