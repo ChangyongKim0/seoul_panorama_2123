@@ -225,7 +225,7 @@ i
 server {
 listen 80;
 server_name [도메인 이름];
-return 301 https://[도메인 이름];
+return 301 https://[도메인 이름]$request_uri;
 }
 
 server {
@@ -324,7 +324,7 @@ i
 server {
 listen 80;
 server_name [도메인 이름];
-return 301 https://[도메인 이름];
+return 301 https://[도메인 이름]$request_uri;
 }
 
 server {
