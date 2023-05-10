@@ -13,12 +13,12 @@
 .frame {
   &-bar {
     width: 100%;
-    box-shadow: 0 0 0 0.5px $txt-black;
+    box-shadow: 0 0 0 1px $txt-primary;
     &-inside {
       width: 100%;
       height: 100%;
-      box-shadow: 0 0 0 0.5px inset $txt-black;
-      background-color: $bgd-primary;
+      box-shadow: 0 0 0 1px inset $txt-primary;
+      background-color: #758a7933;
     }
   }
   &-average {

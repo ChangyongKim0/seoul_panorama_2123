@@ -17,11 +17,16 @@ import {
 
 const cx = classNames.bind(styles);
 
-const ScoreGraph = ({ type, onClick, data }) => {
+const ScoreGraph = ({ type, onClick, data, resolution = 100 }) => {
   const [global_var, setGlobalVar] = useGlobalVar();
   const [global_data, setGlobalData] = useGlobalData();
   const pathLength = useMotionValue(0);
   const opacity = useMotionValue(0);
+  const [show_score, setShowScore] = useState(false);
+  const [score_client_x, setScoreClientX] = useState(0);
+  const [score_data, setScoreData] = useState({ x: 0, y: 0 });
+  const [show_score_timeout_id, setShowScrollTimeoutId] = useState();
+
   const erf = (mu, sigma, x) => {
     return 1 / (1 + Math.exp((-2 * Math.sqrt(2 / Math.PI) * (x - mu)) / sigma));
   };
@@ -65,14 +70,39 @@ const ScoreGraph = ({ type, onClick, data }) => {
       },
     },
   };
+  useEffect(() => {
+    const inner_width = window.innerWidth;
+    if (score_client_x > 32 && score_client_x < inner_width - 32) {
+      const x = (score_client_x - 32) / (inner_width - 64);
+      setScoreData({ x, y: erf(data.average, data.stdev, x) });
+    }
+  }, [score_client_x]);
   return (
-    <div className={cx("wrapper")}>
+    <div
+      className={cx("wrapper")}
+      onTouchStart={(e) => {
+        clearTimeout(show_score_timeout_id);
+        setShowScore(true);
+        setScoreClientX(e?.touches?.[0]?.clientX || 0);
+      }}
+      onTouchMove={(e) => {
+        setScoreClientX(e?.touches?.[0]?.clientX || 0);
+        // e.stopPropagation();
+      }}
+      onTouchEnd={() => {
+        setShowScrollTimeoutId(
+          setTimeout(() => {
+            setShowScore(false);
+          }, 300)
+        );
+      }}
+    >
       <AutoLayout type="row" align="right" fillY gap={0}>
         <motion.div
           className={cx("frame-average", "type-" + type)}
           initial={{ left: data.average * 100 + "%", opacity: 0.01 }}
           whileInView={{ left: data.average * 100 + "%", opacity: 1 }}
-          // viewport={{ once: true }}
+          viewport={{ once: true }}
           transition={{
             type: "spring",
             bounce: 0.2,
@@ -80,39 +110,52 @@ const ScoreGraph = ({ type, onClick, data }) => {
             duration: 1,
           }}
         >
-          <div>{100 * data.average}%</div>
+          <div>{Math.round(100 * data.average)}%</div>
+          <div className={cx("text-score")} style={{ bottom: "50%" }}>
+            ↖50점
+          </div>
+        </motion.div>
+        <motion.div
+          className={cx("frame-average", "smooth", "type-" + type)}
+          style={{
+            left: score_data.x * 100 + "%",
+            opacity: show_score ? 1 : 0,
+          }}
+        >
+          <div>{Math.round(100 * score_data.x)}%</div>
+          <div
+            className={cx("text-score")}
+            style={{ bottom: 100 * score_data.y + "%" }}
+          >
+            ↖{Math.round(100 * score_data.y)}점
+          </div>
         </motion.div>
         <motion.svg
           initial="initial"
           whileInView="while_in_view"
-          // viewport={{ once: true }}
+          viewport={{ once: true }}
           className={cx("graph", "type-" + type)}
         >
           <motion.path
             variants={path_variants}
             strokeWidth="2"
-            stroke="#000"
+            stroke="#758a79"
             fill="none"
-            d={new Array(window.innerWidth - 64)
+            d={new Array(Math.round(resolution + 1))
               .fill(0)
               .map((e, idx) =>
                 idx === 0
                   ? `M 0 ${160 - 160 * erf(data.average, data.stdev, 0)}`
-                  : `L ${idx} ${
+                  : `L ${(idx / resolution) * (window.innerWidth - 64)} ${
                       160 -
-                      160 *
-                        erf(
-                          data.average,
-                          data.stdev,
-                          idx / (window.innerWidth - 64)
-                        )
+                      160 * erf(data.average, data.stdev, idx / resolution)
                     }`
               )
               .join(" ")}
           ></motion.path>
           <motion.path
             variants={fill_variants}
-            fill="rgba(0,0,0,0.3)"
+            fill="#758a7933"
             d={
               new Array(window.innerWidth - 64)
                 .fill(0)
@@ -144,6 +187,7 @@ ScoreGraph.defaultProps = {
     average: 0.3,
     stdev: 0.15,
   },
+  resolution: 100,
 };
 
 export default ScoreGraph;

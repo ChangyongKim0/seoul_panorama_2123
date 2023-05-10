@@ -8,6 +8,7 @@
   box-shadow: 0 0 0 1px inset $txt-black;
   // overflow: hidden;
   margin-bottom: 1rem;
+  user-select: none;
 }
 
 .frame {
@@ -30,10 +31,24 @@
       @include font-eng-14;
       position: absolute;
       bottom: -1rem;
+      width: fit-content;
+    }
+    &.smooth {
+      transition: opacity 0.3s;
     }
   }
 }
 
+.text {
+  &-score {
+    font-weight: bold;
+    padding: 0.25rem;
+    transform: translateY(100%);
+    white-space: nowrap;
+    color: $txt-primary;
+    // background-color: $bgd-white;
+  }
+}
 .graph {
   width: 100%;
   height: 100%;
