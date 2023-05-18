@@ -12,13 +12,13 @@
    1. [HTTP SSL 인증서 발급받기](https://github.com/ChangyongKim0/seoul_panorama_2123#http-ssl-%EC%9D%B8%EC%A6%9D%EC%84%9C-%EB%B0%9C%EA%B8%89%EB%B0%9B%EA%B8%B0)
    1. [프론트엔드 개발 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
    1. [프론트엔드 본 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EB%B3%B8-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
-1. [EC2 재부팅 시 진행 필요 사항]()
-   1. [Remote-SSH 세팅 변경]()
-   1. [`tmux` 세팅하기]()
-1. [3d 모델 개발 서버에서 테스트하기]()
-   1. [모델 업로드]()
-   1. [코드 수정이 필요한 경우]()
-   1. [웹 브라우저에서 디버깅하기]()
+1. [EC2 재부팅 시 진행 필요 사항](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#ec2-%EC%9E%AC%EB%B6%80%ED%8C%85-%EC%8B%9C-%EC%88%98%ED%96%89-%ED%95%84%EC%9A%94-%EC%82%AC%ED%95%AD)
+   1. [Remote-SSH 세팅 변경](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#remote-ssh-%EC%84%B8%ED%8C%85-%EB%B3%80%EA%B2%BD)
+   1. [`tmux` 세팅하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#tmux-%EC%84%B8%ED%8C%85%ED%95%98%EA%B8%B0)
+1. [3d 모델 개발 서버에서 테스트하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#3d-%EB%AA%A8%EB%8D%B8-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84%EC%97%90%EC%84%9C-%ED%85%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EA%B8%B0)
+   1. [모델 업로드](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EB%AA%A8%EB%8D%B8-%EC%97%85%EB%A1%9C%EB%93%9C)
+   1. [코드 수정이 필요한 경우](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%BD%94%EB%93%9C-%EC%88%98%EC%A0%95%EC%9D%B4-%ED%95%84%EC%9A%94%ED%95%9C-%EA%B2%BD%EC%9A%B0)
+   1. [웹 브라우저에서 디버깅하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%EC%97%90%EC%84%9C-%EB%94%94%EB%B2%84%EA%B9%85%ED%95%98%EA%B8%B0)
 
 ---
 
@@ -464,7 +464,7 @@ sudo su
 
 - 3dm모델 준비
 
-  - 사이즈는 `m`단위로 해서 준비
+  - 사이즈는 `meter`단위로 해서 준비
   - 되도록 모델은 원점 부근에 위치시키기
 
 - 서버에 접속
