@@ -43,6 +43,8 @@ const RhinoModel = forwardRef(({ url }, ref) => {
       console.log(model);
       console.log("- useGraph로 가공한 데이터");
       console.log(modelgr);
+      console.log("- 추정되는 guid 목록");
+      console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
       console.log(`◻ ${url} 파일 데이터 출력 완료...`);
     }
   }, [modelgr]);
