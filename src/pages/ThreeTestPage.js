@@ -1,4 +1,5 @@
 import React, {
+  Suspense,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -22,6 +23,7 @@ import {
 } from "@react-three/drei";
 import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
 import { MathUtils } from "three";
+import AutoLayout from "../component/AutoLayout";
 
 const cx = classNames.bind(styles);
 
@@ -33,7 +35,17 @@ const RhinoModel = forwardRef(({ url }, ref) => {
 
   // console.log(model);
 
-  // const modelgr = useGraph(model);
+  const modelgr = useGraph(model);
+  useEffect(() => {
+    if (modelgr) {
+      console.log(`◼ ${url} 파일 데이터 출력 시작...`);
+      console.log("- 순수 모델 데이터");
+      console.log(model);
+      console.log("- useGraph로 가공한 데이터");
+      console.log(modelgr);
+      console.log(`◻ ${url} 파일 데이터 출력 완료...`);
+    }
+  }, [modelgr]);
 
   // console.log(modelgr);
 
@@ -114,7 +126,7 @@ const SampleTorus = ({ rot_speed, orb_speed }) => {
           color="#87a7ca"
           blending={THREE.AdditiveBlending}
           opacity={0.3}
-        ></pointsMaterial>{" "}
+        ></pointsMaterial>
       </points>
       <points ref={torus2}>
         <torusGeometry args={[300, 150, 30, 200]}></torusGeometry>
@@ -165,29 +177,36 @@ const ThreeTestPage = () => {
 
   return (
     <div className={cx("wrapper") + " three-js-container"}>
-      {/* <Stats /> */}
-      {/* <div className={cx("frame")}>
+      <Suspense
+        fallback={
+          <AutoLayout fill absolute attach="center">
+            로딩중입니다...
+          </AutoLayout>
+        }
+      >
+        <Stats />
+        {/* <div className={cx("frame")}>
         <h1>Testing ThreeJS...</h1>
       </div> */}
-      <Canvas shadows>
-        <SoftShadows size={2.5} samples={16} focus={0.05} />
-        {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
-        <color attach="background" args={["#ffffff"]}></color>
-        <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} />
-        <ambientLight args={[0xffffff, 0.5]}></ambientLight>
-        <directionalLight
-          args={["ffffff", 1]}
-          castShadow
-          shadow-mapSize={4096}
-          shadow-bias={-0.001}
-          position={main_cam_pos}
-        >
-          <orthographicCamera
-            attach="shadow-camera"
-            args={[-50, 50, 50, -50, 0.1, 200]}
-          />
-        </directionalLight>
-        {/* <pointLight
+        <Canvas shadows>
+          <SoftShadows size={2.5} samples={16} focus={0.05} />
+          {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
+          <color attach="background" args={["#ffffff"]}></color>
+          {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
+          <ambientLight args={[0xffffff, 0.5]}></ambientLight>
+          <directionalLight
+            args={["#ffffff", 1]}
+            castShadow
+            shadow-mapSize={4096}
+            shadow-bias={-0.001}
+            position={main_cam_pos}
+          >
+            <orthographicCamera
+              attach="shadow-camera"
+              args={[-50, 50, 50, -50, 0.1, 200]}
+            />
+          </directionalLight>
+          {/* <pointLight
           args={["#ffbb55", lt_pow, 200]}
           position={main_cam_pos}
           castShadow
@@ -200,42 +219,45 @@ const ThreeTestPage = () => {
             <meshBasicMaterial />
           </mesh>
         </pointLight> */}
-        <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-          <SampleHouse />
-        </group>
-        <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-          <RhinoModel url="model/0511_test.3dm" />
-        </group>
-        <OrbitControls
-          minDistance={1}
-          maxDistance={2000}
-          target={[0, 1.5, 0]}
-          enableDamping={true}
-          dampingFactor={0.15}
-          maxPolarAngle={Math.PI / 2}
-          screenSpacePanning={false}
-          onEnd={() => {
-            console.log(main_cam_pos);
-          }}
-          onChange={() => {
-            setMainCamPos(
-              new THREE.Vector3(
-                ...(main_cam.current?.position ?? [0, 0, 0])
-              ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
-            );
-          }}
-        >
-          <PerspectiveCamera
-            makeDefault
-            fov={30}
-            aspect={size.width / size.height}
-            near={0.1}
-            far={10000}
-            position={[25, 25, 35]}
-            ref={main_cam}
-          ></PerspectiveCamera>
-        </OrbitControls>
-      </Canvas>
+          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+            <SampleHouse />
+          </group>
+
+          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+            <RhinoModel url="model/0511_test.3dm" />
+          </group>
+
+          <OrbitControls
+            minDistance={1}
+            maxDistance={2000}
+            target={[0, 1.5, 0]}
+            enableDamping={true}
+            dampingFactor={0.15}
+            maxPolarAngle={Math.PI / 2}
+            screenSpacePanning={false}
+            //   onEnd={() => {
+            //     console.log(main_cam_pos);
+            //   }}
+            onChange={() => {
+              setMainCamPos(
+                new THREE.Vector3(
+                  ...(main_cam.current?.position ?? [0, 0, 0])
+                ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
+              );
+            }}
+          >
+            <PerspectiveCamera
+              makeDefault
+              fov={30}
+              aspect={size.width / size.height}
+              near={0.1}
+              far={10000}
+              position={[25, 25, 35]}
+              ref={main_cam}
+            ></PerspectiveCamera>
+          </OrbitControls>
+        </Canvas>
+      </Suspense>
     </div>
   );
 };
