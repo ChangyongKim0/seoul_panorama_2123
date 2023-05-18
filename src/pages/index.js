@@ -10,6 +10,7 @@ import OverlayPage from "./OverlayPage";
 import IntroductionPage2 from "./IntroductionPage2";
 import TorturingMountainPage from "./TorturingMountainPage";
 import EnterPageOld from "./EnterPageOld";
+import ThreeTestPage from "./ThreeTestPage";
 
 export {
   DesignPage,
@@ -24,4 +25,5 @@ export {
   IntroductionPage2,
   TorturingMountainPage,
   EnterPageOld,
+  ThreeTestPage,
 };

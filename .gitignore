@@ -17,6 +17,7 @@
 # data
 /data
 /public/img
+/public/model
 
 # misc
 .DS_Store
