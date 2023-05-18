@@ -4,6 +4,7 @@
   width: #{"min(calc(100vw - 4rem), calc(var(--new100vh) - 272px))"};
   height: #{"min(calc(100vw - 4rem), calc(var(--new100vh) - 272px))"};
   max-height: 400px;
+  max-width: 400px;
   background-color: $bgd-white;
   overflow: hidden;
   @include shd-south-bold;
@@ -18,7 +19,7 @@
 
 .title {
   color: $txt-white;
-  font-family: "Charriot Deluxe";
+  font-family: $font-eng;
   font-size: 1.5rem;
   line-height: 1.5rem;
   text-shadow: 0 1px #000, 0 -1px #000, 1px 0 #000, -1px 0 #000, 1px 1px #000,
