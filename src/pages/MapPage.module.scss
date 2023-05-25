@@ -5,6 +5,7 @@
   width: 100vw;
   height: var(--100vh, 100vh);
   // max-width: 640px;
+  max-width: $max-width;
   overflow: hidden;
   background-color: $bgd-lightgrey;
 }

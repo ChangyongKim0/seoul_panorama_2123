@@ -5,6 +5,7 @@
     background-color: $bgd-white;
     @include shd-fourway-light;
     width: 100%;
+    max-width: calc($max-width - 2rem);
     height: fit-content;
     overflow: hidden;
     box-shadow: 0 0 0 1px $txt-black;
@@ -13,6 +14,8 @@
     background-color: $bgd-lightgrey;
     @include shd-fourway-bold-wide;
     width: 100%;
+    max-width: calc($max-width - 2rem);
+
     height: fit-content;
     overflow: hidden;
     box-shadow: 0 0 0 1px $txt-black;
@@ -20,6 +23,8 @@
   &-fixed {
     position: relative;
     width: 100%;
+    max-width: calc($max-width - 2rem);
+
     height: calc(var(--100vh, 100vh) * 0.7);
     overflow-y: auto;
     overflow-x: hidden;
@@ -68,15 +73,15 @@
   }
   &-small-image {
     position: relative;
-    width: calc(25vw - 1.75rem);
-    height: calc(25vw - 1.75rem);
+    width: calc(min(25vw, calc(0.25 * $max-width)) - 1.75rem);
+    height: calc(min(25vw, calc(0.25 * $max-width)) - 1.75rem);
     box-shadow: 0 0 0 1px inset $txt-black;
     & > * {
       position: absolute;
       top: 0;
       left: 0;
-      width: calc(25vw - 1.75rem);
-      height: calc(25vw - 1.75rem);
+      width: calc(min(25vw, calc(0.25 * $max-width)) - 1.75rem);
+      height: calc(min(25vw, calc(0.25 * $max-width)) - 1.75rem);
       z-index: -1;
       @include shd-fourway-medium;
     }

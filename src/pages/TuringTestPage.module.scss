@@ -37,9 +37,16 @@
       flex-shrink: 0;
     }
   }
+  &-content-wrapper {
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
   &-content {
     background-color: $bgd-white;
-    position: relative;
+    overflow-x: visible;
+    max-width: $max-width;
     width: 100%;
     &.scrollable {
       height: 100%;

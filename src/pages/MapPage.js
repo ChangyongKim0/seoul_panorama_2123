@@ -33,44 +33,47 @@ const MapPage = ({ match }) => {
   }, []);
 
   return (
-    <div className={cx("wrapper")}>
+    <>
+      {" "}
       <Header grey />
-      <AutoLayout type="column" padding={1} gap={1} fill>
-        <div className={cx("frame-top")}></div>
-        <TextBox type="section" black>
-          {["디자인하고 싶은 위치를 터치해주세요."]}
-        </TextBox>
-        <div
-          className={cx("frame-map")}
-          onClick={() => {
-            setMapClicked(true);
-          }}
-        ></div>
-        {map_clicked ? (
-          <AutoLayout type="row" gap={1} fillX>
-            <AutoLayout type="row" gap={1} fillX recoverClick>
-              <Button
-                type="normal"
-                onClick={() => {
-                  setMapClicked(false);
-                }}
-              >
-                다시 선택하기
-              </Button>
-              <Button type="emph" link_to="/design">
-                이 위치로 시작하기
-              </Button>
+      <div className={cx("wrapper")}>
+        <AutoLayout type="column" padding={1} gap={1} fill>
+          <div className={cx("frame-top")}></div>
+          <TextBox type="section" black>
+            {["디자인하고 싶은 위치를 터치해주세요."]}
+          </TextBox>
+          <div
+            className={cx("frame-map")}
+            onClick={() => {
+              setMapClicked(true);
+            }}
+          ></div>
+          {map_clicked ? (
+            <AutoLayout type="row" gap={1} fillX>
+              <AutoLayout type="row" gap={1} fillX recoverClick>
+                <Button
+                  type="normal"
+                  onClick={() => {
+                    setMapClicked(false);
+                  }}
+                >
+                  다시 선택하기
+                </Button>
+                <Button type="emph" link_to="/design">
+                  이 위치로 시작하기
+                </Button>
+              </AutoLayout>
             </AutoLayout>
-          </AutoLayout>
-        ) : (
-          <div className={cx("frame-tip")}>
-            <TextBox type="section" grey align="center">
-              {["TIP! 구룡산-대모산에는 국정원이 있어요!"]}
-            </TextBox>
-          </div>
-        )}
-      </AutoLayout>
-    </div>
+          ) : (
+            <div className={cx("frame-tip")}>
+              <TextBox type="section" grey align="center">
+                {["TIP! 구룡산-대모산에는 국정원이 있어요!"]}
+              </TextBox>
+            </div>
+          )}
+        </AutoLayout>
+      </div>
+    </>
   );
 };
 

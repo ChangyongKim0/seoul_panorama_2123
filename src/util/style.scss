@@ -87,6 +87,8 @@ $font-eng-b: 700;
 $font-kor-m: 500;
 $font-kor-b: 700;
 
+$max-width: 640px;
+
 @mixin font-eng-18 {
   font-family: $font-eng;
   font-size: 18px;

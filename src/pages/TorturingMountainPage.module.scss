@@ -5,6 +5,7 @@
   width: 100vw;
   height: var(--100vh, 100vh);
   // max-width: 640px;
+
   overflow: hidden;
   background-color: $bgd-black;
 }
@@ -13,10 +14,12 @@
   &-image {
     width: 100%;
     position: relative;
+    max-width: $max-width;
     &-overlay {
       position: absolute;
       top: 0;
       width: 100%;
+      max-width: $max-width;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.3);
       opacity: 0;
@@ -29,6 +32,7 @@
   &-blank {
     height: 300px;
     width: 100%;
+    max-width: $max-width;
   }
 }
 

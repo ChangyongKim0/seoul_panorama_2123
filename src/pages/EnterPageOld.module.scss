@@ -4,6 +4,7 @@
   position: absolute;
   width: 100vw;
   height: var(--100vh, 100vh);
+  max-width: $max-width;
   // max-width: 640px;
   overflow-x: hidden;
   background-color: $bgd-primary;

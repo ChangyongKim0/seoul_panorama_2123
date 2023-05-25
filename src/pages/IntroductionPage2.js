@@ -35,44 +35,46 @@ const IntroductionPage2 = ({ match }) => {
     };
   }, []);
   return (
-    <div className={cx("wrapper")}>
-      <AutoLayout type="column" gap={0.75} align="center" fill padding={1}>
+    <>
+      <div className={cx("frame-header")}>
         <TitleBox
           title="[TOOLS FOR EVERYONE]"
           subtitle="모두를 위한 도구 🔧"
           top
         />
-        <div className={cx("frame-scroll")}>
-          <AutoLayout gap={0.75} fillX>
-            <img className={cx("frame-image")} src="/img/introduction/02.png" />
-            <TextBox align={"center"}>
-              {[
-                "우리는 분명히 자연, 기술, 그리고 도시가 조화를 이루는 도시를 만들 수 있는 능력이 있었을텐데...",
-                "",
-                "대체 무엇이 부족했던 것일까..",
-                " ",
-                "우리들의 선조들에게 서울의 변화를 불러올 수 있는  도구가 있었더라면... 상황은 달랐을까?",
-              ]}
-            </TextBox>
-            <Divider />
-            <TextBox align={"center"}>
-              {[
-                "[2123년의 익명의 건축가]가 [2023년의 서울시민들]에게 <서벌전경 2123>을 전송했습니다!",
-              ]}
-            </TextBox>
-            <Divider />
-            <Button
-              type="download"
-              onClick={() => {
-                setOpenOverlay(true);
-              }}
-            >
-              DOWNLOAD
-            </Button>
-            <Divider opaque /> <Divider opaque /> <Divider opaque />
-          </AutoLayout>
-        </div>
-      </AutoLayout>
+      </div>
+      <div className={cx("wrapper")}>
+        <AutoLayout type="column" gap={0.75} align="center" fillX padding={1}>
+          <div className={cx("frame-top")}></div>
+          <img className={cx("frame-image")} src="/img/introduction/02.png" />
+          <TextBox align={"center"}>
+            {[
+              "우리는 분명히 자연, 기술, 그리고 도시가 조화를 이루는 도시를 만들 수 있는 능력이 있었을텐데...",
+              "",
+              "대체 무엇이 부족했던 것일까..",
+              " ",
+              "우리들의 선조들에게 서울의 변화를 불러올 수 있는  도구가 있었더라면... 상황은 달랐을까?",
+            ]}
+          </TextBox>
+          <Divider />
+          <TextBox align={"center"}>
+            {[
+              "[2123년의 익명의 건축가]가 [2023년의 서울시민들]에게 <서벌전경 2123>을 전송했습니다!",
+            ]}
+          </TextBox>
+          <Divider />
+          <Button
+            type="download"
+            onClick={() => {
+              setOpenOverlay(true);
+            }}
+          >
+            DOWNLOAD
+          </Button>
+          <div className={cx("frame-bottom")}></div>
+        </AutoLayout>
+      </div>
+
       <div className={cx("frame-button")}>
         <AutoLayout type="row" fillX attach={"space"} padding={1}>
           <Button
@@ -90,7 +92,7 @@ const IntroductionPage2 = ({ match }) => {
       </div>
       <AnimatePresence>
         {open_overlay && (
-          <Animation type="fade" useExit absolute>
+          <Animation type="fade" useExit absolute zIndex={1}>
             <div className={cx("frame-overlay")}>
               <PopupCardScenario
                 type={popup_type}
@@ -106,7 +108,7 @@ const IntroductionPage2 = ({ match }) => {
           </Animation>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 };
 

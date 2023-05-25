@@ -4,7 +4,7 @@
   // position: relative;
   width: 100vw;
   height: var(--100vh, 100vh);
-  // max-width: 640px;
+  max-width: $max-width;
   overflow-x: hidden;
   background-color: $bgd-primary;
 }
@@ -55,6 +55,8 @@
   &-map {
     position: absolute;
     width: 100%;
+    max-width: $max-width;
+
     height: var(--100vh, 100vh);
     // background-color: aqua;
     // z-index: 0;

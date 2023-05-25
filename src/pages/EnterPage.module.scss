@@ -4,10 +4,13 @@
   // position: absolute;
   width: 100vw;
   height: var(--100vh, 100vh);
-  // max-width: 640px;
+  max-width: $max-width;
   overflow-x: hidden;
   overflow-y: auto;
   background-color: $bgd-primary;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .frame {
@@ -15,7 +18,8 @@
     width: calc(100% - 2rem);
 
     position: fixed;
-    background-color: #758a79f0;
+    z-index: 1;
+    background-color: #758a7970;
     backdrop-filter: blur(3px);
     padding: 0 1rem;
   }
@@ -45,5 +49,6 @@
     padding: 1rem;
     position: fixed;
     bottom: 0;
+    max-width: $max-width;
   }
 }
