@@ -59,6 +59,7 @@ const SampleHouse = () => {
   const trees = useRef();
   const [show_paving, setShowPaving] = useState(false);
   const [show_trees, setShowTrees] = useState(true);
+  const [paving_data, setPavingData] = useState({});
   useFrame(() => {
     pavings.current.position.z = show_paving
       ? MathUtils.lerp(pavings.current.position.z, 0, 0.1)
@@ -67,6 +68,16 @@ const SampleHouse = () => {
       ? MathUtils.lerp(trees.current.position.z, 0, 0.1)
       : MathUtils.lerp(trees.current.position.z, -2, 0.1);
   });
+  useEffect(() => {
+    if (pavings.current) {
+      setPavingData(
+        pavings.current?.children?.reduce?.((prev, curr) => {
+          prev[curr?.userData?.attributes?.id] = curr;
+          return prev;
+        }, {})
+      );
+    }
+  }, [pavings]);
   return (
     <>
       <group
@@ -92,6 +103,15 @@ const SampleHouse = () => {
         }}
       >
         <RhinoModel url="model/testtrees.3dm" ref={trees} />
+      </group>
+      <group scale={1}>
+        {Object.keys(paving_data).map((key, idx) => {
+          return idx % 2 === 0 ? (
+            <></>
+          ) : (
+            <primitive key={key} object={paving_data[key]}></primitive>
+          );
+        })}
       </group>
     </>
   );

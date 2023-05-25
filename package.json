@@ -27,7 +27,7 @@
   },
   "scripts": {
     "preinstall": "npx npm-force-resolutions",
-    "start": "export PORT=3400 && react-scripts start",
+    "start": "export PORT=3400 && BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
