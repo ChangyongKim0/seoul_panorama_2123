@@ -12,9 +12,13 @@
    1. [HTTP SSL 인증서 발급받기](https://github.com/ChangyongKim0/seoul_panorama_2123#http-ssl-%EC%9D%B8%EC%A6%9D%EC%84%9C-%EB%B0%9C%EA%B8%89%EB%B0%9B%EA%B8%B0)
    1. [프론트엔드 개발 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
    1. [프론트엔드 본 서버 배포하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%ED%94%84%EB%A1%A0%ED%8A%B8%EC%97%94%EB%93%9C-%EB%B3%B8-%EC%84%9C%EB%B2%84-%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0)
-1. [EC2 재부팅 시 진행 필요 사항]()
-   1. [Remote-SSH 세팅 변경]()
-   1. [`tmux` 세팅하기]()
+1. [EC2 재부팅 시 진행 필요 사항](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#ec2-%EC%9E%AC%EB%B6%80%ED%8C%85-%EC%8B%9C-%EC%88%98%ED%96%89-%ED%95%84%EC%9A%94-%EC%82%AC%ED%95%AD)
+   1. [Remote-SSH 세팅 변경](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#remote-ssh-%EC%84%B8%ED%8C%85-%EB%B3%80%EA%B2%BD)
+   1. [`tmux` 세팅하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#tmux-%EC%84%B8%ED%8C%85%ED%95%98%EA%B8%B0)
+1. [3d 모델 개발 서버에서 테스트하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#3d-%EB%AA%A8%EB%8D%B8-%EA%B0%9C%EB%B0%9C-%EC%84%9C%EB%B2%84%EC%97%90%EC%84%9C-%ED%85%8C%EC%8A%A4%ED%8A%B8%ED%95%98%EA%B8%B0)
+   1. [모델 업로드](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EB%AA%A8%EB%8D%B8-%EC%97%85%EB%A1%9C%EB%93%9C)
+   1. [코드 수정이 필요한 경우](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%BD%94%EB%93%9C-%EC%88%98%EC%A0%95%EC%9D%B4-%ED%95%84%EC%9A%94%ED%95%9C-%EA%B2%BD%EC%9A%B0)
+   1. [웹 브라우저에서 디버깅하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%EC%97%90%EC%84%9C-%EB%94%94%EB%B2%84%EA%B9%85%ED%95%98%EA%B8%B0)
 
 ---
 
@@ -451,3 +455,100 @@ yarn build
 tmux new -s sudo
 sudo su
 ```
+
+## 3d 모델 개발 서버에서 테스트하기
+
+### 모델 업로드
+
+> 3dm모델을 서버에 업로드한다.
+
+- 3dm모델 준비
+
+  - 사이즈는 `meter`단위로 해서 준비
+  - 되도록 모델은 원점 부근에 위치시키기
+
+- 서버에 접속
+
+- 서버에 3dm모델 업로드
+  - `~/Developing/seoul_panorama_2123/public/model` 폴더 안에 드래그 앤 드롭으로 업로드
+
+> 동일한 이름의 모델을 덮어씌우기 하면 자동으로 덮어쓰기 된 모델로 적용이 된다.
+
+> 새 모델을 추가하고 싶으면, 코드를 일부 수정해야 한다.
+
+### 코드 수정이 필요한 경우
+
+- 테스트 페이지 파일 열기
+
+  - 파일 위치 : `~/Developing/seoul_panorama_2123/src/pages/ThreeTestPage.js`
+
+- 3dm모델 불러오는 코드 추가
+
+  - `ThreeTestPage` 함수의 `return`문 안에서 다음 항목 찾아서 맞는 경로로 수정 또는 새 경로에 해당하는 구문 추가
+
+```jsx
+<group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+  <RhinoModel url="[파일 경로]" />
+</group>
+```
+
+> 위와 같이 구문을 추가하면, 해당 파일 경로에 있는 모델을 웹페이지에 불러오게 된다.
+
+### 웹 브라우저에서 디버깅하기
+
+- 위에서 만들어진 `tmux seoul`창으로 진입
+  - 해당 `tmux`창이 없다면 위에 적힌 대로 창 생성 필요
+
+```bash
+tmux attach -t seoul
+```
+
+- 웹브라우저 창 열기
+  - `ctrl + C` 눌러서 기존 실행 프로그램 종료 후 아래와 같이 다시 실행
+  - 조금 기다리면 브라우저에서 `localhost:3400` 창이 열림
+
+```bash
+yarn start
+```
+
+- 브라우저에서 `localhost:3400/threetest` 주소로 들어가기
+
+- 콘솔 열기
+
+  - 브라우저에서 `F12`를 눌러 개발자 창을 열기
+  - `console` 탭을 눌러 확인
+
+- 데이터 확인
+  - 개별적인 `3dm`파일이 웹브라우저에서 로딩될 때마다, 콘솔창에 데이터가 출력됨
+  - 출력내용은 다음과 같음
+
+```text
+◼ model/test3.3dm 파일 데이터 출력 시작...
+- 순수 모델 데이터
+Object3D {isObject3D: true, uuid: '6bbaec4e-7931-41c5-b98f-9236cd8b1f15', name: 'model/test3.3dm', type: 'Object3D', parent: Group, …}
+- useGraph로 가공한 데이터
+{nodes: {…}, materials: {…}}
+- 추정되는 guid 목록
+[
+    "8a2adbac-e3b0-452c-ba71-4a8752315f55",
+    "56dc8499-0d92-43c5-94b8-28012b412ce5",
+    "ecb0f79d-d751-4ab9-b483-32d06e148a33",
+    "1ce2769d-6f8e-44d1-bfb1-9ba173ee548b",
+    "ba966414-f769-484b-b34a-0451f9b6225e",
+    "38c2b50d-87ab-4599-94ca-65946040d85b",
+    "26145b47-ee06-4247-a5a9-192e7d6d0631",
+    "fb09f81c-a067-4dc3-b3d2-4eb48bfaf58f",
+    "d1cb70d2-708d-455d-8713-d8bb0792f68b",
+    "f5e9ae5b-46e9-4c0d-aa91-eee2da340ac7"
+]
+◻ model/test3.3dm 파일 데이터 출력 완료...
+```
+
+- 오브젝트별 아이디 확인
+  - 순수 모델 데이터 : `children > [아무숫자] > userData > attributes > id` 항목에 있는 것으로 추정
+  - userGraph로 가공한 데이터 : `nodes > [파일경로명] > children > [아무숫자] > userData > attributes > id` 항목에 있는 것으로 추정
+  - 추정되는 guid 목록 : `순수 모델 데이터` 기준으로 추정되는 항목을 추출함
+  - 해당 위치에 3dm 파일 내 오브젝트의 guid과 같은 값이 적혀 있는지 여러 샘플로 확인 필요
+  - 해당 위치 외에도 guid나 해당 오브젝트를 식별할 항목이 있는지 확인 필요
+
+> 위에 언급한대로 guid값이 맞게 출력되는지, 그 외에도 오브젝트를 식별할 항목이 있는지 확인이 필요하다.
