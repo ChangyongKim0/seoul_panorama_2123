@@ -2,6 +2,8 @@
 <html lang="en">
   <head>
     <!-- Google Tag Manager -->
+    <!-- <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script> -->
     <script>
       (function (w, d, s, l, i) {
         w[l] = w[l] || [];
@@ -44,7 +46,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>타이틀입니다.</title>
+    <title>타지용지용니다.</title>
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="오지 사이트 네임입니다." />
@@ -74,6 +76,15 @@
         "sameAs": []
       }
     </script>
+    <script src="util/pathsegpolyfill.js"></script>
+    <script src="util/matrix.js"></script>
+    <script src="util/domparser.js"></script>
+    <script src="util/clipper.js"></script>
+    <script src="util/parallel.js"></script>
+    <script src="util/geometryutil.js"></script>
+    <script src="util/placementworker.js"></script>
+    <script src="svgparser.js"></script>
+    <script src="svgnest.js"></script>
 
     <!-- <meta
       property="al:ios:url"
@@ -91,6 +102,15 @@
   </head>
   <body>
     <!-- Google Tag Manager (noscript) -->
+    <script>
+      function createObject(object, variableName) {
+        //Bind a variable whose name is the string variableName
+        // to the object called 'object'
+        let execString = variableName + " = object";
+        console.log("Running '" + execString + "'");
+        eval(execString);
+      }
+    </script>
     <noscript
       ><iframe
         src="https://www.googletagmanager.com/ns.html?id=GTM-KXZHWZV"
@@ -109,6 +129,7 @@
         justify-content: center;
       "
     ></div>
+
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
