@@ -27,5 +27,6 @@
     width: calc(100% - 2px);
     height: 100%;
     border: 1px solid $txt-black;
+    overflow: hidden;
   }
 }

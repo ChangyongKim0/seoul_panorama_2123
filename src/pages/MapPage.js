@@ -14,6 +14,7 @@ import Button from "../component/Button";
 import { Link } from "react-router-dom";
 import TextInput from "../component/TextInput";
 import { AnimatePresence } from "framer-motion/dist/framer-motion";
+import EntireMap from "../component/EntireMap";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -47,7 +48,9 @@ const MapPage = ({ match }) => {
             onClick={() => {
               setMapClicked(true);
             }}
-          ></div>
+          >
+            <EntireMap />
+          </div>
           {map_clicked ? (
             <AutoLayout type="row" gap={1} fillX>
               <AutoLayout type="row" gap={1} fillX recoverClick>

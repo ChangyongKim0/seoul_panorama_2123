@@ -14,6 +14,7 @@ import ChartBar from "../component/ChartBar";
 import PopupCardScenario from "../component/PopupCardScenario";
 import NavSheet from "../component/NavSheet";
 import Icon from "../component/Icon";
+import DesignMap from "../component/DesignMap";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -51,6 +52,24 @@ const DesignPage = ({ match }) => {
   }, []);
 
   useEffect(() => {
+    alert("message");
+    const blockTouchStart = (e) => {
+      if (e.touches[0].pageX > 20) return;
+      console.log(e.touches[0].pageX);
+      e.preventDefault();
+    };
+    const onGoBackward = () => {
+      alert("message");
+    };
+    window.addEventListener("popstate", onGoBackward);
+    window.addEventListener("touchstart", blockTouchStart);
+    return () => {
+      window.removeEventListener("popstate", onGoBackward);
+      window.removeEventListener("touchstart", blockTouchStart);
+    };
+  }, []);
+
+  useEffect(() => {
     if (scrollable) {
       next_section.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -71,7 +90,7 @@ const DesignPage = ({ match }) => {
             setMapClicked(true);
           }}
         >
-          <img src="/img/design/00.png" className={cx("image")} />
+          <DesignMap />
         </div>
         <div className={cx("frame-content")}>
           <AutoLayout type="column" attach="space" padding={0} fill>
