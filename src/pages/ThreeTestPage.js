@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -56,20 +57,38 @@ const RhinoModel = forwardRef(({ url }, ref) => {
   return <primitive object={model}></primitive>;
 });
 
+const Group = ({ children }) => {
+  return children;
+};
+
 const SampleHouse = () => {
+  const X_LENGTH = 10;
+  const Y_LENGTH = 10;
   const pavings = useRef();
   const trees = useRef();
+  const newtrees = useRef();
   const [show_paving, setShowPaving] = useState(false);
   const [show_trees, setShowTrees] = useState(true);
   const [paving_data, setPavingData] = useState({});
+  const [random_matrix, setRandomMatrix] = useState(
+    new Array(X_LENGTH).fill(new Array(Y_LENGTH).fill(0))
+  );
   useFrame(() => {
     pavings.current.position.z = show_paving
       ? MathUtils.lerp(pavings.current.position.z, 0, 0.1)
       : MathUtils.lerp(pavings.current.position.z, -0.125, 0.1);
-    trees.current.position.z = show_trees
-      ? MathUtils.lerp(trees.current.position.z, 0, 0.1)
-      : MathUtils.lerp(trees.current.position.z, -2, 0.1);
+    newtrees.current.position.z = show_trees
+      ? MathUtils.lerp(newtrees.current.position.z, 0, 0.1)
+      : MathUtils.lerp(newtrees.current.position.z, -2, 0.1);
   });
+  useLayoutEffect(() => {
+    setRandomMatrix(
+      new Array(X_LENGTH)
+        .fill(new Array(Y_LENGTH).fill(0))
+        .map((e) => e.map((e2) => Math.random()))
+    );
+    console.log(random_matrix);
+  }, []);
   useEffect(() => {
     if (pavings.current) {
       setPavingData(
@@ -97,16 +116,36 @@ const SampleHouse = () => {
       >
         <RhinoModel url="model/test3.3dm" ref={pavings} />
       </group>
+      <RhinoModel url="model/testtrees.3dm" ref={trees} />
       <group
         onClick={(event) => {
           console.log(1);
           event.stopPropagation();
           setShowTrees(!show_trees);
         }}
+        ref={newtrees}
       >
-        <RhinoModel url="model/testtrees.3dm" ref={trees} />
+        {random_matrix.map((e, idx) => {
+          return e.map((val, idx2) => {
+            return (
+              <group
+                key={`${idx}-${idx2}`}
+                position-x={5 * (idx + 1) + val * 10}
+                position-y={5 * (idx2 + 1) - val * 10}
+                scale={val * 0.5 + 0.75}
+              >
+                {trees.current ? (
+                  <primitive object={trees.current.clone()} />
+                ) : (
+                  <></>
+                )}
+              </group>
+            );
+          });
+        })}
       </group>
-      <group scale={1}>
+
+      {/* <group scale={1}>
         {Object.keys(paving_data).map((key, idx) => {
           return idx % 2 === 0 ? (
             <></>
@@ -114,7 +153,7 @@ const SampleHouse = () => {
             <primitive key={key} object={paving_data[key]}></primitive>
           );
         })}
-      </group>
+      </group> */}
     </>
   );
 };
@@ -245,9 +284,9 @@ const ThreeTestPage = () => {
             <SampleHouse />
           </group>
 
-          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+          {/* <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
             <RhinoModel url="model/0511_test.3dm" />
-          </group>
+          </group> */}
 
           <OrbitControls
             minDistance={1}
