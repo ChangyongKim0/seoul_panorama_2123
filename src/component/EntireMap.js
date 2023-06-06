@@ -16,6 +16,7 @@ import * as THREE from "three";
 import { Canvas, useFrame, useGraph, useLoader } from "@react-three/fiber";
 import {
   OrbitControls,
+  OrthographicCamera,
   PerspectiveCamera,
   SoftShadows,
   Sphere,
@@ -37,18 +38,18 @@ const RhinoModel = forwardRef(({ url }, ref) => {
   // console.log(model);
 
   const modelgr = useGraph(model);
-  useEffect(() => {
-    if (modelgr) {
-      console.log(`◼ ${url} 파일 데이터 출력 시작...`);
-      console.log("- 순수 모델 데이터");
-      console.log(model);
-      console.log("- useGraph로 가공한 데이터");
-      console.log(modelgr);
-      console.log("- 추정되는 guid 목록");
-      console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
-      console.log(`◻ ${url} 파일 데이터 출력 완료...`);
-    }
-  }, [modelgr]);
+  // useEffect(() => {
+  //   if (modelgr) {
+  //     console.log(`◼ ${url} 파일 데이터 출력 시작...`);
+  //     console.log("- 순수 모델 데이터");
+  //     console.log(model);
+  //     console.log("- useGraph로 가공한 데이터");
+  //     console.log(modelgr);
+  //     console.log("- 추정되는 guid 목록");
+  //     console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
+  //     console.log(`◻ ${url} 파일 데이터 출력 완료...`);
+  //   }
+  // }, [modelgr]);
 
   // console.log(modelgr);
 
@@ -64,113 +65,178 @@ const Group = ({ children }) => {
 const SampleHouse = () => {
   const X_LENGTH = 10;
   const Y_LENGTH = 10;
+  const map = useRef();
   const pavings = useRef();
   const trees = useRef();
-  const newtrees = useRef();
   const [show_paving, setShowPaving] = useState(false);
-  const [show_trees, setShowTrees] = useState(true);
-  const [paving_data, setPavingData] = useState({});
-  const [random_matrix, setRandomMatrix] = useState(
-    new Array(X_LENGTH).fill(new Array(Y_LENGTH).fill(0))
-  );
+  const main_cam = useRef();
+  const orbit_controls = useRef();
+  const [main_cam_pos, setMainCamPos] = useState([0, 0, 0]);
+  const size = { width: window.innerWidth, height: window.innerHeight };
+  const [cam_target, setCamTarget] = useState([1, 1, 1]);
+  const [cam_target0, setCamTarget0] = useState([0, 0, 0]);
+  const [cam_pos, setCamPos] = useState([1, 1, 1]);
+  const [cam_pos0, setCamPos0] = useState([0, 0, 0]);
+  const [lerp_val, setLerpVal] = useState(0);
+  const [map_clicked, setMapClicked] = useState(false);
+  const [touch_disabled, setTouchDisabled] = useState(false);
+
+  useFrame(() => {
+    // console.log(cam_target);
+  });
+
+  useEffect(() => {
+    // main_cam.current.position.set(0, 100, 0);
+    // orbit_controls.current.target.set(1, 1, 0);
+    // orbit_controls.current.update();
+  }, [map_clicked]);
+
   useFrame(() => {
     pavings.current.position.z = show_paving
       ? MathUtils.lerp(pavings.current.position.z, 0, 0.1)
       : MathUtils.lerp(pavings.current.position.z, -0.125, 0.1);
-  });
-  useLayoutEffect(() => {
-    setRandomMatrix(
-      new Array(X_LENGTH)
-        .fill(new Array(Y_LENGTH).fill(0))
-        .map((e) => e.map((e2) => Math.random()))
-    );
-    console.log(random_matrix);
-  }, []);
-  useEffect(() => {
-    if (pavings.current) {
-      setPavingData(
-        pavings.current?.children?.reduce?.((prev, curr) => {
-          prev[curr?.userData?.attributes?.id] = curr;
-          return prev;
-        }, {})
+
+    const new_lerp_val = MathUtils.lerp(lerp_val, map_clicked ? 1 : 0, 0.05);
+    setLerpVal(new_lerp_val);
+    if (map_clicked || touch_disabled) {
+      main_cam.current.position.set(
+        ...[0, 0, 0].map(
+          (_, idx) =>
+            new_lerp_val * cam_pos[idx] + (1 - new_lerp_val) * cam_pos0[idx]
+        )
       );
+      orbit_controls.current.target = new THREE.Vector3(
+        ...[0, 0, 0].map(
+          (_, idx) =>
+            new_lerp_val * cam_target[idx] +
+            (1 - new_lerp_val) * cam_target0[idx]
+        )
+      );
+      if (new_lerp_val < 0.05) {
+        setTouchDisabled(false);
+      }
     }
-  }, [pavings]);
+  });
+
   return (
     <>
-      <group
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
+      <SoftShadows size={2.5} samples={16} focus={0.05} />
+      {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
+      <color attach="background" args={["#ffffff"]}></color>
+      {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
+      <ambientLight args={[0xffffff, 0.5]}></ambientLight>
+      <directionalLight
+        args={["#ffffff", 1]}
+        castShadow
+        shadow-mapSize={4096}
+        shadow-bias={-0.001}
+        position={main_cam_pos}
       >
-        <RhinoModel url="model/test2.3dm" />
-      </group>
+        <orthographicCamera
+          attach="shadow-camera"
+          args={[-50, 50, 50, -50, 0.1, 200]}
+        />
+      </directionalLight>
+      {/* <pointLight
+          args={["#ffbb55", lt_pow, 200]}
+          position={main_cam_pos}
+          castShadow
+          shadow-mapSize={1024}
+          shadow-radius={5}
+          shadow-bias={-0.005}
+        >
+          <mesh>
+            <Sphere />
+            <meshBasicMaterial />
+          </mesh>
+        </pointLight> */}
       <group
-        onClick={(event) => {
-          event.stopPropagation();
-          setShowPaving(!show_paving);
-        }}
+        scale={1}
+        rotation-x={-Math.PI / 2}
+        castShadow
+        receiveShadow
+        ref={map}
       >
-        <RhinoModel url="model/test3.3dm" ref={pavings} />
+        <group
+          onClick={(event) => {
+            console.log(event);
+            event.stopPropagation();
+            setMapClicked(!map_clicked);
+            if (!map_clicked) {
+              setTouchDisabled(true);
+              const vec_target0 = orbit_controls.current.target;
+              const vec_target = event.point;
+              const vec_pos0 = main_cam.current.position;
+              // const vec_pos = event.point;
+              setCamTarget0([vec_target0.x, vec_target0.y, vec_target0.z]);
+              setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
+              setCamPos0([vec_pos0.x, vec_pos0.y, vec_pos0.z]);
+              setCamPos([
+                vec_target.x + 10,
+                vec_target.y + 10,
+                vec_target.z + 10,
+              ]);
+            }
+          }}
+        >
+          <RhinoModel url="model/test2.3dm" />
+        </group>
+        <group
+          onClick={(event) => {
+            event.stopPropagation();
+            setShowPaving(!show_paving);
+          }}
+        >
+          <RhinoModel url="model/test3.3dm" ref={pavings} />
+        </group>
+        <RhinoModel url="model/testtrees.3dm" ref={trees} />
       </group>
-      <RhinoModel url="model/testtrees.3dm" ref={trees} />
+      <OrbitControls
+        minDistance={1}
+        maxDistance={2000}
+        target={[0, 1.5, 0]}
+        enableDamping={true}
+        dampingFactor={0.15}
+        maxPolarAngle={touch_disabled ? Math.PI / 2 : 0.1}
+        screenSpacePanning={true}
+        touches={
+          touch_disabled
+            ? {}
+            : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE }
+        }
+        //   onEnd={() => {
+        //     console.log(main_cam_pos);
+        //   }}
+        onChange={() => {
+          console.log(main_cam.current);
+          console.log(orbit_controls.current);
+          // main_cam.current?.lookAt?.(0, 0, 0);
+          setMainCamPos(
+            new THREE.Vector3(
+              ...(main_cam.current?.position ?? [0, 0, 0])
+            ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
+          );
+        }}
+        ref={orbit_controls}
+      >
+        <PerspectiveCamera
+          makeDefault
+          fov={50}
+          aspect={size.width / size.height}
+          near={0.1}
+          far={10000}
+          position={[0, 200, 1]}
+          ref={main_cam}
+        ></PerspectiveCamera>
+      </OrbitControls>
     </>
   );
 };
 
-const SampleTorus = ({ rot_speed, orb_speed }) => {
-  const torus1 = useRef();
-  const torus2 = useRef();
-  const group = useRef();
-  const model = useRef();
-
-  const point = useTexture(
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/snowflake2.png"
-  );
-
-  useFrame(() => {
-    group.current.rotateX(-0.001 * rot_speed);
-    torus1.current.rotateZ(0.002 * orb_speed);
-    // torus2.current.rotateX(-0.001);
-    torus2.current.rotateZ(-0.001 * orb_speed);
-  });
-
-  return (
-    <group ref={group}>
-      {/* <RhinoModel url="test.3dm" ref={model} /> */}
-      <points ref={torus1}>
-        <torusGeometry args={[300, 130, 60, 30]}></torusGeometry>
-        {/* <meshStandardMaterial color={0x87a7ca} /> */}
-        <pointsMaterial
-          size={2.5}
-          map={point}
-          color="#87a7ca"
-          blending={THREE.AdditiveBlending}
-          opacity={0.3}
-        ></pointsMaterial>
-      </points>
-      <points ref={torus2}>
-        <torusGeometry args={[300, 150, 30, 200]}></torusGeometry>
-        {/* <meshStandardMaterial color={0x87a7ca} /> */}
-        <pointsMaterial
-          size={2.5}
-          map={point}
-          color="#87a7ca"
-          blending={THREE.AdditiveBlending}
-          opacity={0.3}
-        ></pointsMaterial>
-      </points>
-    </group>
-  );
-};
-
 const EntireMap = () => {
-  const size = { width: window.innerWidth, height: window.innerHeight };
   const box_geometry = new THREE.BoxGeometry();
   const box_material = new THREE.MeshBasicMaterial({ color: 0x00ff80 });
   const cube = new THREE.Mesh(box_geometry, box_material);
-  const main_cam = useRef();
-  const [main_cam_pos, setMainCamPos] = useState([0, 0, 0]);
 
   const [test_data, setTestData] = useState({ test: 0 });
 
@@ -210,73 +276,7 @@ const EntireMap = () => {
         <h1>Testing ThreeJS...</h1>
       </div> */}
         <Canvas shadows>
-          <SoftShadows size={2.5} samples={16} focus={0.05} />
-          {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
-          <color attach="background" args={["#ffffff"]}></color>
-          {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
-          <ambientLight args={[0xffffff, 0.5]}></ambientLight>
-          <directionalLight
-            args={["#ffffff", 1]}
-            castShadow
-            shadow-mapSize={4096}
-            shadow-bias={-0.001}
-            position={main_cam_pos}
-          >
-            <orthographicCamera
-              attach="shadow-camera"
-              args={[-50, 50, 50, -50, 0.1, 200]}
-            />
-          </directionalLight>
-          {/* <pointLight
-          args={["#ffbb55", lt_pow, 200]}
-          position={main_cam_pos}
-          castShadow
-          shadow-mapSize={1024}
-          shadow-radius={5}
-          shadow-bias={-0.005}
-        >
-          <mesh>
-            <Sphere />
-            <meshBasicMaterial />
-          </mesh>
-        </pointLight> */}
-          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <SampleHouse />
-          </group>
-
-          {/* <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="model/0511_test.3dm" />
-          </group> */}
-
-          <OrbitControls
-            minDistance={1}
-            maxDistance={2000}
-            target={[0, 1.5, 0]}
-            enableDamping={true}
-            dampingFactor={0.15}
-            maxPolarAngle={Math.PI / 2}
-            screenSpacePanning={false}
-            //   onEnd={() => {
-            //     console.log(main_cam_pos);
-            //   }}
-            onChange={() => {
-              setMainCamPos(
-                new THREE.Vector3(
-                  ...(main_cam.current?.position ?? [0, 0, 0])
-                ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
-              );
-            }}
-          >
-            <PerspectiveCamera
-              makeDefault
-              fov={30}
-              aspect={size.width / size.height}
-              near={0.1}
-              far={10000}
-              position={[25, 25, 35]}
-              ref={main_cam}
-            ></PerspectiveCamera>
-          </OrbitControls>
+          <SampleHouse />
         </Canvas>
       </Suspense>
     </div>
