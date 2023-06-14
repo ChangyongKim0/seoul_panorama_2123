@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -26,93 +27,86 @@ import {
 import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
 import { MathUtils } from "three";
 import AutoLayout from "./AutoLayout";
+import Loading from "./Loading";
+import useGlobalVar from "../hooks/useGlobalVar";
+import useGlobalData from "../hooks/useGlobalData";
+import RhinoModel from "./RhinoModel";
 
 const cx = classNames.bind(styles);
 
+let XHRS = {};
+const getXhrFromXhrs = (xhrs) => {
+  return {
+    loaded: Object.keys(xhrs).reduce(
+      (prev, curr_key) => prev + xhrs[curr_key].loaded,
+      0
+    ),
+    total: Object.keys(xhrs).reduce(
+      (prev, curr_key) => prev + xhrs[curr_key].total,
+      0
+    ),
+  };
+};
+
 // const OrbitControls = oc(THREE);
-const RhinoModel = forwardRef(({ url }, ref) => {
-  const model = useLoader(Rhino3dmLoader, url, (loader) => {
-    loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
-  });
-
-  // console.log(model);
-
-  const modelgr = useGraph(model);
-  // useEffect(() => {
-  //   if (modelgr) {
-  //     console.log(`◼ ${url} 파일 데이터 출력 시작...`);
-  //     console.log("- 순수 모델 데이터");
-  //     console.log(model);
-  //     console.log("- useGraph로 가공한 데이터");
-  //     console.log(modelgr);
-  //     console.log("- 추정되는 guid 목록");
-  //     console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
-  //     console.log(`◻ ${url} 파일 데이터 출력 완료...`);
-  //   }
-  // }, [modelgr]);
-
-  // console.log(modelgr);
-
-  useImperativeHandle(ref, () => model, [url]);
-
-  return <primitive object={model}></primitive>;
-});
 
 const Group = ({ children }) => {
   return children;
 };
 
-const SampleHouse = () => {
-  const X_LENGTH = 10;
-  const Y_LENGTH = 10;
+const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
+  const fov = 10;
   const map = useRef();
   const pavings = useRef();
   const trees = useRef();
   const [show_paving, setShowPaving] = useState(false);
   const main_cam = useRef();
   const orbit_controls = useRef();
-  const [main_cam_pos, setMainCamPos] = useState([0, 0, 0]);
   const size = { width: window.innerWidth, height: window.innerHeight };
   const [cam_target, setCamTarget] = useState([1, 1, 1]);
-  const [cam_target0, setCamTarget0] = useState([0, 0, 0]);
   const [cam_pos, setCamPos] = useState([1, 1, 1]);
-  const [cam_pos0, setCamPos0] = useState([0, 0, 0]);
-  const [lerp_val, setLerpVal] = useState(0);
   const [map_clicked, setMapClicked] = useState(false);
   const [touch_disabled, setTouchDisabled] = useState(false);
-
-  useFrame(() => {
-    // console.log(cam_target);
-  });
+  const [on_change, setOnChange] = useState(0);
 
   useEffect(() => {
-    // main_cam.current.position.set(0, 100, 0);
-    // orbit_controls.current.target.set(1, 1, 0);
-    // orbit_controls.current.update();
-  }, [map_clicked]);
+    if (clicked_state === "unclicked") {
+      setMapClicked(false);
+      setTouchDisabled(true);
+      setCamTarget([0, 1.5, 0]);
+      setCamPos([0, 200, 1]);
+    }
+  }, [clicked_state]);
 
   useFrame(() => {
     pavings.current.position.z = show_paving
       ? MathUtils.lerp(pavings.current.position.z, 0, 0.1)
       : MathUtils.lerp(pavings.current.position.z, -0.125, 0.1);
-
-    const new_lerp_val = MathUtils.lerp(lerp_val, map_clicked ? 1 : 0, 0.05);
-    setLerpVal(new_lerp_val);
+    const lerp_factor = 0.1;
     if (map_clicked || touch_disabled) {
       main_cam.current.position.set(
-        ...[0, 0, 0].map(
-          (_, idx) =>
-            new_lerp_val * cam_pos[idx] + (1 - new_lerp_val) * cam_pos0[idx]
-        )
+        MathUtils.lerp(main_cam.current.position.x, cam_pos[0], lerp_factor),
+        MathUtils.lerp(main_cam.current.position.y, cam_pos[1], lerp_factor),
+        MathUtils.lerp(main_cam.current.position.z, cam_pos[2], lerp_factor)
       );
       orbit_controls.current.target = new THREE.Vector3(
-        ...[0, 0, 0].map(
-          (_, idx) =>
-            new_lerp_val * cam_target[idx] +
-            (1 - new_lerp_val) * cam_target0[idx]
+        MathUtils.lerp(
+          orbit_controls.current.target.x,
+          cam_target[0],
+          lerp_factor
+        ),
+        MathUtils.lerp(
+          orbit_controls.current.target.y,
+          cam_target[1],
+          lerp_factor
+        ),
+        MathUtils.lerp(
+          orbit_controls.current.target.z,
+          cam_target[2],
+          lerp_factor
         )
       );
-      if (new_lerp_val < 0.05) {
+      if (Math.abs(main_cam.current.position.x - cam_pos[0]) < 0.01) {
         setTouchDisabled(false);
       }
     }
@@ -121,35 +115,39 @@ const SampleHouse = () => {
   return (
     <>
       <SoftShadows size={2.5} samples={16} focus={0.05} />
-      {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
       <color attach="background" args={["#ffffff"]}></color>
-      {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
       <ambientLight args={[0xffffff, 0.5]}></ambientLight>
       <directionalLight
         args={["#ffffff", 1]}
         castShadow
         shadow-mapSize={4096}
         shadow-bias={-0.001}
-        position={main_cam_pos}
+        position={[0.05, 0.1, -0.05].map(
+          (e, idx) =>
+            e * fov * main_cam.current?.position?.y || e * 2000 + on_change * 0
+        )}
       >
         <orthographicCamera
           attach="shadow-camera"
-          args={[-50, 50, 50, -50, 0.1, 200]}
+          args={[-0.04, 0.04, 0.04, -0.04, 0.001, 0.2].map(
+            (e, idx) =>
+              e * fov * main_cam.current?.position?.y +
+                [
+                  -1 * Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                  -1 * Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+
+                  Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                  Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                  0,
+                  0,
+                ][idx] || e * 2000 + on_change * 0
+          )}
         />
       </directionalLight>
-      {/* <pointLight
-          args={["#ffbb55", lt_pow, 200]}
-          position={main_cam_pos}
-          castShadow
-          shadow-mapSize={1024}
-          shadow-radius={5}
-          shadow-bias={-0.005}
-        >
-          <mesh>
-            <Sphere />
-            <meshBasicMaterial />
-          </mesh>
-        </pointLight> */}
       <group
         scale={1}
         rotation-x={-Math.PI / 2}
@@ -159,27 +157,37 @@ const SampleHouse = () => {
       >
         <group
           onClick={(event) => {
-            console.log(event);
+            // console.log(event);
             event.stopPropagation();
-            setMapClicked(!map_clicked);
-            if (!map_clicked) {
-              setTouchDisabled(true);
-              const vec_target0 = orbit_controls.current.target;
-              const vec_target = event.point;
-              const vec_pos0 = main_cam.current.position;
-              // const vec_pos = event.point;
-              setCamTarget0([vec_target0.x, vec_target0.y, vec_target0.z]);
+
+            setTouchDisabled(true);
+            setMapClicked(true);
+            const vec_target0 = orbit_controls.current.target;
+            const vec_target = event.point;
+            const vec_pos0 = main_cam.current.position;
+            // const vec_pos = event.point;
+            if (clicked_state === "unclicked") {
+              setClickedState("region");
+              setCamTarget([vec_target0.x, vec_target0.y, vec_target0.z]);
+              setCamPos([vec_pos0.x, 100, vec_pos0.z]);
+            } else if (clicked_state === "region") {
+              console.log("he");
+              setClickedState("position");
               setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
-              setCamPos0([vec_pos0.x, vec_pos0.y, vec_pos0.z]);
               setCamPos([
-                vec_target.x + 10,
-                vec_target.y + 10,
-                vec_target.z + 10,
+                vec_target.x + 100,
+                vec_target.y + 100,
+                vec_target.z + 100,
               ]);
             }
           }}
         >
-          <RhinoModel url="model/test2.3dm" />
+          <RhinoModel
+            url="model/test2.3dm"
+            onProgress={(xhr) => {
+              onEachProgress("test2", xhr);
+            }}
+          />
         </group>
         <group
           onClick={(event) => {
@@ -187,9 +195,29 @@ const SampleHouse = () => {
             setShowPaving(!show_paving);
           }}
         >
-          <RhinoModel url="model/test3.3dm" ref={pavings} />
+          <RhinoModel
+            url="model/test3.3dm"
+            ref={pavings}
+            onProgress={(xhr) => {
+              onEachProgress("test3", xhr);
+            }}
+          />
         </group>
-        <RhinoModel url="model/testtrees.3dm" ref={trees} />
+        {/* <RhinoModel
+          url="model/0511_test.3dm"
+          ref={pavings}
+          onProgress={(xhr) => {
+            onEachProgress("0511_test", xhr);
+          }}
+        /> */}
+
+        <RhinoModel
+          url="model/testtrees.3dm"
+          ref={trees}
+          onProgress={(xhr) => {
+            onEachProgress("testtrees", xhr);
+          }}
+        />
       </group>
       <OrbitControls
         minDistance={1}
@@ -197,10 +225,12 @@ const SampleHouse = () => {
         target={[0, 1.5, 0]}
         enableDamping={true}
         dampingFactor={0.15}
-        maxPolarAngle={touch_disabled ? Math.PI / 2 : 0.1}
+        maxPolarAngle={
+          touch_disabled || clicked_state !== "unclicked" ? Math.PI / 2 : 0.1
+        }
         screenSpacePanning={true}
         touches={
-          touch_disabled
+          touch_disabled || clicked_state !== "unclicked"
             ? {}
             : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE }
         }
@@ -208,20 +238,14 @@ const SampleHouse = () => {
         //     console.log(main_cam_pos);
         //   }}
         onChange={() => {
-          console.log(main_cam.current);
-          console.log(orbit_controls.current);
-          // main_cam.current?.lookAt?.(0, 0, 0);
-          setMainCamPos(
-            new THREE.Vector3(
-              ...(main_cam.current?.position ?? [0, 0, 0])
-            ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
-          );
+          setOnChange(main_cam.current?.position?.y);
+          // console.log(main_cam.current?.position?.y);
         }}
         ref={orbit_controls}
       >
         <PerspectiveCamera
           makeDefault
-          fov={50}
+          fov={fov}
           aspect={size.width / size.height}
           near={0.1}
           far={10000}
@@ -233,7 +257,7 @@ const SampleHouse = () => {
   );
 };
 
-const EntireMap = () => {
+const EntireMap = ({ clicked_state, setClickedState }) => {
   const box_geometry = new THREE.BoxGeometry();
   const box_material = new THREE.MeshBasicMaterial({ color: 0x00ff80 });
   const cube = new THREE.Mesh(box_geometry, box_material);
@@ -245,38 +269,23 @@ const EntireMap = () => {
   const [lt_pos, setLtPos] = useState(-30);
   const [lt_pow, setLtPow] = useState(2);
 
-  const updateData = (e) => {
-    switch (e.path) {
-      case "도넛 회전속도":
-        setOrbSpeed(e.state);
-        break;
-      case "도넛 자전속도":
-        setRotSpeed(e.state);
-        break;
-      case "조명 움직이기":
-        setLtPos(e.state);
-        break;
-      case "조명 세기":
-        setLtPow(e.state);
-        break;
-    }
-  };
+  const [each_xhr, setEachXhr] = useReducer((state, action) => {
+    return { ...state, ...action };
+  }, {});
 
   return (
     <div className={cx("wrapper") + " three-js-container"}>
-      <Suspense
-        fallback={
-          <AutoLayout fill absolute attach="center">
-            로딩중입니다...
-          </AutoLayout>
-        }
-      >
-        <Stats />
-        {/* <div className={cx("frame")}>
-        <h1>Testing ThreeJS...</h1>
-      </div> */}
+      <Suspense fallback={<Loading each_xhr={each_xhr} />}>
         <Canvas shadows>
-          <SampleHouse />
+          <SampleHouse
+            onEachProgress={(name, xhr) => {
+              const new_xhr = {};
+              new_xhr[name] = xhr;
+              setEachXhr(new_xhr);
+            }}
+            clicked_state={clicked_state}
+            setClickedState={setClickedState}
+          />
         </Canvas>
       </Suspense>
     </div>

@@ -1,0 +1,24 @@
+@import "../util/style.scss";
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: $bgd-white;
+}
+
+.frame {
+  &-image {
+    width: 33%;
+  }
+}
+
+.text {
+  @include font-eng-24;
+  &.emph {
+    color: $txt-black;
+  }
+  &.fade {
+    color: $txt-lightgrey;
+  }
+}
