@@ -3,6 +3,7 @@
 .wrapper {
   width: 100%;
   height: var(--new100vh, 100vh);
+  max-width: $max-width;
   overflow-y: auto;
   overflow-x: hidden;
   &::-webkit-scrollbar {
