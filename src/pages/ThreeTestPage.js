@@ -31,7 +31,7 @@ const cx = classNames.bind(styles);
 // const OrbitControls = oc(THREE);
 const RhinoModel = forwardRef(({ url }, ref) => {
   const model = useLoader(Rhino3dmLoader, url, (loader) => {
-    loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
+    loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/");
   });
 
   // console.log(model);
@@ -62,8 +62,8 @@ const Group = ({ children }) => {
 };
 
 const SampleHouse = () => {
-  const X_LENGTH = 10;
-  const Y_LENGTH = 10;
+  const X_LENGTH = 0;
+  const Y_LENGTH = 0;
   const pavings = useRef();
   const trees = useRef();
   const newtrees = useRef();
@@ -106,7 +106,7 @@ const SampleHouse = () => {
           event.stopPropagation();
         }}
       >
-        <RhinoModel url="model/test2.3dm" />
+        <RhinoModel url="model/0613.3dm" />
       </group>
       <group
         onClick={(event) => {
