@@ -17,7 +17,7 @@ const RhinoModel = forwardRef(
       url,
       (loader) => {
         loader.setLibraryPath(
-          "https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/"
+          "https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/"
         );
       },
       onProgress
