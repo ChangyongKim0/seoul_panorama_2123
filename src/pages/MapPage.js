@@ -21,7 +21,8 @@ const cx = classNames.bind(styles);
 // var map = new naver.maps.Map(mapDiv);
 
 const MapPage = ({ match }) => {
-  const [map_clicked, setMapClicked] = useState(false);
+  // unclicked, region, position
+  const [clicked_state, setClickedState] = useState("unclicked");
   useEffect(() => {
     setTimeout(() => {
       document.body.style.backgroundColor = "#EDEDED";
@@ -43,21 +44,19 @@ const MapPage = ({ match }) => {
           <TextBox type="section" black>
             {["디자인하고 싶은 위치를 터치해주세요."]}
           </TextBox>
-          <div
-            className={cx("frame-map")}
-            onClick={() => {
-              setMapClicked(true);
-            }}
-          >
-            <EntireMap />
+          <div className={cx("frame-map")}>
+            <EntireMap
+              clicked_state={clicked_state}
+              setClickedState={setClickedState}
+            />
           </div>
-          {map_clicked ? (
+          {clicked_state === "position" ? (
             <AutoLayout type="row" gap={1} fillX>
               <AutoLayout type="row" gap={1} fillX recoverClick>
                 <Button
                   type="normal"
                   onClick={() => {
-                    setMapClicked(false);
+                    setClickedState("unclicked");
                   }}
                 >
                   다시 선택하기
@@ -67,6 +66,12 @@ const MapPage = ({ match }) => {
                 </Button>
               </AutoLayout>
             </AutoLayout>
+          ) : clicked_state === "region" ? (
+            <div className={cx("frame-tip")}>
+              <TextBox type="section" grey align="center">
+                {["이 영역 안에서 시작할 위치를 터치해봐요."]}
+              </TextBox>
+            </div>
           ) : (
             <div className={cx("frame-tip")}>
               <TextBox type="section" grey align="center">

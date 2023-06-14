@@ -89,6 +89,12 @@ $font-kor-b: 700;
 
 $max-width: 640px;
 
+@mixin font-eng-24 {
+  font-family: $font-eng;
+  font-size: 24px;
+  line-height: 24px;
+}
+
 @mixin font-eng-18 {
   font-family: $font-eng;
   font-size: 18px;

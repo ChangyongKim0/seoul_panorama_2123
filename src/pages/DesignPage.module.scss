@@ -1,7 +1,7 @@
 @import "../util/style.scss";
 
 .wrapper {
-  // position: relative;
+  position: relative;
   width: 100vw;
   height: var(--100vh, 100vh);
   max-width: $max-width;
@@ -74,6 +74,7 @@
   &-nav-sheet {
     width: 100vw;
     height: var(--100vh, 100vh);
+    max-width: $max-width;
     pointer-events: all;
     background-color: $bgd-lightgrey;
     @include shd-fourway-medium;

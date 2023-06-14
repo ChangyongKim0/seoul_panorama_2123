@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -25,43 +26,16 @@ import {
 import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
 import { MathUtils } from "three";
 import AutoLayout from "./AutoLayout";
+import Loading from "./Loading";
+import RhinoModel from "./RhinoModel";
 
 const cx = classNames.bind(styles);
-
-// const OrbitControls = oc(THREE);
-const RhinoModel = forwardRef(({ url }, ref) => {
-  const model = useLoader(Rhino3dmLoader, url, (loader) => {
-    loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/");
-  });
-
-  // console.log(model);
-
-  const modelgr = useGraph(model);
-  useEffect(() => {
-    if (modelgr) {
-      console.log(`◼ ${url} 파일 데이터 출력 시작...`);
-      console.log("- 순수 모델 데이터");
-      console.log(model);
-      console.log("- useGraph로 가공한 데이터");
-      console.log(modelgr);
-      console.log("- 추정되는 guid 목록");
-      console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
-      console.log(`◻ ${url} 파일 데이터 출력 완료...`);
-    }
-  }, [modelgr]);
-
-  // console.log(modelgr);
-
-  useImperativeHandle(ref, () => model, [url]);
-
-  return <primitive object={model}></primitive>;
-});
 
 const Group = ({ children }) => {
   return children;
 };
 
-const SampleHouse = () => {
+const SampleHouse = ({ onEachProgress }) => {
   const X_LENGTH = 10;
   const Y_LENGTH = 10;
   const pavings = useRef();
@@ -103,7 +77,12 @@ const SampleHouse = () => {
           event.stopPropagation();
         }}
       >
-        <RhinoModel url="model/test2.3dm" />
+        <RhinoModel
+          url="model/test2.3dm"
+          onProgress={(xhr) => {
+            onEachProgress("test2", xhr);
+          }}
+        />
       </group>
       <group
         onClick={(event) => {
@@ -111,104 +90,41 @@ const SampleHouse = () => {
           setShowPaving(!show_paving);
         }}
       >
-        <RhinoModel url="model/test3.3dm" ref={pavings} />
+        <RhinoModel
+          url="model/test3.3dm"
+          ref={pavings}
+          onProgress={(xhr) => {
+            onEachProgress("test2", xhr);
+          }}
+        />
       </group>
-      <RhinoModel url="model/testtrees.3dm" ref={trees} />
+      <RhinoModel
+        url="model/0531_grasshopper + id test.3dm"
+        ref={trees}
+        onProgress={(xhr) => {
+          onEachProgress("test2", xhr);
+        }}
+      />
     </>
   );
 };
 
-const SampleTorus = ({ rot_speed, orb_speed }) => {
-  const torus1 = useRef();
-  const torus2 = useRef();
-  const group = useRef();
-  const model = useRef();
-
-  const point = useTexture(
-    "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/sprites/snowflake2.png"
-  );
-
-  useFrame(() => {
-    group.current.rotateX(-0.001 * rot_speed);
-    torus1.current.rotateZ(0.002 * orb_speed);
-    // torus2.current.rotateX(-0.001);
-    torus2.current.rotateZ(-0.001 * orb_speed);
-  });
-
-  return (
-    <group ref={group}>
-      {/* <RhinoModel url="test.3dm" ref={model} /> */}
-      <points ref={torus1}>
-        <torusGeometry args={[300, 130, 60, 30]}></torusGeometry>
-        {/* <meshStandardMaterial color={0x87a7ca} /> */}
-        <pointsMaterial
-          size={2.5}
-          map={point}
-          color="#87a7ca"
-          blending={THREE.AdditiveBlending}
-          opacity={0.3}
-        ></pointsMaterial>
-      </points>
-      <points ref={torus2}>
-        <torusGeometry args={[300, 150, 30, 200]}></torusGeometry>
-        {/* <meshStandardMaterial color={0x87a7ca} /> */}
-        <pointsMaterial
-          size={2.5}
-          map={point}
-          color="#87a7ca"
-          blending={THREE.AdditiveBlending}
-          opacity={0.3}
-        ></pointsMaterial>
-      </points>
-    </group>
-  );
-};
-
 const DesignMap = () => {
+  const fov = 10;
   const size = { width: window.innerWidth, height: window.innerHeight };
   const box_geometry = new THREE.BoxGeometry();
   const box_material = new THREE.MeshBasicMaterial({ color: 0x00ff80 });
   const cube = new THREE.Mesh(box_geometry, box_material);
   const main_cam = useRef();
-  const [main_cam_pos, setMainCamPos] = useState([0, 0, 0]);
-
-  const [test_data, setTestData] = useState({ test: 0 });
-
-  const [rot_speed, setRotSpeed] = useState(1);
-  const [orb_speed, setOrbSpeed] = useState(1);
-  const [lt_pos, setLtPos] = useState(-30);
-  const [lt_pow, setLtPow] = useState(2);
-
-  const updateData = (e) => {
-    switch (e.path) {
-      case "도넛 회전속도":
-        setOrbSpeed(e.state);
-        break;
-      case "도넛 자전속도":
-        setRotSpeed(e.state);
-        break;
-      case "조명 움직이기":
-        setLtPos(e.state);
-        break;
-      case "조명 세기":
-        setLtPow(e.state);
-        break;
-    }
-  };
+  const orbit_controls = useRef();
+  const [on_change, setOnChange] = useState(0);
+  const [each_xhr, setEachXhr] = useReducer((state, action) => {
+    return { ...state, ...action };
+  }, {});
 
   return (
     <div className={cx("wrapper") + " three-js-container"}>
-      <Suspense
-        fallback={
-          <AutoLayout fill absolute attach="center">
-            로딩중입니다...
-          </AutoLayout>
-        }
-      >
-        <Stats />
-        {/* <div className={cx("frame")}>
-        <h1>Testing ThreeJS...</h1>
-      </div> */}
+      <Suspense fallback={<Loading each_xhr={each_xhr} />}>
         <Canvas shadows>
           <SoftShadows size={2.5} samples={16} focus={0.05} />
           {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
@@ -220,60 +136,69 @@ const DesignMap = () => {
             castShadow
             shadow-mapSize={4096}
             shadow-bias={-0.001}
-            position={main_cam_pos}
+            position={[0.05, 0.1, -0.05].map(
+              (e, idx) =>
+                e * fov * main_cam.current?.position?.y ||
+                e * 2000 + on_change * 0
+            )}
           >
             <orthographicCamera
               attach="shadow-camera"
-              args={[-50, 50, 50, -50, 0.1, 200]}
+              args={[-0.06, 0.06, 0.06, -0.06, 0.001, 0.2].map(
+                (e, idx) =>
+                  e * fov * main_cam.current?.position?.y +
+                    [
+                      -1 *
+                        Math.sqrt(1 / 2) *
+                        orbit_controls.current?.target?.z -
+                        Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                      -1 *
+                        Math.sqrt(1 / 2) *
+                        orbit_controls.current?.target?.z -
+                        Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+
+                      Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                        Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                      Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
+                        Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
+                      0,
+                      0,
+                    ][idx] || e * 2000 + on_change * 0
+              )}
             />
           </directionalLight>
-          {/* <pointLight
-          args={["#ffbb55", lt_pow, 200]}
-          position={main_cam_pos}
-          castShadow
-          shadow-mapSize={1024}
-          shadow-radius={5}
-          shadow-bias={-0.005}
-        >
-          <mesh>
-            <Sphere />
-            <meshBasicMaterial />
-          </mesh>
-        </pointLight> */}
-          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <SampleHouse />
-          </group>
 
-          {/* <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="model/0511_test.3dm" />
-          </group> */}
+          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+            <SampleHouse
+              onEachProgress={(name, xhr) => {
+                const new_xhr = {};
+                new_xhr[name] = xhr;
+                setEachXhr(new_xhr);
+              }}
+            />
+          </group>
 
           <OrbitControls
             minDistance={1}
-            maxDistance={2000}
+            maxDistance={2000000}
             target={[0, 1.5, 0]}
             enableDamping={true}
             dampingFactor={0.15}
             maxPolarAngle={Math.PI / 2}
-            screenSpacePanning={false}
-            //   onEnd={() => {
-            //     console.log(main_cam_pos);
-            //   }}
+            screenSpacePanning={true}
             onChange={() => {
-              setMainCamPos(
-                new THREE.Vector3(
-                  ...(main_cam.current?.position ?? [0, 0, 0])
-                ).applyAxisAngle(new THREE.Vector3(0, 1, 0), (3 * Math.PI) / 4)
-              );
+              setOnChange(main_cam.current?.position?.y);
             }}
+            ref={orbit_controls}
+            touches={{ ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }}
           >
             <PerspectiveCamera
               makeDefault
-              fov={30}
+              fov={fov}
               aspect={size.width / size.height}
               near={0.1}
               far={10000}
-              position={[25, 25, 35]}
+              position={[100, 100, 100]}
               ref={main_cam}
             ></PerspectiveCamera>
           </OrbitControls>
