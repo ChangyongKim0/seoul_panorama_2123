@@ -37,7 +37,7 @@ const RhinoModel = forwardRef(
     //   }
     // }, [modelgr]);
 
-    console.log(modelgr);
+    // console.log(modelgr);
 
     useImperativeHandle(ref, () => ({ model, modelgr }), [url]);
 
