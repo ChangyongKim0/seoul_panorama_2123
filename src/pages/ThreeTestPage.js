@@ -254,13 +254,13 @@ const ThreeTestPage = () => {
           {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
           <color attach="background" args={["#ffffff"]}></color>
           {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
-          <ambientLight args={[0xffffff, 0.5]}></ambientLight>
+          <ambientLight args={[0xffffff, 0.2]}></ambientLight>
           <directionalLight
-            args={["#ffffff", 1]}
+            args={["#ffffff", 0.3]}
             castShadow
             shadow-mapSize={4096}
             shadow-bias={-0.001}
-            position={main_cam_pos}
+            position={[1000, 1000, 1000]}
           >
             <orthographicCamera
               attach="shadow-camera"
@@ -284,13 +284,13 @@ const ThreeTestPage = () => {
             <SampleHouse />
           </group>
 
-          {/* <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="model/0511_test.3dm" />
-          </group> */}
+          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+            <RhinoModel url="model/0623_게임용 저용량 원형컷 4.3dm" />
+          </group>
 
           <OrbitControls
             minDistance={1}
-            maxDistance={2000}
+            maxDistance={2000000}
             target={[0, 1.5, 0]}
             enableDamping={true}
             dampingFactor={0.15}
@@ -311,8 +311,8 @@ const ThreeTestPage = () => {
               makeDefault
               fov={30}
               aspect={size.width / size.height}
-              near={0.1}
-              far={10000}
+              near={10}
+              far={1000000}
               position={[25, 25, 35]}
               ref={main_cam}
             ></PerspectiveCamera>
