@@ -79,9 +79,11 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
   }, [clicked_state]);
 
   useFrame(() => {
-    pavings.current.position.z = show_paving
-      ? MathUtils.lerp(pavings.current.position.z, 0, 0.1)
-      : MathUtils.lerp(pavings.current.position.z, -0.125, 0.1);
+    if (pavings.current?.model) {
+      pavings.current.model.position.z = show_paving
+        ? MathUtils.lerp(pavings.current.model.position?.z, 0, 0.1)
+        : MathUtils.lerp(pavings.current.model.position?.z, -0.125, 0.1);
+    }
     const lerp_factor = 0.1;
     if (map_clicked || touch_disabled) {
       main_cam.current.position.set(
