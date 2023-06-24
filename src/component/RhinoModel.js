@@ -16,11 +16,10 @@ const RhinoModel = forwardRef(
       Rhino3dmLoader,
       url,
       (loader) => {
-        loader.setLibraryPath(
-          "https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/"
-        );
+        loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/");
       },
       onProgress
+      // model_name,
     );
     // console.log(model);
 
@@ -38,9 +37,9 @@ const RhinoModel = forwardRef(
     //   }
     // }, [modelgr]);
 
-    // console.log(modelgr);
+    console.log(modelgr);
 
-    useImperativeHandle(ref, () => model, [url]);
+    useImperativeHandle(ref, () => ({ model, modelgr }), [url]);
 
     return <primitive object={model}></primitive>;
   }
