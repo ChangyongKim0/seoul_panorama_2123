@@ -5,9 +5,33 @@ export const GlobalDataContext = createContext({
   setGlobalData: () => {},
 });
 
+const local_storage_list = [
+  "test",
+  "background_state",
+  "bldg_state",
+  "undo_redo_data",
+];
+
 const useGlobalData = () => {
   const { global_data, setGlobalData } = useContext(GlobalDataContext);
   return [global_data, setGlobalData];
+};
+
+const setLocalStorage = (key, item) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(item));
+  } catch {
+    window.localStorage.setItem(key, item);
+  }
+};
+
+const getLocalStorage = (key) => {
+  const temp = window.localStorage.getItem(key);
+  try {
+    return JSON.parse(temp);
+  } catch {
+    return temp;
+  }
 };
 
 const reduceGlobalData = (state, action) => {
@@ -23,6 +47,11 @@ const reduceGlobalData = (state, action) => {
   // });
   console.log(action);
   console.log("global data updated.");
+  Object.keys(action).map((key) => {
+    if (local_storage_list.includes(key)) {
+      setLocalStorage(key, action[key]);
+    }
+  });
   return { ...state, ...action };
 };
 
@@ -31,6 +60,11 @@ export const GlobalDataProvider = ({ children }) => {
     buffer: new Set(),
     editing_data: {},
     assumptions: [],
+    clicked_meshs: [],
+    test: getLocalStorage("test"),
+    background_state: getLocalStorage("background_state"),
+    bldg_state: getLocalStorage("bldg_state"),
+    undo_redo_data: getLocalStorage("undo_redo_data"),
   });
   const value = useMemo(() => {
     return { global_data, setGlobalData };
