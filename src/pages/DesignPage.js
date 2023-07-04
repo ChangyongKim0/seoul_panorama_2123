@@ -15,6 +15,7 @@ import PopupCardScenario from "../component/PopupCardScenario";
 import NavSheet from "../component/NavSheet";
 import Icon from "../component/Icon";
 import DesignMap from "../component/DesignMap";
+import useGlobalData from "../hooks/useGlobalData";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -39,6 +40,7 @@ const DesignPage = ({ match }) => {
   const [open_nav_sheet, setOpenNavSheet] = useState(false);
   const [popup_type, setPopupType] = useState("illust_0");
   const [developed, setDeveloped] = useState(false);
+  const [global_data, setGlobalData] = useGlobalData();
 
   useEffect(() => {
     setTimeout(() => {
@@ -105,6 +107,7 @@ const DesignPage = ({ match }) => {
               >
                 <Icon type="menu" fill size={3} />
               </Button>
+
               <AutoLayout type="column" gap={1} align="right" fillX>
                 <Button
                   type="default"
@@ -113,7 +116,13 @@ const DesignPage = ({ match }) => {
                     setDeveloped((e) => !e);
                   }}
                 >
-                  <div className={cx("frame-icon", developed ? "emph" : "")}>
+                  <div
+                    className={cx(
+                      "frame-icon",
+                      developed ? "emph" : "",
+                      global_data.clicked_meshs?.length > 0 ? "show" : "hide"
+                    )}
+                  >
                     <Icon
                       type={developed ? "undevelop" : "develop"}
                       fill
@@ -131,7 +140,14 @@ const DesignPage = ({ match }) => {
                     setPopupType("build");
                   }}
                 >
-                  <Icon type="build" fill size={3} />
+                  <div
+                    className={cx(
+                      "frame-icon",
+                      global_data.clicked_meshs?.length > 0 ? "show" : "hide"
+                    )}
+                  >
+                    <Icon type="build" fill size={3} />
+                  </div>
                 </Button>
               </AutoLayout>
             </AutoLayout>

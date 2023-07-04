@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 export const _default = (options, default_json) => {
   options = options || {};
   for (let prop in default_json) {
@@ -95,4 +97,56 @@ export const isMobile = () => {
   } catch (e) {
     return false;
   }
+};
+
+export const getDistance = (vec1, vec2, default_dist) => {
+  try {
+    return Math.sqrt(
+      (vec1.x - vec2.x) ** 2 + (vec1.y - vec2.y) ** 2 + (vec1.z - vec2.z) ** 2
+    );
+  } catch (e) {
+    return default_dist;
+  }
+};
+
+export const constrainVector = (
+  type,
+  vector,
+  constraint_vector,
+  offset = 1
+) => {
+  let changed = false;
+  const new_vector_comp = [vector.x, vector.y, vector.z];
+  switch (type) {
+    case "upper":
+      if (vector.x > constraint_vector.x + offset) {
+        changed = true;
+        new_vector_comp[0] = constraint_vector.x;
+      }
+      if (vector.y > constraint_vector.y + offset) {
+        changed = true;
+        new_vector_comp[1] = constraint_vector.y;
+      }
+      if (vector.z > constraint_vector.z + offset) {
+        changed = true;
+        new_vector_comp[2] = constraint_vector.z;
+      }
+      break;
+    case "lower":
+      if (vector.x < constraint_vector.x - offset) {
+        changed = true;
+        new_vector_comp[0] = constraint_vector.x;
+      }
+      if (vector.y < constraint_vector.y - offset) {
+        changed = true;
+        new_vector_comp[1] = constraint_vector.y;
+      }
+      if (vector.z < constraint_vector.z - offset) {
+        changed = true;
+        new_vector_comp[2] = constraint_vector.z;
+      }
+      break;
+    default:
+  }
+  return { changed, constrained_vector: new THREE.Vector3(...new_vector_comp) };
 };

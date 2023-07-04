@@ -25,6 +25,7 @@ import {
 import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
 import { MathUtils } from "three";
 import AutoLayout from "../component/AutoLayout";
+import axios from "axios";
 
 const cx = classNames.bind(styles);
 
@@ -46,6 +47,8 @@ const RhinoModel = forwardRef(({ url }, ref) => {
       console.log(modelgr);
       console.log("- 추정되는 guid 목록");
       console.log(model?.children?.map?.((e) => e?.userData?.attributes?.id));
+      console.log("- JSON Object Scene format 4");
+      console.log(model?.userData?.materials?.map((e) => e.toJSON()));
       console.log(`◻ ${url} 파일 데이터 출력 완료...`);
     }
   }, [modelgr]);
@@ -219,6 +222,14 @@ const ThreeTestPage = () => {
   const [lt_pos, setLtPos] = useState(-30);
   const [lt_pow, setLtPow] = useState(2);
 
+  useLayoutEffect(() => {
+    axios
+      .get(
+        `https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/20211207+rhino7+alias.txt`
+      )
+      .then(console.log);
+  }, []);
+
   const updateData = (e) => {
     switch (e.path) {
       case "도넛 회전속도":
@@ -251,12 +262,12 @@ const ThreeTestPage = () => {
       </div> */}
         <Canvas shadows>
           <SoftShadows size={2.5} samples={16} focus={0.05} />
-          {/* <fog attach="fog" args={["#ffffff", 0, 10000]} /> */}
+          {/* <fog attach="fog" args={["#ffffff", 3000, 7500]} /> */}
           <color attach="background" args={["#ffffff"]}></color>
           {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
           <ambientLight args={[0xffffff, 0.2]}></ambientLight>
           <directionalLight
-            args={["#ffffff", 0.3]}
+            args={["#ffffff", 1.6]}
             castShadow
             shadow-mapSize={4096}
             shadow-bias={-0.001}
@@ -280,12 +291,12 @@ const ThreeTestPage = () => {
             <meshBasicMaterial />
           </mesh>
         </pointLight> */}
-          <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
+          {/* <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
             <SampleHouse />
-          </group>
+          </group> */}
 
           <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="model/0623_게임용 저용량 원형컷 4.3dm" />
+            <RhinoModel url="https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/0629_MAP_sample.3dm" />
           </group>
 
           <OrbitControls
@@ -313,7 +324,7 @@ const ThreeTestPage = () => {
               aspect={size.width / size.height}
               near={10}
               far={1000000}
-              position={[25, 25, 35]}
+              position={[2500, 2500, 35]}
               ref={main_cam}
             ></PerspectiveCamera>
           </OrbitControls>

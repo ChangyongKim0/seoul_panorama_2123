@@ -31,6 +31,15 @@ import Loading from "./Loading";
 import useGlobalVar from "../hooks/useGlobalVar";
 import useGlobalData from "../hooks/useGlobalData";
 import RhinoModel from "./RhinoModel";
+import ThreeMap from "../threejs_component/ThreeMap";
+import { constrainVector, getDistance } from "../util/alias";
+import {
+  EffectComposer,
+  Outline,
+  Select,
+  Selection,
+} from "@react-three/postprocessing";
+import { BlendFunction, KernelSize } from "postprocessing";
 
 const cx = classNames.bind(styles);
 
@@ -49,6 +58,10 @@ const getXhrFromXhrs = (xhrs) => {
 };
 
 // const OrbitControls = oc(THREE);
+const MAX_HEIGHT = 30000;
+const CAM_TARGET_0 = [2950, 100, -2000];
+const CAM_POS_0 = [2900, MAX_HEIGHT, -2000];
+const BOUND = [3500, MAX_HEIGHT, 2000];
 
 const Group = ({ children }) => {
   return children;
@@ -68,23 +81,48 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
   const [map_clicked, setMapClicked] = useState(false);
   const [touch_disabled, setTouchDisabled] = useState(false);
   const [on_change, setOnChange] = useState(0);
+  const [global_data, setGlobalData] = useGlobalData();
 
   useEffect(() => {
     if (clicked_state === "unclicked") {
       setMapClicked(false);
       setTouchDisabled(true);
-      setCamTarget([0, 1.5, 0]);
-      setCamPos([0, 200, 1]);
+      setCamTarget(CAM_TARGET_0);
+      setCamPos(CAM_POS_0);
     }
   }, [clicked_state]);
 
   useFrame(() => {
-    if (pavings.current?.model) {
-      pavings.current.model.position.z = show_paving
-        ? MathUtils.lerp(pavings.current.model.position?.z, 0, 0.1)
-        : MathUtils.lerp(pavings.current.model.position?.z, -0.125, 0.1);
-    }
+    const new_bound_vector = BOUND.map(
+      (e) => e * (1 - (main_cam.current.position.y / MAX_HEIGHT) * 0.95)
+    );
+
+    const upper_bound_vector = new THREE.Vector3(
+      ...CAM_TARGET_0.map((e, idx) => e + new_bound_vector[idx])
+    );
+    const lower_bound_vector = new THREE.Vector3(
+      ...CAM_TARGET_0.map((e, idx) => e - new_bound_vector[idx])
+    );
     const lerp_factor = 0.1;
+    let { changed, constrained_vector } = constrainVector(
+      "upper",
+      orbit_controls.current.target,
+      upper_bound_vector
+    );
+    changed =
+      changed ||
+      constrainVector("lower", constrained_vector, lower_bound_vector).changed;
+    constrained_vector = constrainVector(
+      "lower",
+      constrained_vector,
+      lower_bound_vector
+    ).constrained_vector;
+    if (changed && clicked_state === "unclicked") {
+      console.log(true);
+      orbit_controls.current.target = constrained_vector;
+      main_cam.current.position.x = constrained_vector.x - 50;
+      main_cam.current.position.z = constrained_vector.z;
+    }
     if (map_clicked || touch_disabled) {
       main_cam.current.position.set(
         MathUtils.lerp(main_cam.current.position.x, cam_pos[0], lerp_factor),
@@ -118,35 +156,40 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
     <>
       <SoftShadows size={2.5} samples={16} focus={0.05} />
       <color attach="background" args={["#ffffff"]}></color>
-      <ambientLight args={[0xffffff, 0.5]}></ambientLight>
+      <ambientLight args={[0xffffff, 1]}></ambientLight>
       <directionalLight
-        args={["#ffffff", 1]}
+        args={["#ffffff", 1.6]}
         castShadow
         shadow-mapSize={4096}
         shadow-bias={-0.001}
         position={[0.05, 0.1, -0.05].map(
           (e, idx) =>
-            e * fov * main_cam.current?.position?.y || e * 2000 + on_change * 0
+            (e *
+              fov *
+              getDistance(
+                main_cam.current?.position,
+                cam_target.current,
+                200
+              ) || e * 2000) +
+            on_change * 0 +
+            [
+              cam_target.current?.x,
+              cam_target.current?.y,
+              cam_target.current?.z,
+            ][idx]
         )}
       >
         <orthographicCamera
           attach="shadow-camera"
-          args={[-0.04, 0.04, 0.04, -0.04, 0.001, 0.2].map(
+          args={[-0.02, 0.02, 0.02, -0.02, 0.1, 0.15].map(
             (e, idx) =>
-              e * fov * main_cam.current?.position?.y +
-                [
-                  -1 * Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
-                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
-                  -1 * Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
-                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
-
-                  Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
-                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
-                  Math.sqrt(1 / 2) * orbit_controls.current?.target?.z -
-                    Math.sqrt(1 / 2) * orbit_controls.current?.target?.x,
-                  0,
-                  0,
-                ][idx] || e * 2000 + on_change * 0
+              e *
+                fov *
+                getDistance(
+                  main_cam.current?.position,
+                  cam_target.current,
+                  200
+                ) || e * 2000 + on_change * 0
           )}
         />
       </directionalLight>
@@ -157,11 +200,11 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
         receiveShadow
         ref={map}
       >
-        <group
+        <ThreeMap
           onClick={(event) => {
             // console.log(event);
             event.stopPropagation();
-
+            console.log(event);
             setTouchDisabled(true);
             setMapClicked(true);
             const vec_target0 = orbit_controls.current.target;
@@ -171,60 +214,59 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
             if (clicked_state === "unclicked") {
               setClickedState("region");
               setCamTarget([vec_target0.x, vec_target0.y, vec_target0.z]);
-              setCamPos([vec_pos0.x, 100, vec_pos0.z]);
+              setCamPos([vec_target.x, vec_target.y + 10000, vec_target.z]);
             } else if (clicked_state === "region") {
               console.log("he");
               setClickedState("position");
               setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
               setCamPos([
                 vec_target.x + 100,
-                vec_target.y + 100,
+                vec_target.y + 10000,
                 vec_target.z + 100,
               ]);
             }
           }}
-        >
-          <RhinoModel
-            url="model/test2.3dm"
-            onProgress={(xhr) => {
-              onEachProgress("test2", xhr);
-            }}
-          />
-        </group>
-        <group
-          onClick={(event) => {
-            event.stopPropagation();
-            setShowPaving(!show_paving);
-          }}
-        >
-          <RhinoModel
-            url="model/test3.3dm"
-            ref={pavings}
-            onProgress={(xhr) => {
-              onEachProgress("test3", xhr);
-            }}
-          />
-        </group>
-        {/* <RhinoModel
-          url="model/0511_test.3dm"
-          ref={pavings}
-          onProgress={(xhr) => {
-            onEachProgress("0511_test", xhr);
-          }}
-        /> */}
-
-        <RhinoModel
-          url="model/testtrees.3dm"
-          ref={trees}
-          onProgress={(xhr) => {
-            onEachProgress("testtrees", xhr);
-          }}
+          onEachProgress={onEachProgress}
         />
       </group>
+      <Selection>
+        <EffectComposer autoClear={false}>
+          <Outline
+            blur
+            visibleEdgeColor={0xff0000}
+            edgeStrength={10}
+            hiddenEdgeColor={0xff0000}
+            multisampling={16}
+            width={window.innerWidth}
+            height={window.innerHeight}
+            resolutionX={window.innerWidth * 3}
+            resolutionY={window.innerHeight * 3}
+            xRay
+            kernelSize={KernelSize.SMALL}
+            blendFunction={BlendFunction.ALPHA}
+          />
+        </EffectComposer>
+        <Select enabled>
+          <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
+            {global_data.clicked_meshs?.map?.((e, idx) => (
+              <group key={idx} position={[0, 0, 0]}>
+                <mesh args={[e.clone().geometry]}>
+                  <meshBasicMaterial
+                    attach={"material"}
+                    transparent={true}
+                    opacity={0.5}
+                  />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        </Select>
+      </Selection>
+
       <OrbitControls
         minDistance={1}
-        maxDistance={2000}
-        target={[0, 1.5, 0]}
+        maxDistance={30000}
+        target={CAM_TARGET_0}
         enableDamping={true}
         dampingFactor={0.15}
         maxPolarAngle={
@@ -249,9 +291,23 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
           makeDefault
           fov={fov}
           aspect={size.width / size.height}
-          near={0.1}
-          far={10000}
-          position={[0, 200, 1]}
+          near={
+            0.1 *
+            getDistance(
+              main_cam.current?.position,
+              orbit_controls.current?.target,
+              100
+            )
+          }
+          far={
+            100 *
+            getDistance(
+              main_cam.current?.position,
+              orbit_controls.current?.target,
+              100
+            )
+          }
+          position={CAM_POS_0}
           ref={main_cam}
         ></PerspectiveCamera>
       </OrbitControls>

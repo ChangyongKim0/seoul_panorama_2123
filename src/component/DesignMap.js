@@ -34,50 +34,14 @@ import { MathUtils } from "three";
 import Loading from "./Loading";
 import RhinoModel from "./RhinoModel";
 import useGlobalData from "../hooks/useGlobalData";
+import ThreeBackground from "../threejs_component/ThreeBackground";
+import { getDistance } from "../util/alias";
 
 const cx = classNames.bind(styles);
 
 const Group = ({ children }) => {
   return children;
 };
-
-const SampleHouse = forwardRef(({ onEachProgress, onClick }, ref) => {
-  const [global_data, setGlobalData] = useGlobalData();
-  const X_LENGTH = 10;
-  const Y_LENGTH = 10;
-  const main_model = useRef();
-  useImperativeHandle(ref, () => ({ terrain: main_model.current.model }), [
-    main_model.current,
-  ]);
-
-  useEffect(() => {
-    if (main_model.current) {
-      setGlobalData({
-        main_model_userdata: main_model.current.modelgr.nodes.userData,
-      });
-      console.log(global_data.main_model_userdata);
-    }
-  }, [main_model.current]);
-  return (
-    <>
-      <group
-        onClick={(event) => {
-          event.stopPropagation();
-          onClick?.(event);
-          setGlobalData({ clicked_meshs: [event.object] });
-        }}
-      >
-        <RhinoModel
-          url="model/230618CYTEST2.3dm"
-          ref={main_model}
-          onProgress={(xhr) => {
-            onEachProgress("test2", xhr);
-          }}
-        />
-      </group>
-    </>
-  );
-});
 
 const DesignMap = () => {
   const [global_data, setGlobalData] = useGlobalData();
@@ -89,7 +53,7 @@ const DesignMap = () => {
   const shadow_target = useRef();
   const main_cam = useRef();
   const raycaster = useRef();
-  const sample_model = useRef();
+  const three_background = useRef();
   const orbit_controls = useRef();
   const [target_pos, setTargetPos] = useState(new THREE.Vector3(0, 0, 0));
   const [on_change, setOnChange] = useState(0);
@@ -97,16 +61,6 @@ const DesignMap = () => {
     return { ...state, ...action };
   }, {});
   const [start_count, setStartCount] = useState(0);
-
-  const getDistance = (vec1, vec2, default_dist) => {
-    try {
-      return Math.sqrt(
-        (vec1.x - vec2.x) ** 2 + (vec1.y - vec2.y) ** 2 + (vec1.z - vec2.z) ** 2
-      );
-    } catch (e) {
-      return default_dist;
-    }
-  };
 
   useEffect(() => {
     if (raycaster.current && main_cam.current) {
@@ -162,6 +116,16 @@ const DesignMap = () => {
             <meshBasicMaterial color={0xff00000} />
           </mesh>
           <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
+            <ThreeBackground
+              onEachProgress={(name, xhr) => {
+                const new_xhr = {};
+                new_xhr[name] = xhr;
+                setEachXhr(new_xhr);
+              }}
+              ref={three_background}
+            />
+          </group>
+          {/* <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
             <SampleHouse
               onEachProgress={(name, xhr) => {
                 const new_xhr = {};
@@ -169,20 +133,23 @@ const DesignMap = () => {
                 setEachXhr(new_xhr);
               }}
               // onClick={(event)=>{orbit_controls.current.target = event.point;}}
-              ref={sample_model}
+              // ref={sample_model}
             />
-          </group>
+          </group> */}
           <Selection>
-            <EffectComposer multisampling={8} autoClear={false}>
+            <EffectComposer autoClear={false}>
               <Outline
                 blur
                 visibleEdgeColor={0xffffff}
-                edgeStrength={500}
-                edgeThickness={100}
+                edgeStrength={10}
                 hiddenEdgeColor={0xffffff}
+                multisampling={16}
                 width={window.innerWidth}
                 height={window.innerHeight}
+                resolutionX={window.innerWidth * 3}
+                resolutionY={window.innerHeight * 3}
                 xRay
+                kernelSize={KernelSize.SMALL}
                 blendFunction={BlendFunction.ALPHA}
               />
             </EffectComposer>
@@ -210,7 +177,7 @@ const DesignMap = () => {
 
           <OrbitControls
             minDistance={100}
-            maxDistance={2000}
+            maxDistance={20000}
             target={[128, 98, 30]}
             enableDamping={true}
             dampingFactor={0.15}
@@ -226,11 +193,11 @@ const DesignMap = () => {
             onChange={() => {
               setOnChange(main_cam.current?.position?.y);
               // console.log(main_cam.current?.position?.y, orbit_controls.current?.target?.y )
-              if (sample_model.current) {
+              if (three_background.current?.terrain) {
                 // console.log(sample_model);
                 const raycaster_result =
                   raycaster.current?.intersectObject?.(
-                    sample_model.current.terrain,
+                    three_background.current.terrain,
                     true
                   ) || [];
                 if (raycaster_result.length > 0) {
