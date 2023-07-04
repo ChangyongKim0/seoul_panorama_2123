@@ -1,8 +1,8 @@
 import { useLoader } from "@react-three/fiber";
-import React from "react";
+import React, { useMemo } from "react";
 import { Rhino3dmLoader } from "three/examples/jsm/loaders/3DMLoader";
 
-export const useRhinoModel = ({ url, onProgress }) => {
+export const useRhinoModel = (url, onProgress) => {
   const model = useLoader(
     Rhino3dmLoader,
     url,
@@ -13,12 +13,10 @@ export const useRhinoModel = ({ url, onProgress }) => {
     // model_name,
   );
 
-  const children = model?.children;
-  const materials = model?.userData?.materials;
-  const groups = model?.userData?.groups;
-  const layers = model?.userData?.layers;
+  const children = useMemo(() => model?.children, [model]);
+  const materials = useMemo(() => model?.userData?.materials, [model]);
+  const groups = useMemo(() => model?.userData?.groups, [model]);
+  const layers = useMemo(() => model?.userData?.layers, [model]);
 
-  console.log(children, materials, groups, layers);
-
-  return { children, materials, groups, layers };
+  return { model, children, materials, groups, layers };
 };
