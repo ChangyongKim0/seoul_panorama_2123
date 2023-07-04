@@ -61,7 +61,7 @@ const _getIPAndLocation = (data) => {
   };
 };
 
-const cookie_list = ["unit_type", "encoded_data"];
+const cookie_list = [];
 
 export const GlobalVarContext = createContext({
   global_var: {},
@@ -100,17 +100,11 @@ const reduceGlobalVar = (state, action) => {
 // state : loading / fail / success
 export const GlobalVarProvider = ({ children }) => {
   const [global_var, setGlobalVar] = useReducer(reduceGlobalVar, {
-    unit_type: "py",
     now_visited: true,
     refreshed: true,
     media_mobile: true,
-    summary_name: "가정치 요약",
-    header_height: 168,
     snackbar: false,
-    use_numberpad: false,
     touchable: false,
-    encoded_data: getCookie("encoded_data"),
-    nav_emph_id: "card-list-가정치 요약",
   });
 
   useEffect(() => {
