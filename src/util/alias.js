@@ -150,3 +150,15 @@ export const constrainVector = (
   }
   return { changed, constrained_vector: new THREE.Vector3(...new_vector_comp) };
 };
+
+export const rotateX = (vec) => {
+  return [vec?.[0], vec?.[2], -vec?.[1]];
+};
+
+export const getGuid = (mesh) => {
+  return mesh?.userData?.attributes?.id;
+};
+
+export const getName = (mesh) => {
+  return mesh?.userData?.attributes?.name;
+};
