@@ -18,5 +18,5 @@ export const useRhinoModel = (url, onProgress) => {
   const groups = useMemo(() => model?.userData?.groups, [model]);
   const layers = useMemo(() => model?.userData?.layers, [model]);
 
-  return { model, children, materials, groups, layers };
+  return { children, materials, groups, layers };
 };
