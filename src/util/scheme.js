@@ -8,8 +8,10 @@ const background_mesh = {
   ramp: {},
 };
 
+// rotation
+
 const bldg_mesh = {
-  normal: {
+  normal_bldg: {
     // 최대한 빨리 모든 빌딩 타입 이름, 파일명 제작 필요
     공동주택: {
       mesh: "MESH",
@@ -21,7 +23,8 @@ const bldg_mesh = {
     },
   },
   infra: {},
-  public: {},
+  normal_bldg_big: {},
+  infra_big: {},
 };
 
 // background_relation은 url 제외 모두 id 분류기에서 제공되어야 함
