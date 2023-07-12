@@ -827,6 +827,16 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           </PopupCard>
         </div>
       )}
+      {new_type === "design_out_of_region" && (
+        <div className={cx("wrapper-lightgrey")}>
+          <PopupCard key={new_type}>
+            <TextBox type="sentence">
+              {["여기는 구역 바깥에 있는 부분이라 선택할 수 없어요."]}
+            </TextBox>
+            <Button onClick={onClick?.Close}>다시 선택하기</Button>
+          </PopupCard>
+        </div>
+      )}
     </>
   );
 };
