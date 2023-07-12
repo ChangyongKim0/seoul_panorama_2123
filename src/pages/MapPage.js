@@ -36,7 +36,6 @@ const MapPage = ({ match }) => {
 
   return (
     <>
-      {" "}
       <Header grey />
       <div className={cx("wrapper")}>
         <AutoLayout type="column" padding={1} gap={1} fill>

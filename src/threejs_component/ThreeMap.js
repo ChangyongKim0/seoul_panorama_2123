@@ -10,6 +10,7 @@ import React, {
 } from "react";
 
 import * as THREE from "three";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 import {
   Canvas,
@@ -43,22 +44,17 @@ extend({ MeshLine, MeshLineMaterial });
 
 const ThreeObjectByLayerIndex = forwardRef(
   (
-    { objects, layer_index, onClick = false, show = false, is_line = false },
+    {
+      objects,
+      layer_index,
+      layer_indices,
+      onClick = false,
+      show = false,
+      is_line = false,
+      merge = false,
+    },
     ref
   ) => {
-    const [global_data, setGlobalData] = useGlobalData();
-
-    useEffect(() => {
-      setGlobalData({ test: { name: "test", layer_index, onClick } });
-      console.log(
-        objects.filter(
-          (e) =>
-            e?.userData?.attributes?.layerIndex === layer_index &&
-            (show ? show[e?.userData?.attributes?.id] : true)
-        )
-      );
-    }, [objects]);
-
     return (
       <group
         onClick={
@@ -71,38 +67,62 @@ const ThreeObjectByLayerIndex = forwardRef(
         }
         ref={ref}
       >
-        {objects
-          .filter(
-            (e) =>
-              e?.userData?.attributes?.layerIndex === layer_index &&
-              (show ? show[e?.userData?.attributes?.id] : true)
-          )
-          .map((e, idx) =>
-            is_line ? (
-              <mesh raycast={MeshLineRaycast} useData={e?.useData}>
-                <meshLine attach="geometry" geom={e.geometry} />
-                <meshLineMaterial
-                  attach="material"
-                  depthTest={false}
-                  lineWidth={3}
-                  sizeAttenuation={0}
-                  color={0xffffff}
-                  //   dashArray={0.1}
-                  transparent
-                  opacity={0.25}
-                  resolution={
-                    new THREE.Vector2(window.innerWidth, window.innerHeight)
-                  }
-                />
-              </mesh>
-            ) : (
-              <mesh
-                key={e?.userData?.attributes?.id}
-                args={[e.geometry, e.material]}
-                userData={e?.userData}
-              ></mesh>
+        {merge ? (
+          <mesh
+            args={[
+              BufferGeometryUtils.mergeGeometries(
+                objects
+                  .filter(
+                    (e) =>
+                      (layer_indices
+                        ? layer_indices.includes(
+                            e?.userData?.attributes?.layerIndex
+                          )
+                        : e?.userData?.attributes?.layerIndex ===
+                          layer_index) &&
+                      (show ? show[e?.userData?.attributes?.id] : true)
+                  )
+                  .map((e) => e.geometry),
+                false
+              ),
+            ]}
+          ></mesh>
+        ) : (
+          objects
+            .filter(
+              (e) =>
+                (layer_indices
+                  ? layer_indices.includes(e?.userData?.attributes?.layerIndex)
+                  : e?.userData?.attributes?.layerIndex === layer_index) &&
+                (show ? show[e?.userData?.attributes?.id] : true)
             )
-          )}
+            .map((e, idx) =>
+              is_line ? (
+                <mesh raycast={MeshLineRaycast} userData={e?.userData}>
+                  <meshLine attach="geometry" geom={e.geometry} />
+                  <meshLineMaterial
+                    attach="material"
+                    depthTest={false}
+                    lineWidth={2}
+                    sizeAttenuation={0}
+                    color={0xffffff}
+                    //   dashArray={0.1}
+                    transparent
+                    opacity={0.75}
+                    resolution={
+                      new THREE.Vector2(window.innerWidth, window.innerHeight)
+                    }
+                  />
+                </mesh>
+              ) : (
+                <mesh
+                  key={e?.userData?.attributes?.id}
+                  args={[e.geometry, e.material]}
+                  userData={e?.userData}
+                ></mesh>
+              )
+            )
+        )}
       </group>
     );
   }
@@ -112,28 +132,26 @@ const ThreeMap = forwardRef(
   ({ onEachProgress = console.log, onClick = console.log }, ref) => {
     const [global_data, setGlobalData] = useGlobalData();
     const terrain = useRef();
-    const road = useRef();
-    const ramp = useRef();
-    const stair = useRef();
-    const pilji = useRef();
+    const line = useRef();
     useImperativeHandle(
       ref,
       () => ({
         terrain: terrain.current,
-        road: road.current,
-        ramp: ramp.current,
-        stair: stair.current,
-        pilji: pilji.current,
+        line: line.current,
       }),
-      [terrain.current]
+      [terrain.current, line.current]
     );
 
-    const { model, children, materials, groups, layers } = useRhinoModel(
+    const { children, materials, groups, layers } = useRhinoModel(
       getS3URL("", "map/map_model.3dm"),
       (xhr) => {
         onEachProgress("three_map", xhr);
       }
     );
+
+    useEffect(() => {
+      console.log(layers);
+    }, [layers]);
 
     return (
       <group>
@@ -141,11 +159,6 @@ const ThreeMap = forwardRef(
           objects={children}
           onClick={(event) => {
             if (event.delta < 10) {
-              if (global_data.clicked_meshs?.[0]?.uuid === event.object?.uuid) {
-                setGlobalData({ clicked_meshs: [] });
-              } else {
-                setGlobalData({ clicked_meshs: [event.object] });
-              }
               onClick(event);
             }
           }}
@@ -154,20 +167,28 @@ const ThreeMap = forwardRef(
         />
         <ThreeObjectByLayerIndex
           objects={children}
-          ref={road}
+          ref={line}
           layer_index={layers.findIndex((e) => e.name === "지형_선")}
           is_line
         />
         <ThreeObjectByLayerIndex
           objects={children}
-          ref={pilji}
-          layer_index={layers.findIndex((e) => e.name === "background")}
+          layer_indices={[
+            // layers.findIndex((e) => e.name === "Default"),
+            layers.findIndex((e) => e.name === "지형"),
+            layers.findIndex((e) => e.name === "~1970"),
+            layers.findIndex((e) => e.name === "1970s"),
+            layers.findIndex((e) => e.name === "1980s"),
+            layers.findIndex((e) => e.name === "1990s"),
+            layers.findIndex((e) => e.name === "2000s"),
+            layers.findIndex((e) => e.name === "2010~"),
+          ]}
         />
-        <ThreeObjectByLayerIndex
+        {/* <ThreeObjectByLayerIndex
           objects={children}
-          ref={ramp}
-          layer_index={layers.findIndex((e) => e.name === "지형")}
-        />
+          layer_index={layers.findIndex((e) => e.name === "background")}
+          // merge
+        /> */}
       </group>
     );
   }

@@ -296,7 +296,7 @@ const ThreeTestPage = () => {
           </group> */}
 
           <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/0629_MAP_sample.3dm" />
+            <RhinoModel url="https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/0710_MAP_sample_5.3dm" />
           </group>
 
           <OrbitControls

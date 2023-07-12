@@ -32,7 +32,7 @@ import useGlobalVar from "../hooks/useGlobalVar";
 import useGlobalData from "../hooks/useGlobalData";
 import RhinoModel from "./RhinoModel";
 import ThreeMap from "../threejs_component/ThreeMap";
-import { constrainVector, getDistance } from "../util/alias";
+import { constrainVector, getDistance, rotateX } from "../util/alias";
 import {
   EffectComposer,
   Outline,
@@ -40,6 +40,13 @@ import {
   Selection,
 } from "@react-three/postprocessing";
 import { BlendFunction, KernelSize } from "postprocessing";
+import {
+  getGridIsovectorsFromGrasshopperText,
+  getRegionDataFromGrasshopperText,
+} from "../util/grasshopperText";
+import axios from "axios";
+import { getS3URL } from "../hooks/useS3";
+import ThreeHere from "../threejs_component/ThreeHere";
 
 const cx = classNames.bind(styles);
 
@@ -58,10 +65,14 @@ const getXhrFromXhrs = (xhrs) => {
 };
 
 // const OrbitControls = oc(THREE);
-const MAX_HEIGHT = 30000;
+const size = {
+  width: Math.max(window.innerWidth - 34, 606),
+  height: window.innerHeight - 72,
+};
+const MAX_HEIGHT = (45000 * size.height) / size.width;
 const CAM_TARGET_0 = [2950, 100, -2000];
-const CAM_POS_0 = [2900, MAX_HEIGHT, -2000];
-const BOUND = [3500, MAX_HEIGHT, 2000];
+const CAM_POS_0 = [2950, MAX_HEIGHT, -1950];
+const BOUND = [2500, MAX_HEIGHT, 1500];
 
 const Group = ({ children }) => {
   return children;
@@ -75,13 +86,22 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
   const [show_paving, setShowPaving] = useState(false);
   const main_cam = useRef();
   const orbit_controls = useRef();
-  const size = { width: window.innerWidth, height: window.innerHeight };
+
   const [cam_target, setCamTarget] = useState([1, 1, 1]);
   const [cam_pos, setCamPos] = useState([1, 1, 1]);
   const [map_clicked, setMapClicked] = useState(false);
   const [touch_disabled, setTouchDisabled] = useState(false);
   const [on_change, setOnChange] = useState(0);
   const [global_data, setGlobalData] = useGlobalData();
+  const [global_var, setGlobalVar] = useGlobalVar();
+
+  useEffect(() => {
+    axios.get(getS3URL("", "map/region_data.txt")).then((res) =>
+      setGlobalData({
+        region_data: getRegionDataFromGrasshopperText(res.data),
+      })
+    );
+  }, []);
 
   useEffect(() => {
     if (clicked_state === "unclicked") {
@@ -89,12 +109,13 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
       setTouchDisabled(true);
       setCamTarget(CAM_TARGET_0);
       setCamPos(CAM_POS_0);
+      setGlobalData({ clicked_meshs: [] });
     }
   }, [clicked_state]);
 
   useFrame(() => {
     const new_bound_vector = BOUND.map(
-      (e) => e * (1 - (main_cam.current.position.y / MAX_HEIGHT) * 0.95)
+      (e) => e * (1 - (main_cam.current.position.y / MAX_HEIGHT) * 0.5)
     );
 
     const upper_bound_vector = new THREE.Vector3(
@@ -120,8 +141,8 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
     if (changed && clicked_state === "unclicked") {
       console.log(true);
       orbit_controls.current.target = constrained_vector;
-      main_cam.current.position.x = constrained_vector.x - 50;
-      main_cam.current.position.z = constrained_vector.z;
+      main_cam.current.position.x = constrained_vector.x;
+      main_cam.current.position.z = constrained_vector.z + 50;
     }
     if (map_clicked || touch_disabled) {
       main_cam.current.position.set(
@@ -152,45 +173,54 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
     }
   });
 
+  const [target, setTarget] = useState([0, 0, 0]);
+  useEffect(() => {
+    if (global_var.vec_target) {
+      const new_target = JSON.parse(global_var.vec_target);
+      setTarget([new_target.x, -new_target.z, new_target.y + 10]);
+    }
+  }, [global_var.vec_target]);
+
   return (
     <>
       <SoftShadows size={2.5} samples={16} focus={0.05} />
       <color attach="background" args={["#ffffff"]}></color>
-      <ambientLight args={[0xffffff, 1]}></ambientLight>
+      <ambientLight args={[0xffffff, 0.2]}></ambientLight>
       <directionalLight
         args={["#ffffff", 1.6]}
         castShadow
         shadow-mapSize={4096}
         shadow-bias={-0.001}
-        position={[0.05, 0.1, -0.05].map(
-          (e, idx) =>
-            (e *
-              fov *
-              getDistance(
-                main_cam.current?.position,
-                cam_target.current,
-                200
-              ) || e * 2000) +
-            on_change * 0 +
-            [
-              cam_target.current?.x,
-              cam_target.current?.y,
-              cam_target.current?.z,
-            ][idx]
-        )}
+        position={[3000, 10000, -1000]}
+        // position={[0.05, 0.1, -0.05].map(
+        //   (e, idx) =>
+        //     (e *
+        //       fov *
+        //       getDistance(
+        //         main_cam.current?.position,
+        //         cam_target.current,
+        //         200
+        //       ) || e * 2000) +
+        //     on_change * 0 +
+        //     [
+        //       cam_target.current?.x,
+        //       cam_target.current?.y,
+        //       cam_target.current?.z,
+        //     ][idx]
+        // )}
       >
         <orthographicCamera
           attach="shadow-camera"
-          args={[-0.02, 0.02, 0.02, -0.02, 0.1, 0.15].map(
-            (e, idx) =>
-              e *
-                fov *
-                getDistance(
-                  main_cam.current?.position,
-                  cam_target.current,
-                  200
-                ) || e * 2000 + on_change * 0
-          )}
+          // args={[-0.02, 0.02, 0.02, -0.02, 0.1, 0.15].map(
+          //   (e, idx) =>
+          //     e *
+          //       fov *
+          //       getDistance(
+          //         main_cam.current?.position,
+          //         cam_target.current,
+          //         200
+          //       ) || e * 2000 + on_change * 0
+          // )}
         />
       </directionalLight>
       <group
@@ -204,38 +234,90 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
           onClick={(event) => {
             // console.log(event);
             event.stopPropagation();
-            console.log(event);
+            // console.log(event);
+            // console.log(event?.object?.userData?.attributes?.id);
+            // console.log(event?.point?.x, event?.point?.y);
             setTouchDisabled(true);
             setMapClicked(true);
-            const vec_target0 = orbit_controls.current.target;
-            const vec_target = event.point;
-            const vec_pos0 = main_cam.current.position;
-            // const vec_pos = event.point;
             if (clicked_state === "unclicked") {
+              const region_center = rotateX(
+                global_data.region_data?.[
+                  event?.object?.userData?.attributes?.id
+                ]?.center || [0, 0, 0]
+              );
+              setGlobalVar({
+                region_guid: event?.object?.userData?.attributes?.id,
+              });
+              setGlobalData({ clicked_meshs: [event.object] });
               setClickedState("region");
-              setCamTarget([vec_target0.x, vec_target0.y, vec_target0.z]);
-              setCamPos([vec_target.x, vec_target.y + 10000, vec_target.z]);
-            } else if (clicked_state === "region") {
-              console.log("he");
+              setCamTarget(region_center);
+              setCamPos([
+                region_center[0],
+                region_center[1] +
+                  ((global_data.region_data?.[
+                    event?.object?.userData?.attributes?.id
+                  ]?.width *
+                    size.height) /
+                    size.width || 1000) *
+                    10,
+                region_center[2] + 50,
+              ]);
+            } else if (
+              clicked_state === "region" &&
+              event?.object?.userData?.attributes?.id === global_var.region_guid
+            ) {
+              const vec_target = event.point;
+              const GRID_FACTOR = 300;
+              const ISO_FACTOR = 8;
+              axios.get(getS3URL("", "map/grid_isovectors.txt")).then((res) => {
+                const x_grid = Math.floor(vec_target.x / GRID_FACTOR),
+                  y_grid = Math.floor(-vec_target.z / GRID_FACTOR),
+                  x_direction_to_add =
+                    Math.floor(vec_target.x / GRID_FACTOR) ===
+                    Math.floor((2 * vec_target.x) / GRID_FACTOR) / 2
+                      ? "left"
+                      : "right",
+                  y_direction_to_add =
+                    Math.floor(-vec_target.z / GRID_FACTOR) ===
+                    Math.floor((2 * -vec_target.z) / GRID_FACTOR) / 2
+                      ? "down"
+                      : "up";
+                setGlobalVar({
+                  x_grid,
+                  y_grid,
+                  x_direction_to_add,
+                  y_direction_to_add,
+                });
+                const cam_pos = rotateX(
+                  getGridIsovectorsFromGrasshopperText(res.data)[x_grid][y_grid]
+                );
+                setGlobalVar({
+                  vec_target: JSON.stringify(vec_target),
+                  cam_pos: JSON.stringify(cam_pos),
+                  ISO_FACTOR,
+                  GRID_FACTOR,
+                });
+                setCamPos([
+                  vec_target.x + cam_pos[0] * ISO_FACTOR,
+                  vec_target.y + cam_pos[1] * ISO_FACTOR,
+                  vec_target.z + cam_pos[2] * ISO_FACTOR,
+                ]);
+              });
               setClickedState("position");
               setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
-              setCamPos([
-                vec_target.x + 100,
-                vec_target.y + 10000,
-                vec_target.z + 100,
-              ]);
             }
           }}
           onEachProgress={onEachProgress}
         />
+        <ThreeHere position={target} show={clicked_state === "position"} />
       </group>
       <Selection>
         <EffectComposer autoClear={false}>
           <Outline
             blur
-            visibleEdgeColor={0xff0000}
-            edgeStrength={10}
-            hiddenEdgeColor={0xff0000}
+            visibleEdgeColor={0xffffff}
+            edgeStrength={20}
+            hiddenEdgeColor={0xffffff}
             multisampling={16}
             width={window.innerWidth}
             height={window.innerHeight}
@@ -250,7 +332,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
           <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
             {global_data.clicked_meshs?.map?.((e, idx) => (
               <group key={idx} position={[0, 0, 0]}>
-                <mesh args={[e.clone().geometry]}>
+                <mesh key={idx} args={[e.clone().geometry]}>
                   <meshBasicMaterial
                     attach={"material"}
                     transparent={true}
@@ -264,8 +346,8 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
       </Selection>
 
       <OrbitControls
-        minDistance={1}
-        maxDistance={30000}
+        minDistance={clicked_state === "unclicked" ? MAX_HEIGHT / 2 : 1}
+        maxDistance={MAX_HEIGHT}
         target={CAM_TARGET_0}
         enableDamping={true}
         dampingFactor={0.15}
@@ -276,7 +358,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
         touches={
           touch_disabled || clicked_state !== "unclicked"
             ? {}
-            : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE }
+            : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }
         }
         //   onEnd={() => {
         //     console.log(main_cam_pos);
@@ -290,7 +372,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
         <PerspectiveCamera
           makeDefault
           fov={fov}
-          aspect={size.width / size.height}
+          // aspect={(2 * size.width) / size.height}
           near={
             0.1 *
             getDistance(
