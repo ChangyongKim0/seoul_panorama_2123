@@ -32,7 +32,7 @@ export const requestS3Data = (bucket_type, action, file_path) => {
 };
 
 export const getS3URL = (bucket_type, file_path) => {
-  return getBucketUrl(bucket_type) + file_path;
+  return encodeURI(getBucketUrl(bucket_type) + file_path);
 };
 
 export default useS3;
