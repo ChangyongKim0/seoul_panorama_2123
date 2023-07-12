@@ -61,7 +61,17 @@ const _getIPAndLocation = (data) => {
   };
 };
 
-const cookie_list = [];
+const cookie_list = [
+  "GRID_FACTOR",
+  "ISO_FACTOR",
+  "cam_pos",
+  "region_guid",
+  "vec_target",
+  "x_grid",
+  "y_grid",
+  "x_direction_to_add",
+  "y_direction_to_add",
+];
 
 export const GlobalVarContext = createContext({
   global_var: {},
