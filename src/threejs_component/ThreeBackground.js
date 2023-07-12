@@ -30,6 +30,7 @@ import { BlendFunction, KernelSize } from "postprocessing";
 import { MathUtils } from "three";
 import useGlobalData from "../hooks/useGlobalData";
 import { useRhinoModel } from "../hooks/useRhinoModel";
+import { getS3URL } from "../hooks/useS3";
 
 const ThreeObjectByLayerIndex = forwardRef(
   ({ objects, layer_index, onClick = false, show = false }, ref) => {
@@ -39,9 +40,8 @@ const ThreeObjectByLayerIndex = forwardRef(
       setGlobalData({ test: { name: "test", layer_index, onClick } });
     }, [objects]);
 
-    const texture = useRhinoModel(
-      "https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/texturesample.3dm"
-    ).materials[0];
+    const texture = useRhinoModel(getS3URL("", "texture/sample.3dm"))
+      .materials[0];
 
     return (
       <group
@@ -49,7 +49,9 @@ const ThreeObjectByLayerIndex = forwardRef(
           onClick
             ? (event) => {
                 event.stopPropagation();
-                onClick?.(event);
+                if (event.delta < 5) {
+                  onClick?.(event);
+                }
               }
             : undefined
         }
@@ -101,7 +103,7 @@ const ThreeBackground = forwardRef(
     );
 
     const { model, children, materials, groups, layers } = useRhinoModel(
-      "https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/250그리드_CY.3dm",
+      getS3URL("", "design/grid_model/{12;10}.3dm"),
       (xhr) => {
         onEachProgress("three_background", xhr);
       }
@@ -114,11 +116,7 @@ const ThreeBackground = forwardRef(
         <ThreeObjectByLayerIndex
           objects={children}
           onClick={(event) => {
-            if (global_data.clicked_meshs?.[0]?.uuid === event.object?.uuid) {
-              setGlobalData({ clicked_meshs: [] });
-            } else {
-              setGlobalData({ clicked_meshs: [event.object] });
-            }
+            onClick(event);
           }}
           ref={terrain}
           layer_index={layers.findIndex((e) => e.name === "topo")}

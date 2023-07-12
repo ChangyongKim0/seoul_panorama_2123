@@ -35,7 +35,9 @@ import Loading from "./Loading";
 import RhinoModel from "./RhinoModel";
 import useGlobalData from "../hooks/useGlobalData";
 import ThreeBackground from "../threejs_component/ThreeBackground";
-import { getDistance } from "../util/alias";
+import { getDistance, getGuid, getName } from "../util/alias";
+import { getAsyncRegionGuidDataFromS3RegionGuid } from "../util/grasshopperText";
+import useGlobalVar from "../hooks/useGlobalVar";
 
 const cx = classNames.bind(styles);
 
@@ -57,10 +59,17 @@ const DesignMap = () => {
   const orbit_controls = useRef();
   const [target_pos, setTargetPos] = useState(new THREE.Vector3(0, 0, 0));
   const [on_change, setOnChange] = useState(0);
+  const [global_var, setGlobalVar] = useGlobalVar();
   const [each_xhr, setEachXhr] = useReducer((state, action) => {
     return { ...state, ...action };
   }, {});
   const [start_count, setStartCount] = useState(0);
+
+  useEffect(() => {
+    getAsyncRegionGuidDataFromS3RegionGuid("4").then((res) =>
+      setGlobalData({ background_relation: res })
+    );
+  }, []);
 
   useEffect(() => {
     if (raycaster.current && main_cam.current) {
@@ -117,6 +126,29 @@ const DesignMap = () => {
           </mesh>
           <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
             <ThreeBackground
+              onClick={(event) => {
+                // console.log(getGuid(event.object));
+                // console.log(getName(event.object));
+                const pilji_list =
+                  global_data.background_relation.terrain[
+                    getName(event.object)
+                  ];
+                console.log(
+                  global_data.background_relation.terrain[getName(event.object)]
+                );
+                if (pilji_list === undefined) {
+                  setGlobalVar({
+                    popup_type: "design_out_of_region",
+                    open_overlay: true,
+                  });
+                } else if (
+                  global_data.clicked_meshs?.[0]?.uuid === event.object?.uuid
+                ) {
+                  setGlobalData({ clicked_meshs: [] });
+                } else {
+                  setGlobalData({ clicked_meshs: [event.object] });
+                }
+              }}
               onEachProgress={(name, xhr) => {
                 const new_xhr = {};
                 new_xhr[name] = xhr;
@@ -178,7 +210,7 @@ const DesignMap = () => {
           <OrbitControls
             minDistance={100}
             maxDistance={20000}
-            target={[128, 98, 30]}
+            target={[3780, 7, -3114]}
             enableDamping={true}
             dampingFactor={0.15}
             // maxPolarAngle={Math.PI / 2}
@@ -228,7 +260,7 @@ const DesignMap = () => {
                   100
                 )
               }
-              position={[-500 + 128, 500 + 98, -500 + 30]}
+              position={[-184 * 4 + 3780, 523 * 4 + 7, -490 * 4 + -3114]}
               ref={main_cam}
             ></PerspectiveCamera>
           </OrbitControls>

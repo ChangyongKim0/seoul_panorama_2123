@@ -16,6 +16,7 @@ import NavSheet from "../component/NavSheet";
 import Icon from "../component/Icon";
 import DesignMap from "../component/DesignMap";
 import useGlobalData from "../hooks/useGlobalData";
+import useGlobalVar from "../hooks/useGlobalVar";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -35,12 +36,11 @@ const DesignPage = ({ match }) => {
   const [map_clicked, setMapClicked] = useState(false);
 
   const overlay = useRef();
-  const [open_overlay, setOpenOverlay] = useState(false);
   const [open_nav_overlay, setOpenNavOverlay] = useState(false);
   const [open_nav_sheet, setOpenNavSheet] = useState(false);
-  const [popup_type, setPopupType] = useState("illust_0");
   const [developed, setDeveloped] = useState(false);
   const [global_data, setGlobalData] = useGlobalData();
+  const [global_var, setGlobalVar] = useGlobalVar();
 
   useEffect(() => {
     setTimeout(() => {
@@ -78,8 +78,9 @@ const DesignPage = ({ match }) => {
   }, [scrollable]);
 
   useEffect(() => {
+    setGlobalVar({ popup_type: "illust_0" });
     setTimeout(() => {
-      setOpenOverlay(true);
+      setGlobalVar({ open_overlay: true });
     }, 600);
   }, []);
 
@@ -135,9 +136,9 @@ const DesignPage = ({ match }) => {
                   hug
                   onClick={() => {
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 0);
-                    setPopupType("build");
+                    setGlobalVar({ popup_type: "build" });
                   }}
                 >
                   <div
@@ -157,9 +158,9 @@ const DesignPage = ({ match }) => {
               fillX
               onClick={(e) => {
                 setTimeout(() => {
-                  setOpenOverlay(true);
+                  setGlobalVar({ open_overlay: true });
                 }, 0);
-                setPopupType("score");
+                setGlobalVar({ popup_type: "score" });
               }}
               recoverClick
               // absolute
@@ -180,15 +181,17 @@ const DesignPage = ({ match }) => {
         </div>
       </AutoLayout>
       <AnimatePresence>
-        {open_overlay && (
+        {global_var.open_overlay && (
           <Animation type="fade" useExit absolute>
             <div className={cx("frame-overlay")}>
               <PopupCardScenario
-                type={popup_type}
-                setType={setPopupType}
+                type={global_var.popup_type}
+                setType={(type) => {
+                  setGlobalVar({ popup_type: type });
+                }}
                 onClick={{
                   Close: () => {
-                    setTimeout(() => setOpenOverlay(false), 0);
+                    setTimeout(() => setGlobalVar({ open_overlay: false }), 0);
                   },
                 }}
               />
@@ -230,10 +233,10 @@ const DesignPage = ({ match }) => {
                 <Button
                   onClick={() => {
                     setTimeout(() => {
-                      setPopupType("caution_exit");
+                      setGlobalVar({ popup_type: "caution_exit" });
                     }, 0);
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 600);
                     setOpenNavSheet(false);
                     setOpenNavOverlay(false);
@@ -245,10 +248,10 @@ const DesignPage = ({ match }) => {
                 <Button
                   onClick={() => {
                     setTimeout(() => {
-                      setPopupType("illust_0");
+                      setGlobalVar({ popup_type: "illust_0" });
                     }, 0);
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 600);
                     setOpenNavSheet(false);
                     setOpenNavOverlay(false);
@@ -259,10 +262,10 @@ const DesignPage = ({ match }) => {
                 <Button
                   onClick={() => {
                     setTimeout(() => {
-                      setPopupType("logic");
+                      setGlobalVar({ popup_type: "logic" });
                     }, 0);
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 600);
                     setOpenNavSheet(false);
                     setOpenNavOverlay(false);
@@ -273,10 +276,10 @@ const DesignPage = ({ match }) => {
                 <Button
                   onClick={() => {
                     setTimeout(() => {
-                      setPopupType("score");
+                      setGlobalVar({ popup_type: "score" });
                     }, 0);
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 600);
                     setOpenNavSheet(false);
                     setOpenNavOverlay(false);
@@ -287,10 +290,10 @@ const DesignPage = ({ match }) => {
                 <Button
                   onClick={() => {
                     setTimeout(() => {
-                      setPopupType("credit");
+                      setGlobalVar({ popup_type: "credit" });
                     }, 0);
                     setTimeout(() => {
-                      setOpenOverlay(true);
+                      setGlobalVar({ open_overlay: true });
                     }, 600);
                     setOpenNavSheet(false);
                     setOpenNavOverlay(false);
