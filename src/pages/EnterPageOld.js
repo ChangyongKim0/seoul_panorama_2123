@@ -22,7 +22,7 @@ const EnterPageOld = ({ match }) => {
       <AutoLayout type="column" gap={0.75} align="center" fill padding={1}>
         <TitleBox
           title="<Seoul Panorama 2123>"
-          subtitle="서벌전경(徐伐 全景) 2123( 二千百二十三)"
+          subtitle="서라벌전경 2123 (徐羅伐全景 二千百二十三)"
           top
         />
         <div className={cx("frame-scroll")}>
@@ -31,7 +31,7 @@ const EnterPageOld = ({ match }) => {
             <Divider />
             <TextBox align={"center"}>
               {[
-                "<서벌전경 2123>은 건축가, 도시 계획가, 정치가뿐만 아니라 모든 시민들이 서울 100년 마스터플랜에 동참하도록 돕는 오픈소스 프로그램입니다.",
+                "<서라벌전경 2123>은 건축가, 도시 계획가, 정치가뿐만 아니라 모든 시민들이 서울 100년 마스터플랜에 동참하도록 돕는 오픈소스 프로그램입니다.",
               ]}
             </TextBox>
             <Divider />

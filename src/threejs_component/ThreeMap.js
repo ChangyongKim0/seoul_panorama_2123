@@ -39,6 +39,7 @@ import useGlobalData from "../hooks/useGlobalData";
 import { useRhinoModel } from "../hooks/useRhinoModel";
 import { getS3URL } from "../hooks/useS3";
 import { MeshLine, MeshLineMaterial, MeshLineRaycast } from "three.meshline";
+import { getGuid } from "../util/alias";
 
 extend({ MeshLine, MeshLineMaterial });
 
@@ -55,6 +56,14 @@ const ThreeObjectByLayerIndex = forwardRef(
     },
     ref
   ) => {
+    const [global_data, setGlobalData] = useGlobalData();
+    const [visible, setVisible] = useState(false);
+    useEffect(() => {
+      setTimeout(() => {
+        setVisible(true);
+      }, 100);
+    }, []);
+
     return (
       <group
         onClick={
@@ -98,12 +107,19 @@ const ThreeObjectByLayerIndex = forwardRef(
             )
             .map((e, idx) =>
               is_line ? (
-                <mesh raycast={MeshLineRaycast} userData={e?.userData}>
+                <mesh
+                  key={e?.userData?.attributes?.id}
+                  raycast={MeshLineRaycast}
+                  userData={e?.userData}
+                  position={[0, 0, 10]}
+                >
                   <meshLine attach="geometry" geom={e.geometry} />
                   <meshLineMaterial
                     attach="material"
-                    depthTest={false}
-                    lineWidth={2}
+                    depthTest={true}
+                    lineWidth={
+                      global_data.emph_guids?.includes(getGuid(e)) ? 7 : 2
+                    }
                     sizeAttenuation={0}
                     color={0xffffff}
                     //   dashArray={0.1}
@@ -119,6 +135,7 @@ const ThreeObjectByLayerIndex = forwardRef(
                   key={e?.userData?.attributes?.id}
                   args={[e.geometry, e.material]}
                   userData={e?.userData}
+                  visible={visible}
                 ></mesh>
               )
             )
@@ -142,7 +159,7 @@ const ThreeMap = forwardRef(
       [terrain.current, line.current]
     );
 
-    const { children, materials, groups, layers } = useRhinoModel(
+    const { children, layers } = useRhinoModel(
       getS3URL("", "map/map_model.3dm"),
       (xhr) => {
         onEachProgress("three_map", xhr);
@@ -174,7 +191,7 @@ const ThreeMap = forwardRef(
         <ThreeObjectByLayerIndex
           objects={children}
           layer_indices={[
-            // layers.findIndex((e) => e.name === "Default"),
+            layers.findIndex((e) => e.name === "Default"),
             layers.findIndex((e) => e.name === "지형"),
             layers.findIndex((e) => e.name === "~1970"),
             layers.findIndex((e) => e.name === "1970s"),
@@ -184,11 +201,6 @@ const ThreeMap = forwardRef(
             layers.findIndex((e) => e.name === "2010~"),
           ]}
         />
-        {/* <ThreeObjectByLayerIndex
-          objects={children}
-          layer_index={layers.findIndex((e) => e.name === "background")}
-          // merge
-        /> */}
       </group>
     );
   }

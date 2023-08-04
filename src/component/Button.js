@@ -9,7 +9,16 @@ import { Link } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-const Button = ({ type, children, color, onClick, link_to, hug, fillX }) => {
+const Button = ({
+  type,
+  children,
+  color,
+  onClick,
+  link_to,
+  hug,
+  fillX,
+  disable,
+}) => {
   const [global_var, setGlobalVar] = useGlobalVar();
 
   const [
@@ -34,7 +43,8 @@ const Button = ({ type, children, color, onClick, link_to, hug, fillX }) => {
         "color-" + (type == "default" ? color : type),
         "type-" + type,
         hug ? "hug" : "not-hug",
-        fillX ? "fill-x" : ""
+        fillX ? "fill-x" : "",
+        disable ? "disable" : ""
       )}
       onClick={onClick}
       onTouchStart={global_var.touchable ? onMouseDown : () => {}}
@@ -52,7 +62,8 @@ const Button = ({ type, children, color, onClick, link_to, hug, fillX }) => {
         "color-" + (type == "default" ? color : type),
         "type-" + type,
         hug ? "hug" : "not-hug",
-        fillX ? "fill-x" : ""
+        fillX ? "fill-x" : "",
+        disable ? "disable" : ""
       )}
       onClick={onClick}
       onTouchStart={global_var.touchable ? onMouseDown : () => {}}

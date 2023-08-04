@@ -22,6 +22,7 @@ import {
   TorturingMountainPage,
   EnterPageOld,
   ThreeTestPage,
+  DesktopPage,
 } from "./pages";
 import { AnimatePresence } from "framer-motion/dist/framer-motion";
 
@@ -60,6 +61,7 @@ const App = () => {
               path="/threetest"
               element={<ThreeTestPage />}
             />
+            <Route key="/desktop" path="/desktop" element={<DesktopPage />} />
             <Route element={<NotFound />} />
           </Routes>
         </AnimatePresence>

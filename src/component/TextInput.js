@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 // { useEffect }
 
 import styles from "./TextInput.module.scss";
@@ -10,8 +17,9 @@ import Icon from "../component/Icon";
 
 const cx = classNames.bind(styles);
 
-const TextInput = ({ children, type, onKeyDown }) => {
+const TextInput = forwardRef(({ children, type, onKeyDown }, ref) => {
   const input = useRef();
+  useImperativeHandle(ref, () => input.current, [input.current]);
   return (
     <div className={cx("wrapper")}>
       <input
@@ -34,7 +42,7 @@ const TextInput = ({ children, type, onKeyDown }) => {
       </div>
     </div>
   );
-};
+});
 
 TextInput.defaultProps = {
   children: "샘플",

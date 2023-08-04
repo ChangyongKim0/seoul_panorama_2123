@@ -11,6 +11,7 @@ import IntroductionPage2 from "./IntroductionPage2";
 import TorturingMountainPage from "./TorturingMountainPage";
 import EnterPageOld from "./EnterPageOld";
 import ThreeTestPage from "./ThreeTestPage";
+import DesktopPage from "./DesktopPage";
 
 export {
   DesignPage,
@@ -26,4 +27,5 @@ export {
   TorturingMountainPage,
   EnterPageOld,
   ThreeTestPage,
+  DesktopPage,
 };

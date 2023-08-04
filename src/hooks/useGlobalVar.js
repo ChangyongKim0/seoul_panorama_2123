@@ -19,7 +19,7 @@ export const setCookie = (name, value, exp) => {
 
 export const getCookie = (name) => {
   let value = document.cookie.match("(^|;) ?" + name + "=([^;]*)(;|$)");
-  return value ? value[2] : null;
+  return value ? value[2] : undefined;
 };
 
 export const deleteCookie = (name) => {
@@ -71,6 +71,7 @@ const cookie_list = [
   "y_grid",
   "x_direction_to_add",
   "y_direction_to_add",
+  "user_name",
 ];
 
 export const GlobalVarContext = createContext({
@@ -84,27 +85,12 @@ const useGlobalVar = () => {
 };
 
 const reduceGlobalVar = (state, action) => {
-  if (
-    Object.keys(action)
-      .map((key) => state[key] == action[key])
-      .reduce((prev, curr) => prev && curr, true)
-  ) {
-    return state;
-  }
-  let new_state = { ...state };
-  console.log(new_state);
   Object.keys(action).map((key) => {
-    // console.log(action);
-    if (action[key] != undefined && new_state[key] != action[key]) {
-      new_state[key] = action[key];
-      if (cookie_list.includes(key)) {
-        setCookie(key, action[key], 365);
-      }
+    if (cookie_list.includes(key)) {
+      setCookie(key, action[key], 365);
     }
   });
-  // console.log("global variable updated.");
-  // console.log(new_state);
-  return new_state;
+  return { ...state, ...action };
 };
 
 // state : loading / fail / success
@@ -120,7 +106,7 @@ export const GlobalVarProvider = ({ children }) => {
   useEffect(() => {
     const id = getCookie("id");
     let cookie_data = {};
-    if (id == undefined) {
+    if (id === undefined) {
       createCookie(365);
       console.log("created cookie.");
       cookie_data = { id: getCookie("id") };

@@ -50,7 +50,7 @@ const Histogram = ({ type, onClick, data }) => {
             duration: 1,
           }}
         >
-          <div>{100 * data.average}%</div>
+          <div className={cx("frame-average-text")}>{100 * data.average}%</div>
         </motion.div>
       </AutoLayout>
     </div>

@@ -7,5 +7,5 @@
 <path d="M33.0939 19.6094C32.5064 21.9594 32.115 29.401 32.3598 32.8281" stroke="white" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
 <path d="M12 33.9998C18 32.4997 29.5 31.9998 36.5 33.9998" stroke="white" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
 <path d="M12 37L36 13" stroke="white" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"/>
-<rect x="0.5" y="0.5" width="47" height="47" rx="23.5" stroke="black"/>
+<rect x="0.5" y="0.5" width="47" height="47" rx="23.5" stroke="white"/>
 </svg>

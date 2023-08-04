@@ -50,4 +50,13 @@
   &-bottom {
     height: 3rem;
   }
+  &-overlay {
+    display: flex;
+    width: calc(100% - 2rem);
+    padding: 1rem;
+    height: calc(100% - 2rem);
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
 }

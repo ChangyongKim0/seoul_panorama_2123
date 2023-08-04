@@ -47,6 +47,16 @@ const Animation = ({
       exit: { paddingLeft: "100%", width: "0%", overflow: "hidden" },
       transition: { duration: 0.6, ease: [0, 0.71, 0.2, 1.01] },
     },
+    slide_left_35: {
+      initial: { paddingLeft: "100%", width: "0%", overflow: "hidden" },
+      animate: {
+        paddingLeft: "65%",
+        width: "35%",
+        overflow: "hidden",
+      },
+      exit: { paddingLeft: "100%", width: "0%", overflow: "hidden" },
+      transition: { duration: 0.6, ease: [0, 0.71, 0.2, 1.01] },
+    },
     slide_right: {
       initial: { paddingRight: "100%", width: "0%", overflow: "hidden" },
       animate: { paddingRight: 0, width: "100%", overflow: "hidden" },

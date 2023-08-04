@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -14,7 +15,13 @@ import styles from "./EntireMap.module.scss";
 
 import * as THREE from "three";
 
-import { Canvas, useFrame, useGraph, useLoader } from "@react-three/fiber";
+import {
+  Canvas,
+  useFrame,
+  useGraph,
+  useLoader,
+  useThree,
+} from "@react-three/fiber";
 import {
   OrbitControls,
   OrthographicCamera,
@@ -42,6 +49,7 @@ import {
 import { BlendFunction, KernelSize } from "postprocessing";
 import {
   getGridIsovectorsFromGrasshopperText,
+  getGridSelectionDataFromGrasshopperText,
   getRegionDataFromGrasshopperText,
 } from "../util/grasshopperText";
 import axios from "axios";
@@ -50,35 +58,26 @@ import ThreeHere from "../threejs_component/ThreeHere";
 
 const cx = classNames.bind(styles);
 
-let XHRS = {};
-const getXhrFromXhrs = (xhrs) => {
-  return {
-    loaded: Object.keys(xhrs).reduce(
-      (prev, curr_key) => prev + xhrs[curr_key].loaded,
-      0
-    ),
-    total: Object.keys(xhrs).reduce(
-      (prev, curr_key) => prev + xhrs[curr_key].total,
-      0
-    ),
-  };
-};
-
 // const OrbitControls = oc(THREE);
-const size = {
-  width: Math.max(window.innerWidth - 34, 606),
-  height: window.innerHeight - 72,
-};
-const MAX_HEIGHT = (45000 * size.height) / size.width;
-const CAM_TARGET_0 = [2950, 100, -2000];
-const CAM_POS_0 = [2950, MAX_HEIGHT, -1950];
-const BOUND = [2500, MAX_HEIGHT, 1500];
-
-const Group = ({ children }) => {
-  return children;
-};
 
 const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
+  const size = useMemo(
+    () => ({
+      width: Math.min(window.innerWidth - 24, 606),
+      height: window.innerHeight - 172,
+    }),
+    [window.innerWidth, window.innerHeight]
+  );
+
+  const MAX_HEIGHT = useMemo(() => (40000 * size.height) / size.width, [size]);
+  const CAM_TARGET_0 = [2950, 100, -2000];
+  const CAM_POS_0 = useMemo(() => [2950, MAX_HEIGHT, -1950], [MAX_HEIGHT]);
+  const BOUND = useMemo(() => [2500, MAX_HEIGHT, 1500], [MAX_HEIGHT]);
+
+  const Group = ({ children }) => {
+    return children;
+  };
+
   const fov = 10;
   const map = useRef();
   const pavings = useRef();
@@ -95,10 +94,17 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
   const [global_data, setGlobalData] = useGlobalData();
   const [global_var, setGlobalVar] = useGlobalVar();
 
+  const { invalidate } = useThree();
+
   useEffect(() => {
     axios.get(getS3URL("", "map/region_data.txt")).then((res) =>
       setGlobalData({
         region_data: getRegionDataFromGrasshopperText(res.data),
+      })
+    );
+    axios.get(getS3URL("", "map/grid_selection.txt")).then((res) =>
+      setGlobalData({
+        grid_selection_data: getGridSelectionDataFromGrasshopperText(res.data),
       })
     );
   }, []);
@@ -109,7 +115,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
       setTouchDisabled(true);
       setCamTarget(CAM_TARGET_0);
       setCamPos(CAM_POS_0);
-      setGlobalData({ clicked_meshs: [] });
+      setGlobalData({ clicked_meshs: [], emph_guids: [] });
     }
   }, [clicked_state]);
 
@@ -139,7 +145,6 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
       lower_bound_vector
     ).constrained_vector;
     if (changed && clicked_state === "unclicked") {
-      console.log(true);
       orbit_controls.current.target = constrained_vector;
       main_cam.current.position.x = constrained_vector.x;
       main_cam.current.position.z = constrained_vector.z + 50;
@@ -169,6 +174,8 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
       );
       if (Math.abs(main_cam.current.position.x - cam_pos[0]) < 0.01) {
         setTouchDisabled(false);
+      } else {
+        invalidate();
       }
     }
   });
@@ -245,21 +252,41 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
                   event?.object?.userData?.attributes?.id
                 ]?.center || [0, 0, 0]
               );
+              console.log(event?.object?.userData?.attributes?.id);
               setGlobalVar({
                 region_guid: event?.object?.userData?.attributes?.id,
+                region_no:
+                  Number(
+                    global_data.region_data?.[
+                      event?.object?.userData?.attributes?.id
+                    ].region_name
+                  ) || -1,
               });
-              setGlobalData({ clicked_meshs: [event.object] });
+              setGlobalData({
+                clicked_meshs: [event.object],
+                emph_guids: [
+                  global_data.region_data?.[
+                    event?.object?.userData?.attributes?.id
+                  ]?.polygon,
+                ],
+              });
               setClickedState("region");
               setCamTarget(region_center);
+              const HEIGHT_FACTOR = 6.2;
               setCamPos([
                 region_center[0],
                 region_center[1] +
-                  ((global_data.region_data?.[
-                    event?.object?.userData?.attributes?.id
-                  ]?.width *
-                    size.height) /
-                    size.width || 1000) *
-                    10,
+                  Math.max(
+                    (global_data.region_data?.[
+                      event?.object?.userData?.attributes?.id
+                    ]?.width *
+                      size.height) /
+                      size.width || 1000,
+                    global_data.region_data?.[
+                      event?.object?.userData?.attributes?.id
+                    ]?.height || 1000
+                  ) *
+                    HEIGHT_FACTOR,
                 region_center[2] + 50,
               ]);
             } else if (
@@ -268,7 +295,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
             ) {
               const vec_target = event.point;
               const GRID_FACTOR = 300;
-              const ISO_FACTOR = 8;
+              const ISO_FACTOR = (6 * size.height) / size.width;
               axios.get(getS3URL("", "map/grid_isovectors.txt")).then((res) => {
                 const x_grid = Math.floor(vec_target.x / GRID_FACTOR),
                   y_grid = Math.floor(-vec_target.z / GRID_FACTOR),
@@ -311,40 +338,54 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
         />
         <ThreeHere position={target} show={clicked_state === "position"} />
       </group>
-      <Selection>
-        <EffectComposer autoClear={false}>
-          <Outline
-            blur
-            visibleEdgeColor={0xffffff}
-            edgeStrength={20}
-            hiddenEdgeColor={0xffffff}
-            multisampling={16}
-            width={window.innerWidth}
-            height={window.innerHeight}
-            resolutionX={window.innerWidth * 3}
-            resolutionY={window.innerHeight * 3}
-            xRay
-            kernelSize={KernelSize.SMALL}
-            blendFunction={BlendFunction.ALPHA}
-          />
-        </EffectComposer>
-        <Select enabled>
-          <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
-            {global_data.clicked_meshs?.map?.((e, idx) => (
-              <group key={idx} position={[0, 0, 0]}>
-                <mesh key={idx} args={[e.clone().geometry]}>
-                  <meshBasicMaterial
-                    attach={"material"}
-                    transparent={true}
-                    opacity={0.5}
-                  />
-                </mesh>
-              </group>
-            ))}
+      {/* {clicked_state !== "unclicked" && (
+        <Selection>
+          <EffectComposer autoClear={false}>
+            <Outline
+              blur
+              visibleEdgeColor={0xffffff}
+              edgeStrength={20}
+              hiddenEdgeColor={0xffffff}
+              multisampling={2}
+              width={window.innerWidth}
+              height={window.innerHeight}
+              resolutionX={window.innerWidth * 3}
+              resolutionY={window.innerHeight * 3}
+              xRay
+              kernelSize={KernelSize.SMALL}
+              blendFunction={BlendFunction.ALPHA}
+            />
+          </EffectComposer>
+          <Select enabled>
+            <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
+              {global_data.clicked_meshs?.map?.((e, idx) => (
+                <group key={idx} position={[0, 0, 0]}>
+                  <mesh key={idx} args={[e.clone().geometry]}>
+                    <meshBasicMaterial
+                      attach={"material"}
+                      transparent={true}
+                      opacity={0.5}
+                    />
+                  </mesh>
+                </group>
+              ))}
+            </group>
+          </Select>
+        </Selection>
+      )} */}
+      <group scale={1} rotation-x={-Math.PI / 2} receiveShadow castShadow>
+        {global_data.clicked_meshs?.map?.((e, idx) => (
+          <group key={idx} position={[0, 0, 10]}>
+            <mesh args={[e.clone().geometry]}>
+              <meshBasicMaterial
+                attach={"material"}
+                transparent={true}
+                opacity={0.75}
+              />
+            </mesh>
           </group>
-        </Select>
-      </Selection>
-
+        ))}
+      </group>
       <OrbitControls
         minDistance={clicked_state === "unclicked" ? MAX_HEIGHT / 2 : 1}
         maxDistance={MAX_HEIGHT}
@@ -360,13 +401,6 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
             ? {}
             : { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN }
         }
-        //   onEnd={() => {
-        //     console.log(main_cam_pos);
-        //   }}
-        onChange={() => {
-          setOnChange(main_cam.current?.position?.y);
-          // console.log(main_cam.current?.position?.y);
-        }}
         ref={orbit_controls}
       >
         <PerspectiveCamera
@@ -410,17 +444,31 @@ const EntireMap = ({ clicked_state, setClickedState }) => {
   const [lt_pow, setLtPow] = useState(2);
 
   const [each_xhr, setEachXhr] = useReducer((state, action) => {
-    return { ...state, ...action };
+    if (action === "reset") {
+      return { count: 0, data: {} };
+    }
+    // console.log(action);
+    return {
+      data: { ...state.data, ...action.data },
+      count: action.count,
+      time_sec_last: action.time_sec_last,
+      time_sec_each: action.time_sec_each,
+    };
   }, {});
 
   return (
     <div className={cx("wrapper") + " three-js-container"}>
       <Suspense fallback={<Loading each_xhr={each_xhr} />}>
-        <Canvas shadows>
+        <Canvas shadows frameloop="demand">
           <SampleHouse
             onEachProgress={(name, xhr) => {
-              const new_xhr = {};
-              new_xhr[name] = xhr;
+              const new_xhr = {
+                count: 1,
+                data: {},
+                time_sec_last: 9,
+                time_sec_each: 0,
+              };
+              new_xhr.data[name] = xhr;
               setEachXhr(new_xhr);
             }}
             clicked_state={clicked_state}

@@ -3,7 +3,7 @@ import "../util/reset.css";
 import classNames from "classnames/bind";
 import { Suspense } from "react";
 import styles from "./DesignPage.module.scss";
-import { _transformScroll } from "../util/alias";
+import { _transformScroll, getGuid } from "../util/alias";
 import AutoLayout from "../component/AutoLayout";
 import Animation from "../component/Animation";
 import TextBox from "../component/TextBox";
@@ -17,6 +17,10 @@ import Icon from "../component/Icon";
 import DesignMap from "../component/DesignMap";
 import useGlobalData from "../hooks/useGlobalData";
 import useGlobalVar from "../hooks/useGlobalVar";
+import reduceBackgroundAndBldgState from "../util/reduceBackgroundAndBldgState";
+import { isConstructorDeclaration } from "typescript";
+import { locateBldgsInPilji } from "../util/locateBldgsInPilji";
+import { setGlobalDataOnClickBuild } from "../util/setGlobalDataOnClickBuild";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -24,11 +28,11 @@ const cx = classNames.bind(styles);
 
 const DesignPage = ({ match }) => {
   const image_card_list = [
-    { title: "A", subtitle: "어떤 데이터센터", image_url: "" },
-    { title: "B", subtitle: "또 다른 데이터센터", image_url: "" },
-    { title: "C", subtitle: "설명", image_url: "" },
-    { title: "D", subtitle: "설명", image_url: "" },
-    { title: "I", subtitle: "설명", image_url: "" },
+    { title: "A", subtitle: "분지를 점령한 데이터 센터", image_url: "" },
+    { title: "B", subtitle: "나무를 대체한 태양광 패널", image_url: "" },
+    { title: "C", subtitle: "산의 지하를 파고드는 데이터 센터", image_url: "" },
+    { title: "D", subtitle: "기후조절이 가능한 대규모 온실도시", image_url: "" },
+    { title: "I", subtitle: "깊은 산 속의 대규모 변전시설", image_url: "" },
   ];
   const [scrollable, setScrollable] = useState(false);
 
@@ -54,19 +58,13 @@ const DesignPage = ({ match }) => {
   }, []);
 
   useEffect(() => {
-    alert("message");
     const blockTouchStart = (e) => {
       if (e.touches[0].pageX > 20) return;
       console.log(e.touches[0].pageX);
       e.preventDefault();
     };
-    const onGoBackward = () => {
-      alert("message");
-    };
-    window.addEventListener("popstate", onGoBackward);
     window.addEventListener("touchstart", blockTouchStart);
     return () => {
-      window.removeEventListener("popstate", onGoBackward);
       window.removeEventListener("touchstart", blockTouchStart);
     };
   }, []);
@@ -84,8 +82,78 @@ const DesignPage = ({ match }) => {
     }, 600);
   }, []);
 
+  useEffect(() => {
+    if (global_data.error) {
+      setTimeout(
+        () => setGlobalVar({ open_overlay: true, popup_type: "error" }),
+        0
+      );
+    }
+  }, [global_data.error]);
+
+  useEffect(() => {
+    if (global_data.curr_action?.require_svgNest) {
+      console.log(global_data.curr_action?.bldg_name);
+      setGlobalVar({ loading_state: "use_svgNest" });
+      const pilji_data_list = global_data.background_relation.terrain[
+        global_data.curr_action.guid
+      ].map((e) => global_data.background_relation.pilji[e]);
+      locateBldgsInPilji(
+        pilji_data_list[0]?.pilji_polygon,
+        pilji_data_list[0]?.pilji_height,
+        pilji_data_list[0]?.pilji_rotation,
+        global_data.curr_action.bldg_name,
+        (output) => {
+          setGlobalVar({ loading_state: false });
+          setGlobalData({
+            curr_action: {
+              ...global_data.curr_action,
+              require_svgNest: false,
+              svgNest_completed: true,
+              output,
+            },
+          });
+        }
+      );
+    } else {
+      setGlobalData(reduceBackgroundAndBldgState);
+    }
+  }, [global_data.curr_action]);
+
+  const [perf, setPerf] = useState("");
+
+  useEffect(() => {
+    const interval_id = setInterval(() => {
+      setPerf(
+        JSON.stringify({
+          Limit:
+            Math.round(window.performance.memory?.jsHeapSizeLimit / 1000000) +
+            "MB",
+          total:
+            Math.round(window.performance.memory?.totalJSHeapSize / 1000000) +
+            "MB",
+          used:
+            Math.round(window.performance.memory?.usedJSHeapSize / 1000000) +
+            "MB",
+          "usd/tot":
+            Math.round(
+              (window.performance.memory?.usedJSHeapSize /
+                window.performance.memory?.totalJSHeapSize) *
+                1000
+            ) /
+              10 +
+            "%",
+        })
+      );
+    }, 100);
+    return () => {
+      clearInterval(interval_id);
+    };
+  }, []);
+
   return (
     <div className={cx("wrapper")}>
+      <div style={{ fontSize: 8, fontStretch: "condensed" }}>{perf}</div>
       <AutoLayout type="column" gap={0} fill>
         <div
           className={cx("frame-map")}
@@ -108,24 +176,69 @@ const DesignPage = ({ match }) => {
               >
                 <Icon type="menu" fill size={3} />
               </Button>
-
-              <AutoLayout type="column" gap={1} align="right" fillX>
+            </AutoLayout>
+            <AutoLayout type="column" gap={1} fillX>
+              <AutoLayout
+                type="column"
+                gap={1.5}
+                padding={1}
+                align="right"
+                fillX
+              >
                 <Button
                   type="default"
                   hug
                   onClick={() => {
-                    setDeveloped((e) => !e);
+                    setGlobalData({
+                      curr_action: {
+                        guid: global_data.clicked_guid,
+                        type:
+                          global_data.bldg_state?.[
+                            global_data.clicked_guid
+                          ]?.bldg_configuration?.filter(
+                            (e) => e.overlapped?.length === 0
+                          )?.length > 0
+                            ? "unbuild"
+                            : "undevelop",
+                        bldg_type: "",
+                        bldg_name: "",
+                        bldg_model_type: "",
+                        require_svgNest: false,
+                      },
+                    });
                   }}
+                  disable={
+                    global_data.loading_state
+                      ? true
+                      : (global_data.clicked_meshs?.length > 0 &&
+                          global_data.bldg_state?.[global_data.clicked_guid]
+                            ?.developed) ||
+                        global_data.clicked_bldg_guids?.length > 0
+                      ? false
+                      : true
+                  }
                 >
                   <div
                     className={cx(
                       "frame-icon",
-                      developed ? "emph" : "",
-                      global_data.clicked_meshs?.length > 0 ? "show" : "hide"
+                      (global_data.clicked_meshs?.length > 0 &&
+                        global_data.bldg_state?.[global_data.clicked_guid]
+                          ?.developed) ||
+                        global_data.clicked_bldg_guids?.length > 0
+                        ? "show"
+                        : "hide"
                     )}
                   >
                     <Icon
-                      type={developed ? "undevelop" : "develop"}
+                      type={
+                        global_data.bldg_state?.[
+                          global_data.clicked_guid
+                        ]?.bldg_configuration?.filter(
+                          (e) => e.overlapped?.length === 0
+                        )?.length > 0
+                          ? "unbuild"
+                          : "undevelop"
+                      }
                       fill
                       size={3}
                     />
@@ -135,47 +248,97 @@ const DesignPage = ({ match }) => {
                   type="default"
                   hug
                   onClick={() => {
-                    setTimeout(() => {
-                      setGlobalVar({ open_overlay: true });
-                    }, 0);
-                    setGlobalVar({ popup_type: "build" });
+                    if (
+                      global_data.bldg_state?.[global_data.clicked_guid]
+                        ?.developed
+                    ) {
+                      setTimeout(() => {
+                        setGlobalVar({
+                          popup_type: "build",
+                          open_overlay: true,
+                        });
+                      }, 0);
+                    } else if (global_data.clicked_guid) {
+                      setGlobalData({
+                        curr_action: {
+                          guid: global_data.clicked_guid,
+                          type: "develop",
+                          bldg_type: "",
+                          bldg_name: "",
+                          bldg_model_type: "",
+                          require_svgNest: false,
+                        },
+                      });
+                    }
+                    //
+                    // else {
+                    //   setTimeout(() => {
+                    //     setGlobalVar({
+                    //       popup_type: "build_only_big",
+                    //       open_overlay: true,
+                    //     });
+                    //   }, 0);
+                    // }
                   }}
+                  disable={global_data.loading_state}
                 >
                   <div
                     className={cx(
                       "frame-icon",
-                      global_data.clicked_meshs?.length > 0 ? "show" : "hide"
+                      global_data.bldg_state?.[global_data.clicked_guid]
+                        ?.developed
+                        ? "emph"
+                        : "",
+                      global_data.clicked_guid === undefined ? "hide" : "show"
                     )}
                   >
-                    <Icon type="build" fill size={3} />
+                    <Icon
+                      type={
+                        global_data.bldg_state?.[global_data.clicked_guid]
+                          ?.developed
+                          ? "build"
+                          : global_data.clicked_guid
+                          ? "develop"
+                          : "build"
+                      }
+                      fill
+                      size={3}
+                    />
                   </div>
                 </Button>
               </AutoLayout>
-            </AutoLayout>
-            <AutoLayout
-              type="row"
-              gap={1}
-              fillX
-              onClick={(e) => {
-                setTimeout(() => {
-                  setGlobalVar({ open_overlay: true });
-                }, 0);
-                setGlobalVar({ popup_type: "score" });
-              }}
-              recoverClick
-              // absolute
-            >
-              <div className={cx("frame-chart-button")}>
-                <Button type="default" hug>
-                  <ChartBar
-                    type="normal"
-                    title_left="디자인 점수"
-                    title_right="10%"
-                    percent={0.1}
-                    border
-                  />
-                </Button>
-              </div>
+              <AutoLayout
+                type="column"
+                gap={1}
+                fillX
+                onClick={(e) => {
+                  setTimeout(() => {
+                    setGlobalVar({ open_overlay: true });
+                  }, 0);
+                  setGlobalVar({ popup_type: "score" });
+                }}
+                recoverClick
+                // absolute
+              >
+                <div className={cx("frame-chart-button")}>
+                  <Button type="default" hug>
+                    <ChartBar
+                      type="normal"
+                      title_left="디자인 점수"
+                      title_right={
+                        Math.round(
+                          (global_data.masterplan_score?.tot_converted || 0.1) *
+                            100
+                        ) + "/100"
+                      }
+                      percent={
+                        global_data.masterplan_score?.tot_converted || 0.1
+                      }
+                      border
+                    />
+                  </Button>
+                </div>
+              </AutoLayout>
             </AutoLayout>
           </AutoLayout>
         </div>
@@ -225,7 +388,7 @@ const DesignPage = ({ match }) => {
                 }}
               >
                 <TextBox type="sentence" align="center" black>
-                  {["서울도시건축비엔날레 2023", "<서벌전경 2123>"]}
+                  {["서울도시건축비엔날레 2023", "<서라벌전경 2123>"]}
                 </TextBox>
 
                 <img src="/img/design/01.png" className={cx("frame-image")} />

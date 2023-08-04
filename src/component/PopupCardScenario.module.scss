@@ -133,12 +133,17 @@
 }
 
 .text-small {
-  max-width: calc(25vw - 1.75rem);
   @include font-kor-12;
   color: $txt-grey;
   text-align: center;
   word-break: keep-all;
+  &.semi-condensed {
+    letter-spacing: -1px;
+  }
   &.condensed {
     letter-spacing: -2px;
+  }
+  &-frame {
+    max-width: calc(25vw - 1.75rem);
   }
 }

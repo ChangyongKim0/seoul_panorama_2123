@@ -16,6 +16,8 @@ import ChartBar from "../component/ChartBar";
 import Divider from "../component/Divider";
 import { AnimatePresence } from "framer-motion/dist/framer-motion";
 import PopupCardScenario from "../component/PopupCardScenario";
+import useGlobalVar from "../hooks/useGlobalVar";
+import useGlobalData from "../hooks/useGlobalData";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -25,21 +27,21 @@ const TuringTestPage = ({ match }) => {
   const image_card_list = [
     {
       title: "A",
-      subtitle: "어떤 데이터센터",
+      subtitle: "분지를 점령한 데이터 센터",
       image_path: "/img/turing_test/01.png",
     },
     {
       title: "B",
-      subtitle: "또 다른 데이터센터",
+      subtitle: "나무를 대체한 태양광 패널 ",
       image_path: "/img/turing_test/02.png",
     },
-    { title: "C", subtitle: "설명", image_path: "/img/turing_test/03.png" },
-    { title: "D", subtitle: "설명", image_path: "/img/turing_test/04.png" },
-    { title: "E", subtitle: "설명", image_path: "/img/turing_test/05.png" },
-    { title: "F", subtitle: "설명", image_path: "/img/turing_test/06.png" },
-    { title: "G", subtitle: "설명", image_path: "/img/turing_test/07.png" },
-    { title: "H", subtitle: "설명", image_path: "/img/turing_test/08.png" },
-    { title: "I", subtitle: "설명", image_path: "/img/turing_test/09.png" },
+    { title: "C", subtitle: "산의 지하를 파고드는 데이터 센터", image_path: "/img/turing_test/03.png" },
+    { title: "D", subtitle: "기후조절이 가능한 대규모 온실도시", image_path: "/img/turing_test/04.png" },
+    { title: "E", subtitle: "사막을 뒤덮은 태양광 발전시설", image_path: "/img/turing_test/05.png" },
+    { title: "F", subtitle: "황무지의 데이터 센터", image_path: "/img/turing_test/06.png" },
+    { title: "G", subtitle: "컨테이너로 가득 찬 도시", image_path: "/img/turing_test/07.png" },
+    { title: "H", subtitle: "숲을 이루는 풍력 터빈", image_path: "/img/turing_test/08.png" },
+    { title: "I", subtitle: "깊은 산 속의 대규모 변전시설", image_path: "/img/turing_test/09.png" },
   ];
   const [image_card_click_data, setImageCardClickData] = useState({
     each: [
@@ -100,8 +102,8 @@ const TuringTestPage = ({ match }) => {
     ],
     total: {
       type: "emph",
-      title_left: "Correct 46%",
-      title_right: "Wrong! 54%",
+      title_left: "정답! 46%",
+      title_right: "오답! 54%",
       percent: 0.54,
       right: true,
     },
@@ -110,6 +112,13 @@ const TuringTestPage = ({ match }) => {
   const [open_overlay, setOpenOverlay] = useState(false);
   const [open_popup, setOpenPopup] = useState(false);
   const [popup_type, setPopupType] = useState("download_2");
+  const [global_var, setGlobalVar] = useGlobalVar();
+  const [global_data, setGlobalData] = useGlobalData();
+  const [open_nav_overlay, setOpenNavOverlay] = useState(false);
+  const [card_clicked_state, setCardClickedState] = useReducer((prev, curr) => {
+    // console.log(curr);
+    return { ...prev, ...curr };
+  }, {});
 
   const next_section = useRef();
 
@@ -118,6 +127,15 @@ const TuringTestPage = ({ match }) => {
       next_section.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [scrollable]);
+
+  useEffect(() => {
+    if (global_data.error) {
+      setTimeout(
+        () => setGlobalVar({ open_overlay: true, popup_type: "error" }),
+        0
+      );
+    }
+  }, [global_data.error]);
 
   return (
     <div className={cx("wrapper")}>
@@ -142,15 +160,33 @@ const TuringTestPage = ({ match }) => {
             <div className={cx("frame-slider")}>
               <Slider gap={1} padding={3}>
                 {image_card_list.map((e, idx) => {
-                  return <ImageCard key={idx} {...e} />;
+                  return (
+                    <ImageCard
+                      key={idx}
+                      {...e}
+                      onClick={(state) => {
+                        const data = {};
+                        data[e.title] = state === "clicked" ? true : false;
+                        setCardClickedState(data);
+                      }}
+                    />
+                  );
                 })}
               </Slider>
             </div>
             <Button
               type="normal"
               onClick={() => {
-                setScrollable(true);
-                next_section.current.scrollIntoView({ behavior: "smooth" });
+                if (
+                  Object.keys(card_clicked_state).filter(
+                    (key) => card_clicked_state[key] === true
+                  ).length !== 2
+                ) {
+                  setGlobalData({ error: "click_two_cards" });
+                } else {
+                  setScrollable(true);
+                  next_section.current.scrollIntoView({ behavior: "smooth" });
+                }
                 // window.scrollBy(0, -100);
               }}
             >
@@ -164,6 +200,19 @@ const TuringTestPage = ({ match }) => {
               <Divider emph black />
               <TextBox type="subtitle" align={"center"} black>
                 {[
+                  Object.keys(card_clicked_state).reduce((prev, curr) => {
+                    console.log(curr);
+                    if (
+                      card_clicked_state[curr] &&
+                      !["A", "I"].includes(curr)
+                    ) {
+                      return false;
+                    }
+                    return prev;
+                  }, true)
+                    ? "대단해요! 당신은 인공지능 감별사!"
+                    : "아쉽게도 맞추지 못했어요ㅜㅜㅜ",
+                  "",
                   "사진 (A)와 (I)는 인공지능 모델",
                   "‘Dalle 2’에 의해 생성되었습니다! 🤖",
                 ]}
@@ -228,19 +277,19 @@ const TuringTestPage = ({ match }) => {
               {[
                 "오답:",
                 "",
-                "(B) - Solar panel installations in Ruicheng County in central China's Shanxi Province",
+                "(B) - 중국 산시성 중부에 위치한 루이청 현의 태양광 패널 설치 모습",
                 "",
-                "(C) - A data center is constructed beneath a mountain in Guizhou, China",
+                "(C) - 중국 구이저우 성 위치한 산 아래에 건설된 데이터 센터",
                 "",
-                "(D) - Automated, and climate-controlled farms grow crops around the clock and in every kind of weather, Netherlands",
+                "(D) - 24시간 내내 작물을 재배하는 네덜란드의 자동화 기후 제어 농장.",
                 "",
-                "(E) - Ivanpah Solar Electric Generating System",
+                "(E) - 모하비 사막에 위치한 구글의 이반파 태양열 발전소",
                 "",
-                "(F) - Facebook data center under construction in Eagle Mountain, Utah",
+                "(F) - 유타주 이글 마운틴에 건설 중인 페이스북 데이터 센터",
                 "",
-                "(G) - The Port of Busan is the largest port in South Korea, located in the city of Busan, South Korea",
+                "(G) - 부산시에 위치한 대한민국 최대 규모의 항구인 부산항",
                 "",
-                "(H) - Giant wind turbines are powered by strong prevailing winds near Palm Springs, California",
+                "(H) - 캘리포니아 팜 스프링스 인근의 거대 풍력 터빈",
               ]}
             </TextBox>
             <Divider emph black /> <Divider opaque />
@@ -254,11 +303,11 @@ const TuringTestPage = ({ match }) => {
             ></img>
             <TextBox type="narration" black>
               {[
-                "<건축적 튜링테스트>는 인공지능으로 생성된 허구 이미지와 후기-인류세 건축이 파괴적으로 바꾸고 있는 실제 풍경을 구별하기 위한 테스트이다.",
+                "<건축적 튜링테스트>는 인공지능으로 생성된 허구 이미지와 [후기-인류세] 건축이 파괴적으로 바꾸고 있는 실제 풍경을 구별하기 위한 테스트이다.",
                 "",
-                "무엇보다 놀라운 사실은 나머지 7개의 사진이 현실화되었다는 것이다.",
+                "허구과 현실이 뒤섞여 제시되는 테스트의 사진들은 그 모습이 서로 크게 다르지 않다…",
                 "",
-                "기계가 만들어낸 후기 인류세의 비현실적 풍경은 이미 현실 세계를 구성하는 일부분이 되었다...",
+                "기계가 만들어낸 후기기계가 만들어낸 후기 인류세의 비현실적 풍경은 이미 현실 세계를 구성하는 일부분이 되고 말았다...",
               ]}
             </TextBox>
             <Divider opaque />
@@ -272,11 +321,11 @@ const TuringTestPage = ({ match }) => {
             ></img>
             <TextBox type="narration" black>
               {[
-                "2023년...데이터센터는 실시간 데이터 처리를 위해 코로케이션이라는 이름으로 이미 서울에 잠입했다..",
+                "2023년...데이터센터는 실시간 데이터 처리를 위해 코 로케이션이라는 이름으로 서울에 잠입한다…",
                 "",
-                "자율주행, 메타버스,인공지능 등 화려한 기술의 이면에 등장한 후기-인류세 건축유형이 서울 녹지연결망을 무효화할 수 있다는 사실을 기억해야한다..",
+                "자율주행, 메타버스, 인공지능 등 화려한 기술의 이면에 등장한 후기-인류세 건축유형이 서울의 녹지 사이로 서서히 파고들고 있다는 사실을 기억해야 한다…",
                 "",
-                "그러나 아직까지는 이 건축물들이 그 존재를 숨기고 있기 때문에 우리는 인터넷 사용이 어떤 대가를 치르게 할지 생각할 기회를 갖지 못하고 있다. ",
+                "도처에 존재하는 이 건축물은 도시의 사각지대 속에서 그 존재를 숨기고 있다. 미래의 기술과 인프라가 우리에게 어떤 대가를 치르게 할지, 우리는 생각할 기회조차 갖지 못하고 있다...",
               ]}
             </TextBox>
             <Divider opaque />
@@ -304,6 +353,32 @@ const TuringTestPage = ({ match }) => {
           )}
         </AnimatePresence>
       </div>
+      <AnimatePresence>
+        {global_var.open_overlay && (
+          <Animation type="fade" useExit absolute>
+            <div className={cx("frame-overlay")}>
+              <PopupCardScenario
+                type={global_var.popup_type}
+                setType={(type) => {
+                  setGlobalVar({ popup_type: type });
+                }}
+                onClick={{
+                  Close: () => {
+                    setTimeout(() => setGlobalVar({ open_overlay: false }), 0);
+                  },
+                }}
+              />
+            </div>
+          </Animation>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {open_nav_overlay && (
+          <Animation type="fade" useExit absolute>
+            <div className={cx("frame-overlay")}></div>
+          </Animation>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

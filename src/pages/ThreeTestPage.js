@@ -265,13 +265,13 @@ const ThreeTestPage = () => {
           {/* <fog attach="fog" args={["#ffffff", 3000, 7500]} /> */}
           <color attach="background" args={["#ffffff"]}></color>
           {/* <SampleTorus rot_speed={rot_speed} orb_speed={orb_speed} /> */}
-          <ambientLight args={[0xffffff, 0.2]}></ambientLight>
+          <ambientLight args={[0xffffff, 0.4]}></ambientLight>
           <directionalLight
-            args={["#ffffff", 1.6]}
+            args={["#ffffff", 0.4]}
             castShadow
             shadow-mapSize={4096}
             shadow-bias={-0.001}
-            position={[1000, 1000, 1000]}
+            position={[1000, 2000, 3000]}
           >
             <orthographicCamera
               attach="shadow-camera"
@@ -296,7 +296,7 @@ const ThreeTestPage = () => {
           </group> */}
 
           <group scale={1} rotation-x={-Math.PI / 2} castShadow receiveShadow>
-            <RhinoModel url="https://seoulpanorama2123-test.s3.ap-northeast-2.amazonaws.com/test/0710_MAP_sample_5.3dm" />
+            <RhinoModel url="https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/test.3dm" />
           </group>
 
           <OrbitControls

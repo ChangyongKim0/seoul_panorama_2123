@@ -1,0 +1,157 @@
+@import "../util/style.scss";
+
+.wrapper {
+  &.focused {
+    background-color: none;
+  }
+  min-width: 30rem;
+}
+.frame-field {
+  pointer-events: all;
+  position: relative;
+  @include row(auto, auto, 0px);
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 0 0 1px inset $txt-black;
+  box-sizing: border-box;
+}
+
+.text-field {
+  width: 100%;
+  @include font-eng-16;
+  // -ms-user-select: none;
+  // -moz-user-select: -moz-none;
+  // // -khtml-user-select: none;
+  // -webkit-user-select: none;
+  // user-select: none;
+  @include font-kor-16;
+  &::placeholder {
+    color: $col-txt-g5;
+    @include font-kor-16;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.icon {
+  fill: $col-bgd-g3;
+  cursor: pointer;
+}
+
+.drop-down {
+  @include column(auto, auto, 0px);
+  overflow: auto;
+  max-height: 50vh;
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    &-thumb {
+      height: 7%;
+      background-color: $col-bgd-g8;
+      border-radius: 10px;
+    }
+    &-track {
+      background-color: $col-bgd-w;
+    }
+  }
+}
+
+.frame {
+  &-button {
+    @include row(none, auto, 0px);
+    height: 1rem;
+    justify-content: space-between;
+    padding: 1rem 0.6rem;
+    &.full {
+      width: 100%;
+      padding: 1rem 0rem 1rem 0.6rem;
+    }
+  }
+  &-drop-down {
+    position: absolute;
+    z-index: 2;
+    left: calc(-1px - 0.5rem);
+    bottom: 3.5rem;
+    width: calc(100% + 1rem);
+    background-color: $col-bgd-w;
+    max-height: 50vh;
+    border: 1px solid $txt-black;
+    overflow: hidden;
+  }
+  &-list {
+    @include column(100%, none, 0.3rem);
+    width: calc(100% - 2.5rem);
+
+    padding: 0.75rem 1.25rem;
+    > * {
+      text-align: left;
+    }
+    &:hover {
+      background-color: $col-g95;
+      cursor: pointer;
+    }
+    &:active {
+      background-color: $col-g95;
+    }
+  }
+}
+
+.focused {
+  background-color: $col-g95;
+  cursor: pointer;
+}
+
+.title {
+  font-weight: $font-e;
+  color: $txt-black;
+  line-height: 1.2;
+  &.grey {
+    color: $txt-lightgrey;
+  }
+}
+
+.sub-title {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: $col-g3;
+}
+
+.frame-value {
+  @include row(auto, auto, 0.5rem);
+  justify-content: space-between;
+}
+
+.divider {
+  width: 100%;
+  height: 0;
+  border-top: 1px solid $txt-grey;
+}
+.text {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: $col-g4;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  &:hover {
+    overflow: visible;
+  }
+  &-bold {
+    font-size: 0.875rem;
+    color: $col-g2;
+    font-weight: $font-b;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    &:hover {
+      overflow: visible;
+    }
+  }
+  &-emph {
+    color: $txt-secondary;
+    // background-color: $bgd-primary;
+    // font-weight: bolder;
+    border-radius: 0.2rem;
+  }
+}

@@ -10,6 +10,7 @@ const local_storage_list = [
   "background_state",
   "bldg_state",
   "undo_redo_data",
+  "background_relation",
 ];
 
 const useGlobalData = () => {
@@ -18,10 +19,12 @@ const useGlobalData = () => {
 };
 
 const setLocalStorage = (key, item) => {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(item));
-  } catch {
-    window.localStorage.setItem(key, item);
+  if (item) {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(item));
+    } catch {
+      window.localStorage.setItem(key, item);
+    }
   }
 };
 
@@ -45,8 +48,23 @@ const reduceGlobalData = (state, action) => {
   //     new_state[action.type][key] = action.data[action.type][key];
   //   }
   // });
-  console.log(action);
-  console.log("global data updated.");
+  if (typeof action === "function") {
+    const new_action = action(state);
+    if (new_action.type !== "silent") {
+      console.log(new_action);
+      console.log("global data updated.");
+    }
+    Object.keys(new_action).map((key) => {
+      if (local_storage_list.includes(key)) {
+        setLocalStorage(key, new_action[key]);
+      }
+    });
+    return { ...state, ...new_action };
+  }
+  if (action.type !== "silent") {
+    console.log(action);
+    console.log("global data updated.");
+  }
   Object.keys(action).map((key) => {
     if (local_storage_list.includes(key)) {
       setLocalStorage(key, action[key]);

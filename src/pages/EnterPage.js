@@ -32,7 +32,7 @@ const EnterPage = ({ match }) => {
       <div className={cx("frame-header")}>
         <TitleBox
           title="<Seoul Panorama 2123>"
-          subtitle="서벌전경(徐伐 全景) 2123( 二千百二十三)"
+          subtitle="서라벌전경 2123 (徐羅伐全景 二千百二十三)"
           top
         />
       </div>
@@ -44,14 +44,14 @@ const EnterPage = ({ match }) => {
           <Divider />
           <TextBox align={"center"}>
             {[
-              "<서벌전경 2123>은 건축가, 도시 계획가, 정치가뿐만 아니라 모든 시민들이 서울 100년 마스터플랜에 동참하도록 돕는 오픈소스 프로그램입니다.",
+              "<서라벌전경 2123>은 소수의 전문가만이 아닌 모든 시민들이 향후 100년을 위한 서울 마스터플랜 수립에 동참할 수 있도록 돕는 오픈소스 프로그램입니다.",
             ]}
           </TextBox>
           <Divider />
           <TextBox align={"center"}>
             {[
               "🌍⛰🌳🌱",
-              "당신은 서울의 어떤 미래를 꿈꾸시나요 ?",
+              "당신은 서울의 어떤 미래를 꿈꾸시나요?",
               "서울을 친환경 고밀도시로 만들어 보아요!",
             ]}
           </TextBox>

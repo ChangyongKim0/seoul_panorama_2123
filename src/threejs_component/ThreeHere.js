@@ -11,7 +11,13 @@ import React, {
 
 import * as THREE from "three";
 
-import { Canvas, useFrame, useGraph, useLoader } from "@react-three/fiber";
+import {
+  Canvas,
+  useFrame,
+  useGraph,
+  useLoader,
+  useThree,
+} from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
@@ -41,9 +47,12 @@ const ThreeHere = forwardRef(({ position = [0, 0, 0], show = false }, ref) => {
   const here = useRef();
   useImperativeHandle(ref, () => here, [here]);
 
+  const { invalidate } = useThree();
+
   useFrame(() => {
     if (show) {
       here.current.rotateZ(-0.02);
+      invalidate();
     }
   });
 

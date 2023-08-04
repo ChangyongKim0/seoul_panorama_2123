@@ -23,6 +23,14 @@ import ChartBar from "./ChartBar";
 import Divider from "../component/Divider";
 import Histogram from "./Histogram";
 import ScoreGraph from "./ScoreGraph";
+import {
+  building_data,
+  setGlobalDataOnClickBuild,
+} from "../util/setGlobalDataOnClickBuild";
+import { _API_URL, _getStrLenWhenHangeulIs2 } from "../util/alias";
+import { getErrorPopupProperties } from "../util/getErrorPopupProperties";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const cx = classNames.bind(styles);
 
@@ -30,35 +38,17 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
   const wrapper = useRef();
   const [new_type, setNewType] = useState(type);
   const [timer, setTimer] = useState(0);
+  const [global_var, setGlobalVar] = useGlobalVar();
+  const [global_data, setGlobalData] = useGlobalData();
+  const navigate = useNavigate();
+  const error_data = useMemo(
+    () => getErrorPopupProperties(global_data.error),
+    [global_data.error]
+  );
 
-  const building_data = [
-    {
-      section: "건물 타입",
-      contents: [
-        { image_path: "/img/build/building/01.png", name: "단독주택" },
-        { image_path: "/img/build/building/02.png", name: "공동주택" },
-        { image_path: "/img/build/building/03.png", name: "캐노피" },
-        { image_path: "/img/build/building/04.png", name: "상업시설" },
-        { image_path: "/img/build/building/05.png", name: "오피스" },
-      ],
-    },
-    {
-      section: "인프라 타입",
-      contents: [
-        { image_path: "/img/build/infra/01.png", name: "어떤인프라" },
-        { image_path: "/img/build/infra/02.png", name: "좀더 긴 인프라" },
-        { image_path: "/img/build/infra/03.png", name: "캐노피" },
-        { image_path: "/img/build/infra/04.png", name: "공원" },
-      ],
-    },
-    {
-      section: "공공 대형 건축",
-      contents: [
-        { image_path: "/img/build/public/01.png", name: "데이터센터" },
-        { image_path: "/img/build/public/02.png", name: "공공청사" },
-      ],
-    },
-  ];
+  useEffect(() => {
+    setNewType(type);
+  }, [type]);
 
   useEffect(() => {
     setInterval(() => {
@@ -80,7 +70,7 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           <PopupCard key={new_type}>
             <AutoLayout gap={0.5} fillX>
               <TextBox type="narration-black" align="center">
-                {["[서벌전경 2123]", "ver 3.2.1"]}
+                {["[서라벌전경 2123]", "ver 3.2.1"]}
               </TextBox>
               <AutoLayout gap={0} fillX>
                 <TextBox type="narration-black" align="center">
@@ -120,12 +110,14 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           <PopupCard key={new_type}>
             <AutoLayout gap={0.5} fillX>
               <TextBox type="narration-black" align="center">
-                {["[서벌전경 2123]", "ver 3.2.1"]}
+                {["[서라벌전경 2123]", "ver 3.2.1"]}
               </TextBox>
               <AutoLayout gap={0} fillX>
-                <TextBox type="narration-black" align="center">
-                  {["다운로드 파일"]}
-                </TextBox>
+                <Link to="/desktop">
+                  <TextBox type="narration-black" align="center">
+                    {["다운로드 파일"]}
+                  </TextBox>
+                </Link>
                 <Divider black />
                 <TextBox type="narration-black" align="center">
                   {["[건축적 튜링테스트] 확인하시겠습니까?"]}
@@ -152,7 +144,7 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           <PopupCard key={new_type}>
             <AutoLayout gap={0.5} fillX>
               <TextBox type="narration-black" align="center">
-                {["[서벌전경 2123]", "ver 3.2.1"]}
+                {["[서라벌전경 2123]", "ver 3.2.1"]}
               </TextBox>
               <AutoLayout gap={0} fillX>
                 <TextBox type="narration-black" align="center">
@@ -185,20 +177,20 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
             <AutoLayout gap={1} fill>
               <TextBox type="sentence">
                 {[
-                  "디자인하고 싶은 위치를 선택해주세요.",
-                  "여러 위치를 한꺼번에 선택할 수 있어요.",
+                  "선택한 구역의 산을 개발하고",
+                  "다양한 시설을 지어보세요.",
                 ]}
               </TextBox>
               <TextBox type="sentence">
-                {["이미 선택한 위치를 다시 누르면", "선택 대상에서 사라져요."]}
+                {["자신만의 마스터플랜에 점수를 매기고 ", "서버에도 등록해보아요!"]}
               </TextBox>
               <img
-                src="/img/imageSample.jpg"
+                src="/img/intro/01.jpg"
                 className={cx("frame-popup-image")}
               ></img>
             </AutoLayout>
             <TextBox type="section" lightgrey align="center">
-              {["1 / 4"]}
+              {["1 / 5"]}
             </TextBox>
             <Button onClick={() => setNewType("illust_1")}>다음</Button>
           </PopupCard>
@@ -211,8 +203,8 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               <AutoLayout type="row" attach="space" fillX>
                 <TextBox type="sentence">
                   {[
-                    "선택한 위치를 개발하고 싶다면,",
-                    "개발하기 아이콘을 눌러요.",
+                    "디자인하고 싶은 필지를 선택해주세요,",
+                    "최대 20개의 필지를 디자인할 수 있어요.",
                   ]}
                 </TextBox>
                 <div className={cx("frame-icon")}>
@@ -222,8 +214,8 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               <AutoLayout type="row" attach="space" fillX>
                 <TextBox type="sentence">
                   {[
-                    "원래 형태로 되돌리고 싶다면,",
-                    "아이콘을 다시 한번 눌러봐요.",
+                    "이미 선택된 필지를 다시 누르면,",
+                    "선택에서 제외돼요.",
                   ]}
                 </TextBox>
                 <div className={cx("frame-icon", "emph")}>
@@ -231,12 +223,12 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
                 </div>
               </AutoLayout>
               <img
-                src="/img/imageSample.jpg"
+                src="/img/intro/02.jpg"
                 className={cx("frame-popup-image")}
               ></img>
             </AutoLayout>
             <TextBox type="section" lightgrey align="center">
-              {["2 / 4"]}
+              {["2 / 5"]}
             </TextBox>
             <AutoLayout type="row" gap={1} fillX>
               <Button onClick={() => setNewType("illust_0")}>이전</Button>
@@ -252,8 +244,8 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               <AutoLayout type="row" attach="space" fillX>
                 <TextBox type="sentence">
                   {[
-                    "건물, 시설을 설치하고 싶다면,",
-                    "건물짓기 아이콘을 눌러요.",
+                    "선택한 필지를 개발하고 싶다면,",
+                    "개발하기 아이콘을 눌러보세요.",
                   ]}
                 </TextBox>
                 <div className={cx("frame-icon")}>
@@ -262,17 +254,17 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               </AutoLayout>
               <TextBox type="sentence">
                 {[
-                  "건물을 짓거나 허물고 싶다면,",
-                  "아이콘을 다시 한번 눌러봐요.",
+                  "원래 지형으로 되돌리고 싶다면,",
+                  "개발취소 아이콘을 눌러보세요.",
                 ]}
               </TextBox>
               <img
-                src="/img/imageSample.jpg"
+                src="/img/intro/03.jpg"
                 className={cx("frame-popup-image")}
               ></img>
             </AutoLayout>
             <TextBox type="section" lightgrey align="center">
-              {["3 / 4"]}
+              {["3 / 5"]}
             </TextBox>
             <AutoLayout type="row" gap={1} fillX>
               <Button onClick={() => setNewType("illust_1")}>이전</Button>
@@ -287,23 +279,51 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
             <AutoLayout gap={1} fill>
               <TextBox type="sentence">
                 {[
-                  "개발 영역, 설치한 정도에 따라",
-                  "마스터플랜 디자인의 점수가 매겨져요.",
+                  "시설을 설치 혹은 변경하려면,",
+                  "시설짓기 아이콘을 눌러보세요",
                 ]}
               </TextBox>
               <TextBox type="sentence">
-                {["점수가 80점을 넘기면,", "다른 사람에게도 공유할 수 있어요!"]}
+                {["빈 필지로 되돌리고 싶다면", "시설철거 아이콘을 눌러보세요."]}
               </TextBox>
               <img
-                src="/img/imageSample.jpg"
+                src="/img/intro/04.jpg"
                 className={cx("frame-popup-image")}
               ></img>
             </AutoLayout>
             <TextBox type="section" lightgrey align="center">
-              {["4 / 4"]}
+              {["4 / 5"]}
             </TextBox>
             <AutoLayout type="row" gap={1} fillX>
               <Button onClick={() => setNewType("illust_2")}>이전</Button>
+              <Button onClick={() => setNewType("illust_4")}>다음</Button>
+            </AutoLayout>
+          </PopupCard>
+        </div>
+      )}
+      {new_type === "illust_4" && (
+        <div className={cx("wrapper-lightgrey")}>
+          <PopupCard key={new_type}>
+            <AutoLayout gap={1} fill>
+              <TextBox type="sentence">
+                {[
+                  "종합 디자인 점수가 80점을 넘으면,",
+                  "서버에 업로드 할 수 있어요.",
+                ]}
+              </TextBox>
+              <TextBox type="sentence">
+                {["업로드시 개발한 모든 영역은", "서로 연결되어 있어야 해요!."]}
+              </TextBox>
+              <img
+                src="/img/intro/05.jpg"
+                className={cx("frame-popup-image")}
+              ></img>
+            </AutoLayout>
+            <TextBox type="section" lightgrey align="center">
+              {["5 / 5"]}
+            </TextBox>
+            <AutoLayout type="row" gap={1} fillX>
+              <Button onClick={() => setNewType("illust_3")}>이전</Button>
               <Button onClick={() => onClick?.Close?.()} type="emph">
                 시작해봐요!
               </Button>
@@ -311,7 +331,9 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           </PopupCard>
         </div>
       )}
-      {(new_type === "build" || new_type === "build_and_unbuild") && (
+      {(new_type === "build" ||
+        new_type === "build_and_unbuild" ||
+        new_type === "build_only_big") && (
         <div className={cx("wrapper-fixed", "lightgrey")}>
           <div className={cx("frame-header", "lightgrey")}>
             <TextBox type="section" black>
@@ -321,65 +343,82 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           <div className={cx("frame-scroll")}>
             <AutoLayout gap={1} padding={1} fill>
               <div className={cx("frame-top")}></div>
-              {building_data.map((e, idx) => {
-                return (
-                  <AutoLayout gap={1} fillX key={idx}>
-                    <TextBox type="section" black>
-                      {[e.section]}
-                    </TextBox>
-                    <AutoLayout
-                      type="row"
-                      multiple_line
-                      gap={1}
-                      fillX
-                      align="left"
-                    >
-                      {e.contents.map((e2, idx2) => (
-                        <Button type="default" hug key={idx2}>
-                          <AutoLayout
-                            gap={0.25}
-                            onClick={() => {
-                              if (e2.name === "공동주택") {
-                                setNewType("caution_height");
-                              } else if (e.section === "공공 대형 건축") {
-                                setNewType("caution_largebldg_info");
-                              } else {
-                                onClick?.Build?.(e2.name);
+              {building_data
+                .filter((_, idx) =>
+                  new_type === "build_only_big"
+                    ? [0, 3, 4, 5].includes(idx)
+                    : [1, 2, 3, 4].includes(idx)
+                )
+                .map((e, idx) => {
+                  return (
+                    <AutoLayout gap={1} fillX key={idx}>
+                      <TextBox type="section" black>
+                        {[e.section]}
+                      </TextBox>
+                      <AutoLayout
+                        type="row"
+                        multiple_line
+                        gap={1}
+                        fillX
+                        align="left"
+                      >
+                        {e.contents.map((e2, idx2) => (
+                          <Button type="default" hug key={idx2}>
+                            <AutoLayout
+                              gap={0.25}
+                              onClick={() => {
+                                setGlobalData(
+                                  setGlobalDataOnClickBuild(
+                                    e2.bldg_type,
+                                    e2.bldg_name,
+                                    e2.bldg_model_type,
+                                    e2.require_svgNest
+                                  )
+                                );
                                 onClick?.Close?.();
-                              }
-                            }}
-                          >
-                            <div className={cx("frame-small-image")}>
-                              <img src={e2.image_path}></img>
-                            </div>
-                            <div className={cx("text-small")}>{e2.name}</div>
-                          </AutoLayout>
-                        </Button>
-                      ))}
+
+                                // if (e2.name === "공동주택") {
+                                //   setNewType("caution_height");
+                                // } else if (e.section === "공공 대형 건축") {
+                                //   setNewType("caution_largebldg_info");
+                                // } else {
+                                //   onClick?.Build?.(e2.name);
+                                // }
+                              }}
+                            >
+                              <div className={cx("frame-small-image")}>
+                                <img src={e2.image_path}></img>
+                              </div>
+                              <div className={cx("text-small-frame")}>
+                                <AutoLayout align="center" fillX>
+                                  <div
+                                    className={cx(
+                                      "text-small",
+                                      e2.name?.split("_")?.length > 1
+                                        ? ""
+                                        : _getStrLenWhenHangeulIs2(e2.name) > 12
+                                        ? "condensed"
+                                        : _getStrLenWhenHangeulIs2(e2.name) > 10
+                                        ? "semi-condensed"
+                                        : ""
+                                    )}
+                                  >
+                                    {e2.name?.split("_")?.join(" ")}
+                                  </div>
+                                </AutoLayout>
+                              </div>
+                            </AutoLayout>
+                          </Button>
+                        ))}
+                      </AutoLayout>
                     </AutoLayout>
-                  </AutoLayout>
-                );
-              })}
+                  );
+                })}
               <div className={cx("frame-bottom")}></div>
             </AutoLayout>
           </div>
           <div className={cx("frame-footer", "lightgrey")}>
-            {new_type === "build" ? (
-              <Button onClick={() => onClick?.Close?.()}>뒤로 가기</Button>
-            ) : (
-              <AutoLayout type="row" gap={1} fillX>
-                <Button onClick={() => onClick?.Close?.()}>뒤로 가기</Button>
-                <Button
-                  onClick={() => {
-                    onClick?.Close?.();
-                    onClick?.Unbuild?.();
-                  }}
-                  type="emph"
-                >
-                  건물 부수기
-                </Button>
-              </AutoLayout>
-            )}
+            <Button onClick={() => onClick?.Close?.()}>뒤로 가기</Button>
           </div>
         </div>
       )}
@@ -481,8 +520,12 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               >
                 <ChartBar
                   title_left="자연친화성"
-                  title_right="47/100"
-                  percent={0.47}
+                  title_right={
+                    Math.round(
+                      (global_data.masterplan_score?.l_converted || 0.1) * 100
+                    ) + "/100"
+                  }
+                  percent={global_data.masterplan_score?.l_converted || 0.1}
                   border
                 />
               </Button>
@@ -496,8 +539,12 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               >
                 <ChartBar
                   title_left="공공성"
-                  title_right="97/100"
-                  percent={0.97}
+                  title_right={
+                    Math.round(
+                      (global_data.masterplan_score?.p_converted || 0.1) * 100
+                    ) + "/100"
+                  }
+                  percent={global_data.masterplan_score?.p_converted || 0.1}
                   border
                 />
               </Button>
@@ -511,8 +558,12 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
               >
                 <ChartBar
                   title_left="사업성"
-                  title_right="42/100"
-                  percent={0.42}
+                  title_right={
+                    Math.round(
+                      (global_data.masterplan_score?.b_converted || 0.1) * 100
+                    ) + "/100"
+                  }
+                  percent={global_data.masterplan_score?.b_converted || 0.1}
                   border
                 />
               </Button>
@@ -527,8 +578,12 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
                 <ChartBar
                   type="emph"
                   title_left="종합 디자인 점수"
-                  title_right="82/100"
-                  percent={0.82}
+                  title_right={
+                    Math.round(
+                      (global_data.masterplan_score?.tot_converted || 0.1) * 100
+                    ) + "/100"
+                  }
+                  percent={global_data.masterplan_score?.tot_converted || 0.1}
                   border
                 />
               </Button>
@@ -774,7 +829,7 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
         <div className={cx("wrapper-lightgrey")}>
           <AutoLayout gap={1} padding={1} fill>
             <TextBox type="section" black align="center">
-              {["서울도시건축비엔날레 2023", "<서벌전경 2123> 팀"]}
+              {["서울도시건축비엔날레 2023", "<서라벌전경 2123> 팀"]}
             </TextBox>
 
             <TextBox type="sentence" align="center">
@@ -827,13 +882,87 @@ const PopupCardScenario = ({ type, onClick, setType }) => {
           </PopupCard>
         </div>
       )}
-      {new_type === "design_out_of_region" && (
+      {new_type === "already_registered" && (
         <div className={cx("wrapper-lightgrey")}>
           <PopupCard key={new_type}>
             <TextBox type="sentence">
-              {["여기는 구역 바깥에 있는 부분이라 선택할 수 없어요."]}
+              {[
+                `이미 "${global_var.user_name}"이라는 이름으로 등록하셨어요. "${global_var.new_user_name}"로 이름을 다시 등록할까요?`,
+              ]}
             </TextBox>
-            <Button onClick={onClick?.Close}>다시 선택하기</Button>
+            <TextBox type="sentence">
+              {["새로운 이름으로 등록하더라도, 기존 디자인 정보는 남아있어요."]}
+            </TextBox>
+            <AutoLayout type="row" gap={1} fillX>
+              <Button
+                onClick={() => {
+                  onClick?.Close?.();
+                }}
+              >
+                돌아가기
+              </Button>
+              <Button
+                onClick={() => {
+                  axios
+                    .put(`${_API_URL}name`, { name: global_var.new_user_name })
+                    .then((res) => {
+                      console.log(res);
+                      switch (res.data?.state) {
+                        case "success":
+                          setGlobalVar({ user_name: global_var.new_user_name });
+                          navigate("/map");
+                          break;
+                        case "duplicated":
+                          setGlobalData({ error: "duplicated_name" });
+                          break;
+                        case "error":
+                          setGlobalData({ error: "error_while_register" });
+                          break;
+                      }
+                      onClick?.Close?.();
+                    })
+                    .catch(console.log);
+                }}
+                type={"emph"}
+              >
+                새 이름 등록하기
+              </Button>
+            </AutoLayout>
+          </PopupCard>
+        </div>
+      )}
+      {new_type === "error" && (
+        <div className={cx("wrapper-lightgrey")}>
+          <PopupCard key={new_type}>
+            <TextBox type="sentence">{[error_data?.message]}</TextBox>
+            <AutoLayout type="row" gap={1} fillX>
+              {error_data.actions?.map((action, idx) => (
+                <Button
+                  key={idx}
+                  onClick={() => {
+                    action.onClick?.();
+                    if (action.click_when_close) {
+                      onClick?.Close?.();
+                    }
+                    if (action.transit_popup) {
+                      setNewType(action.transit_popup);
+                    }
+                    if (action.send_global_data) {
+                      setGlobalData(action.send_global_data);
+                    }
+                    if (action.link_to) {
+                      navigate(action.link_to);
+                    }
+                    setTimeout(() => {
+                      setGlobalData({ error: undefined });
+                    }, 350);
+                  }}
+                  type={action.emph ? "emph" : undefined}
+                >
+                  {action.text}
+                </Button>
+              ))}
+            </AutoLayout>
           </PopupCard>
         </div>
       )}
