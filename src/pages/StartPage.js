@@ -11,12 +11,16 @@ import TextBox from "../component/TextBox";
 import TitleBox from "../component/TitleBox";
 import Button from "../component/Button";
 import useSvgNest from "../hooks/useSvgNest";
+import useGlobalVar from "../hooks/useGlobalVar";
+import CustomImage from "../component/CustomImage";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
 // var map = new naver.maps.Map(mapDiv);
 
 const StartPage = ({ match }) => {
+  const [global_var, setGlobalVar] = useGlobalVar();
+
   useEffect(() => {
     setTimeout(() => {
       document.body.style.backgroundColor = "#000000";
@@ -61,6 +65,7 @@ pi = compute_pi(100000)`}
       <div id="pi">{}</div>
       <div id="today"></div> */}
       <AutoLayout type="column" gap={2} attach="center" align="center" fill>
+        { global_var.visited_design_page && <div className={cx("frame-fixed")}><Button type="default" link_to="/design">{global_var.use_eng? ">>> Go to Design Page":">>> 디자인페이지 바로가기"}</Button></div>}
         <AutoLayout
           type="column"
           gap={0.75}
@@ -68,7 +73,14 @@ pi = compute_pi(100000)`}
           align="center"
           fill
         >
-          <img className={cx("frame-image")} src="/img/start/01.png" />
+          <div className={cx("frame-image")}>
+            <CustomImage
+              srcset="https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/start/01.png"
+              width={292}
+              height={528}
+              fillY
+            />
+          </div>
           <TitleBox
             title="<Seoul Panorama 2123>"
             subtitle="서라벌전경 2123 (徐羅伐全景 二千百二十三)"
@@ -81,11 +93,25 @@ pi = compute_pi(100000)`}
       <div className={cx("frame-button")}>
         <AutoLayout type="row" gap={0} fillX attach={"center"}>
           <Button type="default" hug link_to={"/enter"}>
-            <div className={cx("frame-btn", "left")}>KR</div>
+            <div
+              className={cx("frame-btn", "left")}
+              onClick={() => {
+                setGlobalVar({ use_eng: false });
+              }}
+            >
+              KR
+            </div>
           </Button>
           <div className={cx("text-center")}>|</div>
           <Button type="default" hug link_to={"/enter"}>
-            <div className={cx("frame-btn", "right")}>EN</div>
+            <div
+              className={cx("frame-btn", "right")}
+              onClick={() => {
+                setGlobalVar({ use_eng: true });
+              }}
+            >
+              EN
+            </div>
           </Button>
         </AutoLayout>
       </div>

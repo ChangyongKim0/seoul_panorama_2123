@@ -59,11 +59,15 @@ const ThreeObjectByLayerName = forwardRef(
       use_name = false,
       hide_default = false,
       bldg = false,
-      update_data = false,
+      update_background_data = false,
+      clear_bldg_data = false,
+      update_bldg_data = false,
+      visibility,
     },
     ref
   ) => {
     const [global_data, setGlobalData] = useGlobalData();
+    const [global_var, setGlobalVar] = useGlobalVar();
 
     const setNewBldgState = (objects) => {
       if (layer_name === "topo") {
@@ -116,18 +120,25 @@ const ThreeObjectByLayerName = forwardRef(
       }, 100);
     }, []);
 
+    // console.log("running");
+
     useEffect(() => {
       if (data_name) {
-        setNewBldgState(objects);
-        if (update_data) {
+        if (clear_bldg_data) {
+          setGlobalData({ bldg_state: {} });
+        }
+        if (update_background_data) {
           setGlobalData((global_data) => {
             const data_to_update = global_data.background_state || {};
             data_to_update[data_name] = bldg ? {} : [];
             return { background_state: data_to_update, type: "silent" };
           });
         }
+        if (update_bldg_data) {
+          setNewBldgState(objects);
+        }
       }
-    }, []);
+    }, [clear_bldg_data, update_background_data, update_bldg_data]);
 
     return (
       <group
@@ -155,13 +166,13 @@ const ThreeObjectByLayerName = forwardRef(
                 raycast={MeshLineRaycast}
                 userData={e?.userData}
                 visible={
-                  data_name
+                  (data_name
                     ? global_data?.background_state?.[data_name]?.includes(
                         use_name ? getName(e) : getGuid(e)
                       )
                       ? hide_default
                       : !hide_default
-                    : true
+                    : true) && visibility === undefined
                 }
               >
                 <meshLine attach="geometry" geom={e.geometry} />
@@ -171,10 +182,14 @@ const ThreeObjectByLayerName = forwardRef(
                     global_data.emph_guids?.includes(getGuid(e)) ? false : true
                   }
                   lineWidth={
-                    global_data.emph_guids?.includes(getGuid(e)) ? 5 : 1
+                    layer_name === "region_border"
+                      ? 5
+                      : global_data.emph_guids?.includes(getGuid(e))
+                      ? 5
+                      : 1
                   }
                   sizeAttenuation={0}
-                  color={0xffffff}
+                  color={layer_name === "region_border" ? 0xe1e5e0 : 0xffffff}
                   //   dashArray={0.1}
                   transparent
                   opacity={
@@ -202,26 +217,67 @@ const ThreeObjectByLayerName = forwardRef(
                                 use_name ? getName(e) : getGuid(e)
                               ]?.texture
                             : data_name
-                            ? data_name
+                            ? data_name === "pilji" &&
+                              global_data?.bldg_state?.[
+                                global_data?.background_relation?.pilji?.[
+                                  getName(e)
+                                ]?.terrain
+                              ]?.developed &&
+                              global_data?.bldg_state?.[
+                                global_data?.background_relation?.pilji?.[
+                                  getName(e)
+                                ]?.terrain
+                              ]?.bldg_type === "normal" &&
+                              global_data?.bldg_state?.[
+                                global_data?.background_relation?.pilji?.[
+                                  getName(e)
+                                ]?.terrain
+                              ]?.bldg_configuration?.filter(
+                                (e) => e.overlapped.length === 0
+                              )?.length > 0
+                              ? (["house", "retail", "amenities", "workspace"].includes(global_data?.bldg_state?.[
+                                  global_data?.background_relation?.pilji[
+                                    getName(e)
+                                  ]?.terrain
+                                ]?.bldg_name)?global_data?.bldg_state?.[
+                                  global_data?.background_relation?.pilji[
+                                    getName(e)
+                                  ]?.terrain
+                                ]?.bldg_name:"infra")
+                              : data_name
+                            : layer_name === "small_terrain"
+                            ? "terrain"
                             : layer_name)
                       )?.[0],
                 ]}
                 userData={e?.userData}
                 visible={
-                  visible &&
-                  (data_name
-                    ? (
-                        bldg
-                          ? Object.keys(
-                              global_data?.background_state?.[data_name] || {}
-                            )?.includes(use_name ? getName(e) : getGuid(e))
-                          : global_data?.background_state?.[
-                              data_name
-                            ]?.includes(use_name ? getName(e) : getGuid(e))
-                      )
-                      ? hide_default
-                      : !hide_default
-                    : true)
+                  (visible &&
+                    (data_name
+                      ? (
+                          bldg
+                            ? Object.keys(
+                                global_data?.background_state?.[data_name] || {}
+                              )?.includes(use_name ? getName(e) : getGuid(e))
+                            : global_data?.background_state?.[
+                                data_name
+                              ]?.includes(use_name ? getName(e) : getGuid(e))
+                        )
+                        ? hide_default
+                        : !hide_default
+                      : true) &&
+                    (visibility === "modeling"
+                      ? ![
+                          "topo",
+                          "topo_outline",
+                          "region_border",
+                          "small_terrain",
+                          "always_on",
+                          "topo_wall",
+                        ].includes(layer_name)
+                      : visibility === undefined)) ||
+                  (visibility === "silhouette" &&
+                    global_data.background_state?.terrain?.includes(getGuid(e)))
                 }
                 onClick={
                   bldg &&
@@ -242,6 +298,14 @@ const ThreeObjectByLayerName = forwardRef(
                         event.stopPropagation();
                         if (event.delta < 5) {
                           onClickBldg?.({ event, data_name });
+                        }
+                      }
+                    : layer_name === "small_terrain"
+                    ? () => {
+                        if (global_var.found_easter_egg) {
+                          setGlobalData({ error: "too_small_terrain_again" });
+                        } else {
+                          setGlobalData({ error: "too_small_terrain" });
                         }
                       }
                     : undefined
@@ -273,6 +337,10 @@ export const LAYER_PROPERTIES = [
     layer_name: "topo_outline",
     is_line: true,
     // hide_default: true,
+  },
+  { layer_name: "region_border", is_line: true },
+  {
+    layer_name: "small_terrain",
   },
   {
     layer_name: "always_on",
@@ -373,10 +441,13 @@ const ThreeBackgroundEach = forwardRef(
       objects = [],
       layers = [],
       textures = [],
-      update_data = false,
+      clear_bldg_data = false,
+      update_background_data = false,
+      update_bldg_data = false,
       onEachProgress = console.log,
       onClick = console.log,
       onClickBldg = console.log,
+      visibility,
     },
     ref
   ) => {
@@ -410,7 +481,10 @@ const ThreeBackgroundEach = forwardRef(
           ref={terrain}
           data_name="terrain"
           layer_name="topo"
-          update_data={update_data}
+          update_background_data={update_background_data}
+          clear_bldg_data={clear_bldg_data}
+          update_bldg_data={update_bldg_data}
+          visibility={visibility}
         />
         {LAYER_PROPERTIES.map((e, idx) => (
           <ThreeObjectByLayerName
@@ -421,8 +495,9 @@ const ThreeBackgroundEach = forwardRef(
             onClickBldg={(event) => {
               onClickBldg(event);
             }}
-            update_data={update_data}
+            update_background_data={update_background_data}
             {...e}
+            visibility={visibility}
           />
         ))}
       </group>
@@ -437,6 +512,8 @@ export const ThreeBackground = forwardRef(
       onClick = console.log,
       onClickBldg = console.log,
       onClickBack = console.log,
+      update_data,
+      visibility,
     },
     ref
   ) => {
@@ -444,18 +521,20 @@ export const ThreeBackground = forwardRef(
     const [global_data, setGlobalData] = useGlobalData();
     const [global_var, setGlobalVar] = useGlobalVar();
 
-    const url_data = useMemo(
-      () => ({
-        background: global_data.grids?.map((e) =>
-          getS3URL("", `design/grid_model/${e}.3dm`)
-        ),
-        back: getS3URL(
-          "",
-          `design/grid_background/${global_var.region_no}_${global_data.grids[0]}.3dm`
-        ),
-      }),
-      [global_data.grids, global_var.region_no]
-    );
+    const url_data = useMemo(() => {
+      if (global_data.grids && global_var.region_no) {
+        return {
+          background: global_data.grids?.map((e) =>
+            getS3URL("", `design/grid_model/${e}.3dm`)
+          ),
+          back: getS3URL(
+            "",
+            `design/grid_background/${global_var.region_no}_${global_data.grids[0]}.3dm`
+          ),
+        };
+      }
+      return {};
+    }, [global_data.grids, global_var.region_no]);
 
     const textures = useRhinoModel(
       getS3URL("", "texture/big_bldg.3dm"),
@@ -493,9 +572,10 @@ export const ThreeBackground = forwardRef(
       };
     };
 
-    // useEffect(() => {
-    //   console.log(background_back);
-    // }, [background_back]);
+    useEffect(() => {
+      console.log("uploaded");
+      setGlobalVar({ need_to_change_design_data: false });
+    }, []);
 
     return (
       <group>
@@ -506,7 +586,10 @@ export const ThreeBackground = forwardRef(
           onClick={onClick}
           onClickBldg={onClickBldg}
           ref={getEachRef(ref, "background_0")}
-          update_data
+          clear_bldg_data={update_data}
+          update_bldg_data={update_data}
+          update_background_data={update_data}
+          visibility={visibility}
         />
         <ThreeBackgroundEach
           objects={background_1.children}
@@ -515,6 +598,8 @@ export const ThreeBackground = forwardRef(
           onClick={onClick}
           onClickBldg={onClickBldg}
           ref={getEachRef(ref, "background_1")}
+          update_bldg_data={update_data}
+          visibility={visibility}
         />
         <ThreeBackgroundEach
           objects={background_2.children}
@@ -523,6 +608,8 @@ export const ThreeBackground = forwardRef(
           onClick={onClick}
           onClickBldg={onClickBldg}
           ref={getEachRef(ref, "background_2")}
+          update_bldg_data={update_data}
+          visibility={visibility}
         />
         <ThreeBackgroundEach
           objects={background_3.children}
@@ -531,6 +618,8 @@ export const ThreeBackground = forwardRef(
           onClick={onClick}
           onClickBldg={onClickBldg}
           ref={getEachRef(ref, "background_3")}
+          update_bldg_data={update_data}
+          visibility={visibility}
         />
         <group
           ref={(internal_ref) => {
@@ -540,6 +629,7 @@ export const ThreeBackground = forwardRef(
             ref.current.back = internal_ref;
           }}
           onClick={onClickBack}
+          visible={visibility === undefined}
         >
           {background_back.children.map((e) => (
             <mesh

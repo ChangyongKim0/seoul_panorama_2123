@@ -50,6 +50,18 @@
     box-shadow: 0 0 0 1px inset $txt-black;
     @include shd-fourway-medium;
   }
+  &-emph-secondary {
+    font-family: $font-kor;
+    font-size: 1rem;
+    line-height: 1rem;
+    color: $txt-white;
+    font-weight: bold;
+    padding: 1rem 0;
+    width: 100%;
+    background-color: $bgd-secondary;
+    box-shadow: 0 0 0 1px inset $txt-black;
+    @include shd-fourway-medium;
+  }
   &-emph_white {
     font-family: $font-eng;
     font-size: 1.5rem;

@@ -26,6 +26,11 @@ import {
 } from "./pages";
 import { AnimatePresence } from "framer-motion/dist/framer-motion";
 
+if (process.env.NODE_ENV === "production") {
+  console.log = function no_console() {};
+  console.warn = function no_console() {};
+}
+
 const App = () => {
   const location = useLocation();
 
@@ -61,7 +66,16 @@ const App = () => {
               path="/threetest"
               element={<ThreeTestPage />}
             />
-            <Route key="/desktop" path="/desktop" element={<DesktopPage />} />
+            <Route
+              key="/masterplan"
+              path="/masterplan"
+              element={<DesktopPage />}
+            />
+            <Route
+              key="/desktop"
+              path="/exhibition"
+              element={<DesktopPage for_exhibition={true} />}
+            />
             <Route element={<NotFound />} />
           </Routes>
         </AnimatePresence>

@@ -5,9 +5,9 @@ import { origin_bldgscore_table } from "./origin_bldgscore_table.js";
 export const _getMasterplanScore = (
   background_relation,
   bldg_state,
-  region_no = 1,
-  mean_data = { l: 2.5, b: 2.5, p: 2.5 },
-  stdev_data = { l: 1, b: 1, p: 1 }
+  region_no,
+  mean_data, //= { l: 2.5, b: 2.5, p: 2.5 },
+  stdev_data //= { l: 1, b: 1, p: 1 }
 ) => {
   return calculateScore(
     background_relation,

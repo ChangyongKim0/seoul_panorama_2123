@@ -50,7 +50,7 @@
   }
   &-image {
     width: 100%;
-    box-shadow: 0 0 0 1px inset $txt-black;
+    box-shadow: 0 0 0 1px $txt-black;
   }
   &-map {
     position: absolute;
@@ -59,9 +59,10 @@
 
     height: var(--100vh, 100vh);
     // background-color: aqua;
-    // z-index: 0;
+    // z-index: -1;
   }
   &-overlay {
+    position: absolute;
     display: flex;
     width: calc(100% - 2rem);
     padding: 1rem;
@@ -69,6 +70,10 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2;
+    &.enable {
+      pointer-events: fill;
+    }
   }
 
   &-nav-sheet {
@@ -103,6 +108,10 @@
     pointer-events: auto;
     cursor: pointer;
     overflow: visible;
+  }
+  &-button-last {
+    width: calc(100% - 2rem);
+    padding: 0 1rem 1rem 1rem;
   }
 }
 

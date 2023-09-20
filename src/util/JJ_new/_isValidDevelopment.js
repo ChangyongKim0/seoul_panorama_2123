@@ -76,38 +76,54 @@ const isSimplyConnected = (multipolygons) => {
   return false;
 };
 
-const getDevelopedPolygonsFromBldgState = (background_relation, bldg_state) => {
+const getDevelopedPolygonsFromBldgState = (
+  background_relation,
+  bldg_state,
+  get_detailed_data = false
+) => {
   const polygons = [];
+  const height_list = [];
   Object.keys(bldg_state).forEach((key) => {
     const pilji_guid = background_relation.terrain[key]?.[0];
     if (
       bldg_state[key]?.developed &&
-      pilji_guid &&
-      (bldg_state[key]?.bldg_configuration?.length === 0 ||
-        bldg_state[key]?.bldg_configuration?.reduce(
-          (prev, curr) => (curr?.overlapped?.length === 0 ? true : prev),
-          false
-        ))
+      pilji_guid
+      // &&
+      // (bldg_state[key]?.bldg_configuration?.length === 0 ||
+      //   bldg_state[key]?.bldg_configuration?.reduce(
+      //     (prev, curr) => (curr?.overlapped?.length === 0 ? true : prev),
+      //     false
+      //   ))
     ) {
       polygons.push(background_relation.pilji[pilji_guid]?.terrain_polygon);
+      height_list.push(
+        background_relation.pilji[pilji_guid]?.pilji_height || 250
+      );
     }
     if (bldg_state[key]?.bldg_type?.split("_").includes("big")) {
-      polygons.push([
-        background_relation.terrain[key].reduce((prev, pilji_guid) => {
-          const polygon =
-            background_relation.pilji[pilji_guid]?.[
-              bldg_state[key]?.bldg_model_type + "_polygon"
-            ];
-          if (prev.length === 0) {
-            return polygon;
-          }
-          return prev;
-        }, []),
-      ]);
-      console.log();
+      if (background_relation.terrain[key]) {
+        polygons.push([
+          background_relation.terrain[key].reduce((prev, pilji_guid) => {
+            const polygon =
+              background_relation.pilji[pilji_guid]?.[
+                bldg_state[key]?.bldg_model_type + "_polygon"
+              ];
+            if (prev.length === 0) {
+              return polygon;
+            }
+            return prev;
+          }, []),
+        ]);
+      }
     }
   });
+  const avg_height =
+    height_list.reduce((a, b) => a + b, 0) / height_list.length;
+  const max_height = Math.max(...height_list);
   // console.log(polygons);
+  if (get_detailed_data) {
+    return { polygons, avg_height, max_height };
+  }
   return polygons;
 };
 
@@ -115,8 +131,33 @@ export const _isValidDevelopment = (
   background_relation,
   bldg_state,
   tolerance = 0,
-  threshold_area = 0
+  threshold_area = 0,
+  get_detailed_data = false,
+  get_polygon_data = false
 ) => {
+  if (get_polygon_data) {
+    const dev_polygon_data = getDevelopedPolygonsFromBldgState(
+      background_relation,
+      bldg_state,
+      true
+    );
+    return {
+      polygon: unionPolygon(
+        dev_polygon_data.polygons,
+        tolerance,
+        threshold_area
+      ),
+      avg_height: dev_polygon_data.avg_height,
+      max_height: dev_polygon_data.max_height,
+    };
+  }
+  if (get_detailed_data) {
+    return unionPolygon(
+      getDevelopedPolygonsFromBldgState(background_relation, bldg_state),
+      tolerance,
+      threshold_area
+    ).map((e) => e.length);
+  }
   return isSimplyConnected(
     unionPolygon(
       getDevelopedPolygonsFromBldgState(background_relation, bldg_state),

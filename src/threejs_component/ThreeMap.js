@@ -191,15 +191,25 @@ const ThreeMap = forwardRef(
         <ThreeObjectByLayerIndex
           objects={children}
           layer_indices={[
-            layers.findIndex((e) => e.name === "Default"),
-            layers.findIndex((e) => e.name === "지형"),
             layers.findIndex((e) => e.name === "~1970"),
             layers.findIndex((e) => e.name === "1970s"),
             layers.findIndex((e) => e.name === "1980s"),
             layers.findIndex((e) => e.name === "1990s"),
             layers.findIndex((e) => e.name === "2000s"),
             layers.findIndex((e) => e.name === "2010~"),
+            layers.findIndex((e) => e.name === "others"),
           ]}
+        />
+        <ThreeObjectByLayerIndex
+          objects={children}
+          layer_indices={[
+            layers.findIndex((e) => e.name === "Default"),
+            layers.findIndex((e) => e.name === "지형"),
+          ]}
+          onClick={(e) => {
+            console.log(e.eventObject);
+            setGlobalData({ error: "out_of_moutain" });
+          }}
         />
       </group>
     );

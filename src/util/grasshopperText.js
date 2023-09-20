@@ -217,6 +217,7 @@ export const getRegionGuidDataFromGrasshopperText = (txt, type) => {
           break;
         case ",":
           new_list[new_list.length - 1].push([]);
+          break;
         default:
           switch (type) {
             case "guid":
@@ -278,8 +279,10 @@ export const getGridSelectionDataFromGrasshopperText = (txt) => {
           data[0]
         ] = {
           grids: data.slice(0, 4),
-          default_position: data[4]
-            ?.slice(1, data[4].length - 1)
+          region_ratio: Number(data[4]),
+          developable_ratio: Number(data[5]),
+          default_position: data[6]
+            ?.slice(1, data[6].length - 1)
             ?.split(",")
             ?.map((e) => Number(e)),
         };

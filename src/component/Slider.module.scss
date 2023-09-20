@@ -13,9 +13,10 @@
   &:last-child {
     scroll-snap-align: end;
   }
-
-  &::-webkit-scrollbar {
-    display: none;
+  &.touchable {
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 

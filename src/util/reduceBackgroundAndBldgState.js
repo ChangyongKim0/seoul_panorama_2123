@@ -11,12 +11,14 @@ import { LAYER_PROPERTIES } from "../threejs_component/ThreeBackground";
 import { getErrorPopupProperties } from "./getErrorPopupProperties";
 import { MODELS_TO_LOAD } from "./locateBldgsInPilji";
 import { cloneDeep } from "lodash";
+import { _getPiljiType } from "./JJ_new/_getPiljiType";
 
 const reduceBackgroundAndBldgState = (global_data) => {
   if (
     global_data.background_state &&
     global_data.bldg_state &&
-    global_data.background_relation
+    global_data.background_relation &&
+    global_data.curr_action
   ) {
     const data_to_update = {
       background_state: { ...global_data.background_state },
@@ -34,6 +36,7 @@ const reduceBackgroundAndBldgState = (global_data) => {
         switch (action.bldg_type) {
           case "big":
           case "big_x":
+          case "custom":
             if (!global_data?.waiting_clicking_pilji) {
               if (
                 _isBuildable(
@@ -46,7 +49,7 @@ const reduceBackgroundAndBldgState = (global_data) => {
                   data_to_update,
                   action.guid
                 );
-                _arranageBldgStateWhenBuildBigType(
+                const is_valid = _arrangeBldgStateWhenBuildBigType(
                   data_to_update,
                   global_data.background_relation,
                   action.guid,
@@ -54,6 +57,11 @@ const reduceBackgroundAndBldgState = (global_data) => {
                   action.bldg_model_type,
                   action.bldg_name
                 );
+                if (!is_valid) {
+                  return {
+                    error: "far_to_configurate",
+                  };
+                }
               } else {
                 return {
                   error: "hell_to_configurate",
@@ -125,6 +133,7 @@ const reduceBackgroundAndBldgState = (global_data) => {
       data_to_update,
       global_data.background_relation
     );
+    console.log(data_to_update);
     return data_to_update;
   }
   return {};
@@ -139,6 +148,34 @@ const _arrangeOverlappedWhenBuildNormalType = (
   bldg_name,
   svgNest_output
 ) => {
+  const pilji_list = background_relation.terrain[terrain_guid];
+  const terrain_multipolygon =
+    background_relation.pilji?.[pilji_list[0]]?.terrain_polygon;
+  if (terrain_multipolygon && terrain_multipolygon.length > 1) {
+    const polygons_to_check = terrain_multipolygon.slice(
+      1,
+      terrain_multipolygon.length
+    );
+    data.bldg_state[terrain_guid].bldg_configuration.forEach((e, idx) => {
+      const my_polygon =
+        MODELS_TO_LOAD?.[data.bldg_state[terrain_guid].bldg_name]?.filter(
+          (e2) =>
+            e2.name === e.name &&
+            e2.pilji_type === data.bldg_state[terrain_guid].pilji_type
+        )?.[0]?.polygon || [];
+      const rotated_polygon = _applyMatrix4OnPolygon(
+        my_polygon,
+        data.bldg_state[terrain_guid].bldg_configuration[idx]?.transform
+      );
+      polygons_to_check.forEach((polygon_to_check, polygon_idx) => {
+        if (_polygonOverlaps(polygon_to_check, rotated_polygon)) {
+          data.bldg_state[terrain_guid].bldg_configuration[idx].overlapped.push(
+            polygon_idx
+          );
+        }
+      });
+    });
+  }
   const overlapped = data.bldg_state[terrain_guid].overlapped;
   overlapped.forEach((e) => {
     if (e !== terrain_guid) {
@@ -148,7 +185,8 @@ const _arrangeOverlappedWhenBuildNormalType = (
           MODELS_TO_LOAD?.[data.bldg_state[terrain_guid].bldg_name]?.filter(
             (e2) =>
               e2.name ===
-              data.bldg_state[terrain_guid].bldg_configuration[idx].name
+                data.bldg_state[terrain_guid].bldg_configuration[idx].name &&
+              e2.pilji_type === data.bldg_state[terrain_guid].pilji_type
           )?.[0]?.polygon || [];
         const rotated_polygon = _applyMatrix4OnPolygon(
           my_polygon,
@@ -232,6 +270,10 @@ const _arrangeBldgStateWhenSvgNestCompleted = (
     overlaps: [],
   }));
   data.bldg_state[terrain_guid].bldg_configuration = configurations;
+  const pilji_guids = background_relation.terrain[terrain_guid];
+  data.bldg_state[terrain_guid].pilji_type = _getPiljiType(
+    background_relation.pilji[pilji_guids[0]]?.pilji_polygon
+  );
   console.log(data.bldg_state[terrain_guid]);
 };
 
@@ -239,7 +281,10 @@ const _isBuildable = (background_relation, terrain_guid, bldg_model_type) => {
   const pilji_guids = background_relation.terrain[terrain_guid];
   let bldg_count = 0;
   pilji_guids.forEach((pilji_guid) => {
-    ["model", "wall", "roof"].forEach((type) => {
+    (bldg_model_type.split("_").includes("c")
+      ? ["polygon"]
+      : ["model", "wall", "roof"]
+    ).forEach((type) => {
       if (
         background_relation.pilji[pilji_guid][bldg_model_type + "_" + type]
           ?.length > 0
@@ -251,7 +296,7 @@ const _isBuildable = (background_relation, terrain_guid, bldg_model_type) => {
   return bldg_count > 0;
 };
 
-const _arranageBldgStateWhenBuildBigType = (
+const _arrangeBldgStateWhenBuildBigType = (
   data,
   background_relation,
   terrain_guid,
@@ -283,17 +328,41 @@ const _arranageBldgStateWhenBuildBigType = (
           new Set(
             background_relation.pilji?.[e]?.[
               bldg_model_type + "_overlaps"
-            ]?.map((e2) => background_relation.pilji[e2].terrain)
+            ]?.map((e2) => background_relation.pilji[e2]?.terrain || -1)
           )
       )
     ),
   ];
+  if (overlaps.includes(-1)) {
+    return false;
+  }
   data.bldg_state[terrain_guid].bldg_name = bldg_name;
   data.bldg_state[terrain_guid].bldg_model_type = bldg_model_type;
   data.bldg_state[terrain_guid].bldg_type = bldg_type;
   data.bldg_state[terrain_guid].bldg_configuration = [
-    { overlapped: [], transform: new THREE.Matrix4(), overlaps },
+    {
+      name: bldg_name,
+      overlapped: [],
+      transform:
+        bldg_type === "custom"
+          ? new THREE.Matrix4()
+              .makeTranslation(
+                ...(background_relation.pilji[pilji_guids[0]]?.pilji_center || [
+                  0, 0, 0,
+                ])
+              )
+              .multiply(
+                new THREE.Matrix4().makeRotationZ(
+                  background_relation.pilji[pilji_guids[0]]?.pilji_rotation
+                )
+              )
+          : new THREE.Matrix4(),
+      overlaps,
+    },
   ];
+  data.bldg_state[terrain_guid].pilji_type = _getPiljiType(
+    background_relation.pilji[pilji_guids[0]]?.pilji_polygon
+  );
 
   // big_x는 주변 무조건 개발시킴
   if (bldg_type === "big_x") {
@@ -328,7 +397,8 @@ const _arranageBldgStateWhenBuildBigType = (
           this_polygon =
             MODELS_TO_LOAD?.[data.bldg_state[e].bldg_name]?.filter(
               (e2) =>
-                e2.name === data.bldg_state[e].bldg_configuration[idx].name
+                e2.name === data.bldg_state[e].bldg_configuration[idx].name &&
+                e2.pilji_type === data.bldg_state[e].pilji_type
             )?.[0]?.polygon || [];
         } else {
           const pilji_list = background_relation.terrain[e];
@@ -350,8 +420,15 @@ const _arranageBldgStateWhenBuildBigType = (
           this_polygon,
           data.bldg_state[e].bldg_configuration[idx]?.transform
         );
-        if (_polygonOverlaps(rotated_polygon, my_polygon)) {
-          if (data.bldg_state[e].bldg_type === "normal") {
+        if (
+          _polygonOverlaps(
+            data.bldg_state[e].bldg_type === "custom"
+              ? this_polygon
+              : rotated_polygon,
+            my_polygon
+          )
+        ) {
+          if (["normal", "custom"].includes(data.bldg_state[e].bldg_type)) {
             data.bldg_state[e].bldg_configuration[idx].overlapped.push(
               terrain_guid
             );
@@ -359,14 +436,10 @@ const _arranageBldgStateWhenBuildBigType = (
             _arrangeOverlappedWhenUnbuildBigType(data, e);
           }
         }
-        console.log(
-          rotated_polygon,
-          _polygonOverlaps(rotated_polygon, my_polygon)
-        );
       });
     }
   });
-
+  return true;
   // console.log(bldg_name);
 };
 
@@ -408,13 +481,13 @@ const _arrangeBackgroundStateByTerrainState = (data, background_relation) => {
         background_relation.terrain_wall_list_of_mound,
         multipleUnion(
           developed_pilji_list.map(
-            (e) => background_relation.pilji[e].terrain_wall
+            (e) => background_relation.pilji[e]?.terrain_wall
           )
         )
       ),
       multipleUnion(
         adjacent_pilji_list.map(
-          (e) => background_relation.pilji[e].terrain_wall
+          (e) => background_relation.pilji[e]?.terrain_wall
         )
       )
     ),
@@ -423,12 +496,12 @@ const _arrangeBackgroundStateByTerrainState = (data, background_relation) => {
     ...multipleUnion([
       multipleUnion(
         developed_pilji_list.map(
-          (e) => background_relation.pilji[e].adjacent_road_front
+          (e) => background_relation.pilji[e]?.adjacent_road_front
         )
       ),
       multipleUnion(
         developed_pilji_list.map(
-          (e) => background_relation.pilji[e].adjacent_road_back
+          (e) => background_relation.pilji[e]?.adjacent_road_back
         )
       ),
     ]),

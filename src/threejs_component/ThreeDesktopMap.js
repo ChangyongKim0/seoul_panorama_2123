@@ -174,11 +174,6 @@ const ThreeDesktopMap = forwardRef(
       <group>
         <ThreeObjectByLayerIndex
           objects={children}
-          onClick={(event) => {
-            if (event.delta < 10) {
-              onClick(event);
-            }
-          }}
           ref={terrain}
           layer_index={layers.findIndex((e) => e.name === "지형_구역")}
         />

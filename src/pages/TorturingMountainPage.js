@@ -11,12 +11,15 @@ import TextBox from "../component/TextBox";
 import TitleBox from "../component/TitleBox";
 import Button from "../component/Button";
 import Header from "../component/Header";
+import useGlobalVar from "../hooks/useGlobalVar";
+import CustomImage from "../component/CustomImage";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
 // var map = new naver.maps.Map(mapDiv);
 
 const TorturingMountainPage = ({ match }) => {
+  const [global_var, setGlobalVar] = useGlobalVar();
   const [page_idx, setPageIdx] = useState(0);
   useEffect(() => {
     setTimeout(() => {
@@ -42,10 +45,19 @@ const TorturingMountainPage = ({ match }) => {
       <AutoLayout type="column" gap={0} attach="center" align="center" fill>
         <div className={cx("frame-blank")}></div>
         <div className={cx("frame-image")}>
-          <img
-            className={cx("image")}
-            src={"./img/torturing_mountain/0" + (page_idx + 1) + ".png"}
-          />
+          <div className={cx("image")}>
+            <CustomImage
+              srcset={
+                page_idx === 5
+                  ? "https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/torturing_mountain/06.gif"
+                  : "https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/torturing_mountain/0" +
+                    (page_idx + 1) +
+                    ".png"
+              }
+              width={567}
+              height={528}
+            />
+          </div>
           {
             <div
               className={cx(
@@ -55,11 +67,17 @@ const TorturingMountainPage = ({ match }) => {
             >
               <AutoLayout fill attach="center">
                 <TextBox type="narration" align="center">
-                  {[
-                    "서울의 경계를 이루는 <대모산-구룡산>은 은폐와 무관심 속에서 가장 많은 침식을 당한 산입니다.",
-                    "",
-                    "우리는 향후 100년동안 산에 새로운 욕망이 투사될 수 있다는 사실을 인지해야 합니다!",
-                  ]}
+                  {global_var.use_eng
+                    ? [
+                        "<Daemosan-Guryongsan>, located at the edge of Seoul, is the mountain that has experienced the most destruction due to concealment and development.",
+                        "",
+                        "We must acknowledge that new desires could be projected onto this mountain over the next 100 years!",
+                      ]
+                    : [
+                        "서울의 경계를 이루는 <대모산-구룡산>은 은폐와 무관심 속에서 가장 많은 침식을 당한 산입니다.",
+                        "",
+                        "우리는 향후 100년 동안 산에 새로운 욕망이 투사될 수 있다는 사실을 인지해야 합니다!",
+                      ]}
                 </TextBox>
               </AutoLayout>
             </div>
@@ -72,20 +90,34 @@ const TorturingMountainPage = ({ match }) => {
                 type={page_idx === 5 ? "subtitle" : "narration"}
                 align="center"
               >
-                {page_idx === 0
-                  ? ["....."]
+                {global_var.use_eng
+                  ? page_idx === 0
+                    ? [".....", "(please touch the screen)"]
+                    : page_idx === 1
+                    ? ["Ugh...", "(please touch the screen)"]
+                    : page_idx === 2
+                    ? ["Ugh.....", "(please touch the screen)"]
+                    : page_idx === 3
+                    ? ["Ugh....", "(please touch the screen)"]
+                    : page_idx === 4
+                    ? ["Ugh....!", "(please touch the screen)"]
+                    : page_idx === 5
+                    ? [">>> NEXT >>>"]
+                    : []
+                  : page_idx === 0
+                  ? [".....", "(화면을 클릭해주세요.)"]
                   : page_idx === 1
-                  ? ["윽..."]
+                  ? ["윽...", "(화면을 클릭해주세요.)"]
                   : page_idx === 2
-                  ? ["으윽....."]
+                  ? ["으윽.....", "(화면을 클릭해주세요.)"]
                   : page_idx === 3
-                  ? ["으으으...."]
+                  ? ["으으으....", "(화면을 클릭해주세요.)"]
                   : page_idx === 4
-                  ? ["으으윽....!"]
+                  ? ["으으윽....!", "(화면을 클릭해주세요.)"]
                   : page_idx === 5
                   ? [">>> 다음 >>>"]
                   : []}
-              </TextBox>{" "}
+              </TextBox>
             </Link>
           </AutoLayout>
         </div>

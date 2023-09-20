@@ -14,12 +14,23 @@ export const setCookie = (name, value, exp) => {
   let date = new Date();
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   document.cookie =
-    name + "=" + value + ";expires=" + date.toUTCString() + ";path=/";
+    name +
+    "=" +
+    encodeURI(value) +
+    ";expires=" +
+    date.toUTCString() +
+    ";path=/";
 };
 
 export const getCookie = (name) => {
   let value = document.cookie.match("(^|;) ?" + name + "=([^;]*)(;|$)");
-  return value ? value[2] : undefined;
+  return value
+    ? value[2] === "true"
+      ? true
+      : value[2] === "false"
+      ? false
+      : decodeURI(value[2])
+    : undefined;
 };
 
 export const deleteCookie = (name) => {
@@ -32,14 +43,10 @@ const createCookie = (exp = default_expire_date) => {
   const time = date.getTime();
   date.setTime(time);
   exp_date.setTime(time + exp * 24 * 60 * 60 * 1000);
+  const id = date.toUTCString();
   document.cookie =
-    "id=" +
-    date.toUTCString() +
-    " " +
-    time +
-    ";expires=" +
-    exp_date.toUTCString() +
-    ";path=/";
+    "id=" + id + " " + time + ";expires=" + exp_date.toUTCString() + ";path=/";
+  return id;
 };
 
 const _getIPAndLocation = (data) => {
@@ -64,14 +71,20 @@ const _getIPAndLocation = (data) => {
 const cookie_list = [
   "GRID_FACTOR",
   "ISO_FACTOR",
-  "cam_pos",
   "region_guid",
-  "vec_target",
   "x_grid",
   "y_grid",
   "x_direction_to_add",
   "y_direction_to_add",
   "user_name",
+  "region_no",
+  "turing_test_completed",
+  "use_eng",
+  "visited_design_page",
+  "modeling_uploaded_at_least_once",
+  "found_easter_egg",
+  "upload_no",
+  "once_clicked_big_building",
 ];
 
 export const GlobalVarContext = createContext({
@@ -90,6 +103,8 @@ const reduceGlobalVar = (state, action) => {
       setCookie(key, action[key], 365);
     }
   });
+  console.log(action);
+  console.log({ ...state, ...action });
   return { ...state, ...action };
 };
 
@@ -104,15 +119,16 @@ export const GlobalVarProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    const id = getCookie("id");
+    let id = getCookie("id");
     let cookie_data = {};
     if (id === undefined) {
-      createCookie(365);
+      id = createCookie(365);
       console.log("created cookie.");
-      cookie_data = { id: getCookie("id") };
+      cookie_data = { id };
+      setGlobalVar({ refreshed: false, id });
     } else {
       console.log("cookie already set: ID=" + id);
-      cookie_data = { id: id };
+      cookie_data = { id };
       cookie_list.map((e) => {
         const each_cookie = getCookie(e);
         if (each_cookie !== undefined) {

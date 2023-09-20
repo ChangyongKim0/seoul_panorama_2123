@@ -27,26 +27,61 @@
     height: 100%;
     width: 0px;
     border-right: dashed 1.5px $bgd-black;
-    & > * {
-      @include font-eng-14;
-      position: absolute;
-      bottom: -1rem;
-      width: fit-content;
-    }
     &.smooth {
       transition: opacity 0.3s;
+    }
+    &.my {
+      border-right: dashed 1.5px $bgd-secondary;
     }
   }
 }
 
 .text {
   &-score {
+    @include font-eng-14;
+    position: absolute;
+    width: fit-content;
     font-weight: bold;
     padding: 0.25rem;
     transform: translateY(100%);
     white-space: nowrap;
+    word-break: keep-all;
     color: $txt-primary;
+    &.my {
+      color: $bgd-secondary;
+    }
+    &.up {
+      transform: translateY(0%);
+    }
+    &.down {
+      transform: translateY(100%);
+    }
+    &.left {
+      right: 0rem;
+    }
+    &.right {
+      left: 0rem;
+    }
     // background-color: $bgd-white;
+  }
+  &-base-score {
+    @include font-eng-14;
+    position: absolute;
+    bottom: -1.25rem;
+    width: fit-content;
+    font-weight: bold;
+    white-space: nowrap;
+    word-break: keep-all;
+    &.left {
+      right: 0.25rem;
+    }
+    &.right {
+      left: 0.25rem;
+    }
+    &.my {
+      bottom: 0.25rem;
+      color: $bgd-secondary;
+    }
   }
 }
 .graph {

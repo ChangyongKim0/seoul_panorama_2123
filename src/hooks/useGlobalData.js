@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useMemo, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+} from "react";
 
 export const GlobalDataContext = createContext({
   global_data: {},
@@ -10,7 +16,13 @@ const local_storage_list = [
   "background_state",
   "bldg_state",
   "undo_redo_data",
-  "background_relation",
+  // "background_relation",
+  "grids",
+  "default_position",
+  "vec_target",
+  "cam_pos",
+  "this_region_data",
+  "id",
 ];
 
 const useGlobalData = () => {
@@ -22,7 +34,9 @@ const setLocalStorage = (key, item) => {
   if (item) {
     try {
       window.localStorage.setItem(key, JSON.stringify(item));
-    } catch {
+    } catch (e) {
+      console.log(e);
+      console.log(item);
       window.localStorage.setItem(key, item);
     }
   }
@@ -50,10 +64,8 @@ const reduceGlobalData = (state, action) => {
   // });
   if (typeof action === "function") {
     const new_action = action(state);
-    if (new_action.type !== "silent") {
-      console.log(new_action);
-      console.log("global data updated.");
-    }
+    console.log(new_action);
+    console.log("global data updated.");
     Object.keys(new_action).map((key) => {
       if (local_storage_list.includes(key)) {
         setLocalStorage(key, new_action[key]);
@@ -61,15 +73,14 @@ const reduceGlobalData = (state, action) => {
     });
     return { ...state, ...new_action };
   }
-  if (action.type !== "silent") {
-    console.log(action);
-    console.log("global data updated.");
-  }
-  Object.keys(action).map((key) => {
+  console.log(action);
+  console.log("global data updated.");
+  Object.keys(action).forEach((key) => {
     if (local_storage_list.includes(key)) {
       setLocalStorage(key, action[key]);
     }
   });
+  console.log({ ...state, ...action });
   return { ...state, ...action };
 };
 
@@ -79,11 +90,15 @@ export const GlobalDataProvider = ({ children }) => {
     editing_data: {},
     assumptions: [],
     clicked_meshs: [],
-    test: getLocalStorage("test"),
-    background_state: getLocalStorage("background_state"),
-    bldg_state: getLocalStorage("bldg_state"),
-    undo_redo_data: getLocalStorage("undo_redo_data"),
   });
+  useLayoutEffect(() => {
+    setGlobalData(
+      local_storage_list.reduce((prev, key) => {
+        prev[key] = getLocalStorage(key);
+        return prev;
+      }, {})
+    );
+  }, []);
   const value = useMemo(() => {
     return { global_data, setGlobalData };
   }, [global_data, setGlobalData]);

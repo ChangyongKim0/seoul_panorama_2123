@@ -18,10 +18,23 @@ export const getDevelopedPilji = (bldg_state, background_relation) => {
   const developed_objects = [];
 
   for (const [tguid, obj] of Object.entries(bldg_state)) {
+    // console.log(tguid, obj);
     if (obj.developed) {
       const { bldg_type, bldg_name, overlapped, bldg_configuration } = obj;
-      const guid = background_relation.terrain[tguid][0];
-      const polygons = getPiljiPolygonFromGuids(background_relation.pilji, guid);
+
+      // CY 추가
+      const guids = background_relation.terrain[tguid];
+      if (guids === undefined) {
+        break;
+      }
+
+      // 재진 보완 필요
+      const guid = guids[0];
+      const polygons = getPiljiPolygonFromGuids(
+        background_relation.pilji,
+        guid
+      );
+
       const area = polygonArea(polygons[0]);
       const x_2_area = polygonArea(polygons[1]);
       const y_1_area = polygonArea(polygons[2]);
@@ -48,7 +61,7 @@ export const getDevelopedPilji = (bldg_state, background_relation) => {
   }
 
   return developed_objects;
-}
+};
 
 // testcode
 // import { background_relation } from "./background_relation.js";

@@ -82,7 +82,7 @@ const convertSvgMatixToMatrix4 = (svg_matrix) => {
 const extractSvgMatrixListFromSvgList = (svglist, rotate) => {
   const matrix =
     svglist?.[0]?.children?.[0]?.transform?.baseVal?.consolidate?.()?.matrix;
-  console.log(rotate);
+  // console.log(rotate);
   return Array.from(svglist?.[0]?.children).map((e) => ({
     id: e?.children?.[0]?.id || e?.id,
     matrix4: convertSvgMatixToMatrix4(
@@ -113,7 +113,8 @@ const formatOutput = (svg_matrix_list) => {
 
 export const getSvgNestWithCallback = (
   polygon_data,
-  rotate,
+  config,
+  total_rotation_angle,
   setOutput,
   onProgress = () => {},
   onRenderSvg = () => {}
@@ -128,10 +129,10 @@ export const getSvgNestWithCallback = (
     let transformations = {};
     try {
       transformations = formatOutput(
-        extractSvgMatrixListFromSvgList(svglist, rotate)
+        extractSvgMatrixListFromSvgList(svglist, total_rotation_angle)
       );
-      console.log(transformations);
-      console.log(svglist);
+      // console.log(transformations);
+      // console.log(svglist);
     } catch {}
     setOutput({
       transformations,
@@ -144,10 +145,12 @@ export const getSvgNestWithCallback = (
   };
   try {
     const parsed_svgs = svg_nest?.parsesvg?.(
-      convertPolygonDataToSvg(polygon_data, rotate)
+      convertPolygonDataToSvg(polygon_data, total_rotation_angle)
     );
-    console.log(parsed_svgs);
+    // console.log(parsed_svgs);
     svg_nest.setbin(parsed_svgs.children[0]);
+    // console.log(config);
+    svg_nest.config(config);
     svg_nest.stop();
     svg_nest.start(progress, renderSvg);
   } catch {}

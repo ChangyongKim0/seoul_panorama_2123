@@ -4,6 +4,7 @@ import "../util/reset.css";
 import styles from "./NotFound.module.scss";
 import classNames from "classnames/bind";
 import { Link } from "react-router-dom";
+import CustomImage from "../component/CustomImage";
 
 const cx = classNames.bind(styles);
 
@@ -26,8 +27,15 @@ const NotFound = () => {
   return (
     <div className={cx("wrapper")}>
       <Link to="/">
-        <div className={cx("frame-logo")}>
-          <img className={cx("logo")} src="/logo512.png" alt="Propi"></img>
+        <div className={cx("logo")}>
+          <div className={cx("frame-image")} alt="Propi">
+                <CustomImage
+                  srcset="https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/logo/logo512.png"
+                  width={512}
+                  height={512}
+                />
+              </div>
+          {/* <img className={cx("logo")} src="/logo512.png" alt="Propi"></img> */}
           <div className={cx("logo-title")}>Calculator × Propi</div>
         </div>
       </Link>

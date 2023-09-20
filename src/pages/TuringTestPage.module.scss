@@ -43,6 +43,17 @@
     display: flex;
     justify-content: center;
   }
+  &-blank-button {
+    height: 3rem;
+  }
+  &-real-button {
+    width: 100%;
+    &.fixed {
+      width: calc(min(100%, 640px) - 2rem);
+      position: fixed;
+      bottom: 1rem;
+    }
+  }
   &-content {
     background-color: $bgd-white;
     overflow-x: visible;

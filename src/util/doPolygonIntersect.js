@@ -77,3 +77,14 @@ export function doPolygonsIntersect(polygon1, polygon2) {
 
   return false;
 }
+
+const _transformCustomPolygonToPolygon = (custom_polygon) => {
+  return custom_polygon.map((e) => new Point(e[0], e[1]));
+};
+
+export const doCustomPolygonsIntersect = (polygon1, polygon2) => {
+  return doPolygonsIntersect(
+    _transformCustomPolygonToPolygon(polygon1),
+    _transformCustomPolygonToPolygon(polygon2)
+  );
+};

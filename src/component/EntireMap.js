@@ -55,6 +55,8 @@ import {
 import axios from "axios";
 import { getS3URL } from "../hooks/useS3";
 import ThreeHere from "../threejs_component/ThreeHere";
+import { _getRegionDataFromTable } from "../util/JJ_new/_getRegionDataFromTable";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 const cx = classNames.bind(styles);
 
@@ -119,6 +121,19 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
     }
   }, [clicked_state]);
 
+  useEffect(() => {
+    if (global_var.map_clicked_state === "region") {
+      setClickedState("region");
+      setCamTarget(global_data.region_center);
+      setCamPos(global_data.region_cam_pos);
+      setGlobalVar({ map_clicked_state: false });
+    }
+  }, [
+    global_var.map_clicked_state,
+    global_data.region_center,
+    global_data.region_cam_pos,
+  ]);
+
   useFrame(() => {
     const new_bound_vector = BOUND.map(
       (e) => e * (1 - (main_cam.current.position.y / MAX_HEIGHT) * 0.5)
@@ -182,11 +197,11 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
 
   const [target, setTarget] = useState([0, 0, 0]);
   useEffect(() => {
-    if (global_var.vec_target) {
-      const new_target = JSON.parse(global_var.vec_target);
+    if (global_data.vec_target) {
+      const new_target = global_data.vec_target;
       setTarget([new_target.x, -new_target.z, new_target.y + 10]);
     }
-  }, [global_var.vec_target]);
+  }, [global_data.vec_target]);
 
   return (
     <>
@@ -246,7 +261,7 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
             // console.log(event?.point?.x, event?.point?.y);
             setTouchDisabled(true);
             setMapClicked(true);
-            if (clicked_state === "unclicked") {
+            const goToRegion = () => {
               const region_center = rotateX(
                 global_data.region_data?.[
                   event?.object?.userData?.attributes?.id
@@ -262,18 +277,8 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
                     ].region_name
                   ) || -1,
               });
-              setGlobalData({
-                clicked_meshs: [event.object],
-                emph_guids: [
-                  global_data.region_data?.[
-                    event?.object?.userData?.attributes?.id
-                  ]?.polygon,
-                ],
-              });
-              setClickedState("region");
-              setCamTarget(region_center);
               const HEIGHT_FACTOR = 6.2;
-              setCamPos([
+              const region_cam_pos = [
                 region_center[0],
                 region_center[1] +
                   Math.max(
@@ -288,50 +293,104 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
                   ) *
                     HEIGHT_FACTOR,
                 region_center[2] + 50,
-              ]);
-            } else if (
-              clicked_state === "region" &&
-              event?.object?.userData?.attributes?.id === global_var.region_guid
-            ) {
+              ];
+              setGlobalData({
+                clicked_meshs: [event.object],
+                emph_guids: [
+                  global_data.region_data?.[
+                    event?.object?.userData?.attributes?.id
+                  ]?.polygon,
+                ],
+                this_region_data: _getRegionDataFromTable(
+                  Number(
+                    global_data.region_data?.[
+                      event?.object?.userData?.attributes?.id
+                    ].region_name
+                  ) || -1
+                ),
+                region_cam_pos,
+                region_center,
+              });
+              setClickedState("region");
+              setCamTarget(region_center);
+              setCamPos(region_cam_pos);
+            };
+            const goToPosition = () => {
               const vec_target = event.point;
               const GRID_FACTOR = 300;
-              const ISO_FACTOR = (6 * size.height) / size.width;
-              axios.get(getS3URL("", "map/grid_isovectors.txt")).then((res) => {
-                const x_grid = Math.floor(vec_target.x / GRID_FACTOR),
-                  y_grid = Math.floor(-vec_target.z / GRID_FACTOR),
-                  x_direction_to_add =
-                    Math.floor(vec_target.x / GRID_FACTOR) ===
-                    Math.floor((2 * vec_target.x) / GRID_FACTOR) / 2
-                      ? "left"
-                      : "right",
-                  y_direction_to_add =
-                    Math.floor(-vec_target.z / GRID_FACTOR) ===
-                    Math.floor((2 * -vec_target.z) / GRID_FACTOR) / 2
-                      ? "down"
-                      : "up";
-                setGlobalVar({
-                  x_grid,
-                  y_grid,
-                  x_direction_to_add,
-                  y_direction_to_add,
-                });
-                const cam_pos = rotateX(
-                  getGridIsovectorsFromGrasshopperText(res.data)[x_grid][y_grid]
-                );
-                setGlobalVar({
-                  vec_target: JSON.stringify(vec_target),
-                  cam_pos: JSON.stringify(cam_pos),
-                  ISO_FACTOR,
-                  GRID_FACTOR,
-                });
-                setCamPos([
-                  vec_target.x + cam_pos[0] * ISO_FACTOR,
-                  vec_target.y + cam_pos[1] * ISO_FACTOR,
-                  vec_target.z + cam_pos[2] * ISO_FACTOR,
-                ]);
-              });
-              setClickedState("position");
-              setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
+              const x_grid = Math.floor(vec_target.x / GRID_FACTOR),
+                y_grid = Math.floor(-vec_target.z / GRID_FACTOR),
+                x_direction_to_add =
+                  Math.floor(vec_target.x / GRID_FACTOR) ===
+                  Math.floor((2 * vec_target.x) / GRID_FACTOR) / 2
+                    ? "left"
+                    : "right",
+                y_direction_to_add =
+                  Math.floor(-vec_target.z / GRID_FACTOR) ===
+                  Math.floor((2 * -vec_target.z) / GRID_FACTOR) / 2
+                    ? "down"
+                    : "up";
+              const data = global_data.grid_selection_data.filter(
+                (e) => e.region_no === global_var.region_no
+              );
+              const developable_ratio =
+                data.length > 0
+                  ? data[0].selection_data[`{${x_grid};${y_grid}}`]
+                      ?.developable_ratio
+                  : 0;
+              console.log(developable_ratio);
+              const onSuccess = () => {
+                const ISO_FACTOR = (6 * size.height) / size.width;
+                axios
+                  .get(getS3URL("", "map/grid_isovectors.txt"))
+                  .then((res) => {
+                    setGlobalVar({
+                      x_grid,
+                      y_grid,
+                      x_direction_to_add,
+                      y_direction_to_add,
+                      ISO_FACTOR,
+                      GRID_FACTOR,
+                    });
+                    const cam_pos = rotateX(
+                      getGridIsovectorsFromGrasshopperText(res.data)[x_grid][
+                        y_grid
+                      ]
+                    );
+                    setGlobalData({
+                      cam_pos,
+                      vec_target,
+                    });
+                    setCamPos([
+                      vec_target.x + cam_pos[0] * ISO_FACTOR,
+                      vec_target.y + cam_pos[1] * ISO_FACTOR,
+                      vec_target.z + cam_pos[2] * ISO_FACTOR,
+                    ]);
+                  });
+                setClickedState("position");
+                setCamTarget([vec_target.x, vec_target.y, vec_target.z]);
+              };
+              if (developable_ratio < 0.1) {
+                setGlobalData({ error: "undevelopable_position" });
+              } else {
+                if (developable_ratio < 0.25) {
+                  setGlobalData({ error: "lowly_developable_position" });
+                }
+                onSuccess();
+              }
+            };
+            if (clicked_state === "unclicked") {
+              goToRegion();
+            } else if (clicked_state === "region") {
+              if (
+                event?.object?.userData?.attributes?.id ===
+                global_var.region_guid
+              ) {
+                goToPosition();
+              } else {
+                // setGlobalData({ error: "out_of_region_on_map" });
+                goToRegion();
+              }
             }
           }}
           onEachProgress={onEachProgress}
@@ -432,22 +491,11 @@ const SampleHouse = ({ onEachProgress, clicked_state, setClickedState }) => {
 };
 
 const EntireMap = ({ clicked_state, setClickedState }) => {
-  const box_geometry = new THREE.BoxGeometry();
-  const box_material = new THREE.MeshBasicMaterial({ color: 0x00ff80 });
-  const cube = new THREE.Mesh(box_geometry, box_material);
-
-  const [test_data, setTestData] = useState({ test: 0 });
-
-  const [rot_speed, setRotSpeed] = useState(1);
-  const [orb_speed, setOrbSpeed] = useState(1);
-  const [lt_pos, setLtPos] = useState(-30);
-  const [lt_pow, setLtPow] = useState(2);
-
+  const [global_data, setGlobalData] = useGlobalData();
   const [each_xhr, setEachXhr] = useReducer((state, action) => {
     if (action === "reset") {
       return { count: 0, data: {} };
     }
-    // console.log(action);
     return {
       data: { ...state.data, ...action.data },
       count: action.count,
@@ -455,25 +503,34 @@ const EntireMap = ({ clicked_state, setClickedState }) => {
       time_sec_each: action.time_sec_each,
     };
   }, {});
+  const [activated, setActivated] = useState(false);
+  useEffect(() => {
+    if (!activated) {
+      setTimeout(() => setActivated(true), 1000);
+    }
+  }, []);
 
   return (
     <div className={cx("wrapper") + " three-js-container"}>
       <Suspense fallback={<Loading each_xhr={each_xhr} />}>
         <Canvas shadows frameloop="demand">
-          <SampleHouse
-            onEachProgress={(name, xhr) => {
-              const new_xhr = {
-                count: 1,
-                data: {},
-                time_sec_last: 9,
-                time_sec_each: 0,
-              };
-              new_xhr.data[name] = xhr;
-              setEachXhr(new_xhr);
-            }}
-            clicked_state={clicked_state}
-            setClickedState={setClickedState}
-          />
+          {activated && global_data.error !== "possible_crash_warning" && (
+            <SampleHouse
+              onEachProgress={(name, xhr) => {
+                const new_xhr = {
+                  count: 1,
+                  data: {},
+                  time_sec_last: 9,
+                  time_sec_each: 0,
+                };
+                new_xhr.data[name] = xhr;
+                setEachXhr(new_xhr);
+                console.log(new_xhr);
+              }}
+              clicked_state={clicked_state}
+              setClickedState={setClickedState}
+            />
+          )}
         </Canvas>
       </Suspense>
     </div>

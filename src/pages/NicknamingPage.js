@@ -18,6 +18,8 @@ import useGlobalData from "../hooks/useGlobalData";
 import useGlobalVar from "../hooks/useGlobalVar";
 import { AnimatePresence } from "framer-motion/dist/framer-motion";
 import PopupCardScenario from "../component/PopupCardScenario";
+import CustomImage from "../component/CustomImage";
+import { useEffectAfterFirst } from "../hooks/useEffectAfterSecond";
 
 const cx = classNames.bind(styles);
 // var mapDiv = document.getElementById('map');
@@ -37,7 +39,7 @@ const NicknamingPage = ({ match }) => {
     };
   }, []);
 
-  useEffect(() => {
+  useEffectAfterFirst(() => {
     if (global_data.error) {
       setTimeout(
         () => setGlobalVar({ open_overlay: true, popup_type: "error" }),
@@ -59,17 +61,41 @@ const NicknamingPage = ({ match }) => {
         <AutoLayout type="column" padding={1} gap={1.5}>
           <div className={cx("frame-top")}></div>
           <TextBox type="title-fill" hug>
-            {["[SEOUL MASTERPLAN PROGRAM]"]}
+            {global_var.use_eng
+              ? ["[SEOUL M.PLAN PROGRAM]"]
+              : ["[서울 마스터플랜 프로그램]"]}
           </TextBox>
-          <img className={cx("frame-image")} src="/img/nicknaming/01.png"></img>
+          <div className={cx("frame-image")}>
+            <CustomImage
+              srcset={
+                global_var.use_eng
+                  ? "https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/nicknaming/01e.png"
+                  : "https://seoulpanorama2123.s3.ap-northeast-2.amazonaws.com/design/img/nicknaming/01.png"
+              }
+              width={2043}
+              height={1234}
+            />
+          </div>
           <TextBox type="narration" black>
-            {[
-              "안녕하세요! [시민 건축가]님!",
-              "",
-              "당신은 서울 마스터플랜 건축가가 되어 원하는 미래를 만들어낼 자격이 충분합니다!",
-              "",
-              "여러분의 손으로 <구룡산-대모산>을 구해주세요!",
-            ]}
+            {global_var.use_eng
+              ? [
+                  "Hello! [Citizen Architect]!",
+                  "",
+                  "You are eligible to become a Master Plan Architect for Seoul and shape the future you envision!",
+                  "",
+                  "Take action to save <Guryongsan-Daemosan>!",
+                ]
+              : [
+                  "안녕하세요! [시민 건축가]님!",
+                  "",
+                  "당신은 서울 마스터플랜 건축가가 되어 원하는 미래를 만들어낼 자격이 충분합니다!",
+                  "",
+                  "여러분의 손으로 <구룡산-대모산>을 구해주세요!",
+                  // global_var.user_name,
+                  // global_data.cam_pos,
+                  // global_var.region_no,
+                  // global_var.visited_design_page,
+                ]}
           </TextBox>
           <TextInput
             type="emph"
@@ -78,13 +104,20 @@ const NicknamingPage = ({ match }) => {
             }}
             ref={user_name}
           >
-            시민 건축가님, 당신의 이름은?
+            {global_var.use_eng ? "Your name?" : "당신의 이름은?"}
           </TextInput>
           <Button
             type="emph"
             onClick={() => {
               if (!(user_name.current?.value?.length > 0)) {
                 setGlobalData({ error: "blank_name" });
+              } else if (
+                user_name.current?.value.match(/^[ㄱ-ㅣ가-힣a-zA-Z0-9 ]*$/g) ===
+                null
+              ) {
+                setGlobalData({ error: "invalid_nickname" });
+              } else if (user_name.current?.value?.length > 10) { // 글자수 제한
+                setGlobalData({ error: "too_long_nickname" });
               } else if (global_var.user_name) {
                 if (global_var.user_name !== user_name.current?.value) {
                   setGlobalVar({
@@ -117,7 +150,7 @@ const NicknamingPage = ({ match }) => {
               }
             }}
           >
-            PLAY!
+            {global_var.use_eng ? "PLAY!" : "시작하기!"}
           </Button>
           <div className={cx("frame-bottom")}></div>
         </AutoLayout>

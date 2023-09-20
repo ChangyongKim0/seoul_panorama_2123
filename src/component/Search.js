@@ -16,6 +16,8 @@ import Icon from "./Icon";
 import Divider from "./Divider";
 import useGlobalVar from "../hooks/useGlobalVar";
 import useGlobalData from "../hooks/useGlobalData";
+import axios from "axios";
+import { _API_URL } from "../util/alias";
 
 const cx = classNames.bind(styles);
 
@@ -23,7 +25,7 @@ let input_search = "";
 
 const reduceSearchResults = (state, action) => {
   let new_state = cloneDeep(state);
-  // console.log(new_state.focus);
+  console.log(action);
   switch (action.type) {
     case "focus_down":
       if (state.focus < state.data.length - 1) {
@@ -62,9 +64,9 @@ const emphasizeText = (text, word) => {
   // return text.replace(new RegExp(word, "gi"), `<mark>${word}</mark>`);
   return text.split(word).map((e, idx) =>
     idx == 0 ? (
-      <span>{e}</span>
+      <span key={idx}>{e}</span>
     ) : (
-      <span>
+      <span key={idx}>
         <span className={cx("text-emph")}>{word}</span>
         {e}
       </span>
@@ -72,24 +74,13 @@ const emphasizeText = (text, word) => {
   );
 };
 
-const SAMPLE = [
-  { name: "지용이형" },
-  { name: "지용" },
-  { name: "전지용" },
-  { name: "김창용" },
-  { name: "김창용0103" },
-  { name: "창용" },
-  { name: "재진" },
-  { name: "샘플0" },
-  { name: "샘플2" },
-];
-
 const Search = forwardRef(({ onClick }, ref) => {
   const [search_results, handleSearchResults] = useReducer(
     reduceSearchResults,
     { data: [], focus: 0 }
   );
   const [global_data, setGlobalData] = useGlobalData();
+  const name_list = useRef([]);
 
   let callback = function (result, status) {
     // if (status === window.kakao.maps.services.Status.OK) {
@@ -118,12 +109,13 @@ const Search = forwardRef(({ onClick }, ref) => {
 
   useEffect(() => {
     input_search = document.getElementById("input_search");
-    input_search.addEventListener("keydown", (e) => {
+    const onKeyDown = (e) => {
       if (e.key == "ArrowUp" || e.key == "ArrowDown") {
         e.preventDefault();
       }
-    });
-    input_search.addEventListener("keyup", (e) => {
+    };
+    input_search.addEventListener("keydown", onKeyDown);
+    const onKeyUp = (e) => {
       // console.log(e);
       if (e.code == "ArrowUp") {
         if (e.key == "ArrowUp") {
@@ -138,7 +130,7 @@ const Search = forwardRef(({ onClick }, ref) => {
           });
         }
       } else if (e.code == "Enter") {
-        forceActivateSearchResults();
+        forceActivateSearchResults(onClick);
       } else if (
         e.code != "Enter" &&
         e.code != "ArrowLeft" &&
@@ -146,12 +138,17 @@ const Search = forwardRef(({ onClick }, ref) => {
       ) {
         forceSearch();
       }
-    });
-  }, []);
+    };
+    input_search.addEventListener("keyup", onKeyUp);
+    return () => {
+      input_search.removeEventListener("keyup", onKeyUp);
+      input_search.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClick]);
 
   const [global_var, setGlobalVar] = useGlobalVar();
 
-  const forceActivateSearchResults = () => {
+  const forceActivateSearchResults = (onClick) => {
     handleSearchResults({
       type: "force_activate",
       callback: (state) => {
@@ -176,6 +173,9 @@ const Search = forwardRef(({ onClick }, ref) => {
           } else {
             setGlobalData({ error: "no_matching_name" });
           }
+        },
+        updateValue: (text) => {
+          search_field.current.value = text?.split("_")?.[0];
         },
       };
     },
@@ -213,10 +213,9 @@ const Search = forwardRef(({ onClick }, ref) => {
   const forceSearch = () => {
     // places.keywordSearch(input_search.value, callback);
     if (search_field.current?.value?.length > 0) {
-      const related_data = SAMPLE.filter((data) =>
-        data.name.includes(search_field.current.value)
-      )
-        .sort((a, b) => a.name?.length - b.name?.length)
+      const related_data = name_list.current
+        .filter((data) => data.includes(search_field.current.value))
+        .sort((a, b) => a?.length - b?.length)
         .slice(0, 5);
       handleSearchResults({ type: "update", data: related_data });
     }
@@ -246,13 +245,20 @@ const Search = forwardRef(({ onClick }, ref) => {
             id="input_search"
             className={cx("text-field")}
             type="text"
-            placeholder="이름을 검색하시면 자신의 디자인을 확인할 수 있어요!"
+            placeholder={
+              global_var.use_eng
+                ? ["Search your design with your name!"]
+                : ["이름을 검색하시면 자신의 디자인을 확인할 수 있어요!"]
+            }
             onFocus={() => {
               forceSearch();
               setFocused(true);
+              axios
+                .get(_API_URL + "uploaded_user_names")
+                .then((res) => (name_list.current = res.data));
             }}
             ref={search_field}
-            autoComplete="false"
+            autoComplete="off"
           ></input>
         </div>
 
@@ -286,7 +292,7 @@ const Search = forwardRef(({ onClick }, ref) => {
                       }}
                     >
                       <div className={cx("title")}>
-                        {emphasizeText(e.name, input_search.value)}
+                        {emphasizeText(e?.split("_")?.[0], input_search.value)}
                       </div>
                     </div>
                   </>
@@ -300,7 +306,9 @@ const Search = forwardRef(({ onClick }, ref) => {
             <div id="input_search_drop_down" className={cx("drop-down")}>
               <div className={cx("frame-list")}>
                 <div className={cx("title", "grey")}>
-                  {"검색하신 이름이 없어요."}
+                  {global_var.use_eng
+                    ? ["The name isn't registerd yet."]
+                    : ["검색하신 이름이 없어요."]}
                 </div>
               </div>
             </div>

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  forwardRef,
+} from "react";
 // { useEffect }
 
 import styles from "./NavSheet.module.scss";
@@ -13,13 +19,13 @@ import Button from "../component/Button";
 
 const cx = classNames.bind(styles);
 
-const NavSheet = ({ type, children, onClick }) => {
+const NavSheet = forwardRef(({ type, children, onClick, fillX }, ref) => {
   const [global_var, setGlobalVar] = useGlobalVar();
   const [global_data, setGlobalData] = useGlobalData();
 
   const navigate = useNavigate();
   return (
-    <div className={cx("wrapper")}>
+    <div className={cx("wrapper", fillX ? "fillX" : "")} ref={ref}>
       <div className={cx("frame-header")}>
         <AutoLayout type="row" attach="space" padding={0.75} fillX>
           <div className={cx("frame-rotate")}>
@@ -41,7 +47,7 @@ const NavSheet = ({ type, children, onClick }) => {
       </AutoLayout>
     </div>
   );
-};
+});
 
 NavSheet.defaultProps = { type: "back" };
 

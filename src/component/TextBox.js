@@ -22,9 +22,13 @@ const TextBox = ({
   black,
   grey,
   lightgrey,
+  zIndex,
 }) => {
   return (
-    <div className={cx("wrapper", opaque ? "opaque" : "", hug ? "hug" : "")}>
+    <div
+      className={cx("wrapper", opaque ? "opaque" : "", hug ? "hug" : "")}
+      style={zIndex ? { zIndex: zIndex } : {}}
+    >
       {children.map((e, idx) => (
         <p
           key={idx}

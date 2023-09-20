@@ -79,6 +79,7 @@
       position: absolute;
       overflow: hidden;
       height: 100%;
+      // z-index: 1;
       @include shd-fourway-medium;
       &.right {
         right: 0;

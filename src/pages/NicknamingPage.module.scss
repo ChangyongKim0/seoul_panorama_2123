@@ -51,6 +51,7 @@
     height: 3rem;
   }
   &-overlay {
+    position: fixed;
     display: flex;
     width: calc(100% - 2rem);
     padding: 1rem;
@@ -58,5 +59,6 @@
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1;
   }
 }

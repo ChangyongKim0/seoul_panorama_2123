@@ -31,7 +31,15 @@ export const _centroid = (x, y) => {
 export const _sum = (list) => list.reduce((a, b) => a + b, 0);
 export const _avg = (list) => _sum(list) / list.length || 0;
 
-export const _fillZeros = (data, length) => {
+export const _fillZeros = (data, length, back = false) => {
+  if (back) {
+    const back_length = data.toString().split(".")?.[1]?.length || 0;
+    if (back_length === 0) {
+      return _fillZeros(data + ".0", length, true);
+    } else if (back_length < length) {
+      return _fillZeros(data + "0", length, true);
+    }
+  }
   if (data.length < length) {
     return _fillZeros("0" + data, length);
   }
@@ -107,6 +115,14 @@ export const getDistance = (vec1, vec2, default_dist) => {
     );
   } catch (e) {
     return default_dist;
+  }
+};
+
+export const getAngle = (vec1, vec2, default_angle) => {
+  try {
+    return Math.atan2(vec2.z - vec1.z, vec2.x - vec1.x);
+  } catch (e) {
+    return default_angle;
   }
 };
 
@@ -252,3 +268,44 @@ export const _applyMatrix4OnPolygon = (polygon, matrix_element) => {
 };
 
 export const _API_URL = "https://seoulpanorama2123.com:81/";
+
+export const _getDevelopedPiljiNumber = (bldg_state) => {
+  return Object.keys(bldg_state || {}).filter(
+    (key) => bldg_state[key].developed === true
+  ).length;
+};
+
+export const _getThousandSepStrFromNumber = (number) => {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
+export const _transformScoreGraphData = (score_graph_data) => {
+  return [
+    {
+      l: score_graph_data?.l?.mean,
+      b: score_graph_data?.b?.mean,
+      p: score_graph_data?.p?.mean,
+    },
+    {
+      l: score_graph_data?.l?.stdev,
+      b: score_graph_data?.b?.stdev,
+      p: score_graph_data?.p?.stdev,
+    },
+  ];
+};
+
+export const _getReducedScore = (score, bldg_state) => {
+  const threshold_number = 5;
+  const developed_number = _getDevelopedPiljiNumber(bldg_state);
+  return developed_number < threshold_number
+    ? (score * developed_number) / (threshold_number || 1)
+    : score;
+};
+
+export const _getCircledScore = (score) => {
+  return (
+    "●".repeat(Math.floor(score || 0)) +
+    (score % 1 !== 0 ? "◐" : "") +
+    "○".repeat(Math.floor(Math.abs(5 - (score || 0))))
+  );
+};

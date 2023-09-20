@@ -68,6 +68,9 @@ const Loading = ({ each_xhr = {} }) => {
       setAdditionalPercentage(-1);
     };
   }, [use_additional_percentage]);
+  useLayoutEffect(() => {
+    console.log("loader starts");
+  }, []);
 
   return (
     <div className={cx("wrapper")}>

@@ -19,6 +19,7 @@ const ChartBar = ({
   percent,
   right,
   border,
+  fill_window,
 }) => {
   const wrapper = useRef();
   const [wrapper_width, setWrapperWidth] = useState("0px");
@@ -41,7 +42,9 @@ const ChartBar = ({
     if (wrapper.current) {
       setWrapperWidth(
         "calc(" +
-          window.getComputedStyle(wrapper.current).width +
+          (fill_window
+            ? window.innerWidth - 32 + "px"
+            : window.getComputedStyle(wrapper.current).width) +
           " - " +
           (["small", "small-emph"].includes(type) ? "1" : "2") +
           "rem)"
@@ -49,7 +52,7 @@ const ChartBar = ({
     } else {
       setWrapperWidth("0px");
     }
-  }, [wrapper.current]);
+  }, [wrapper.current, fill_window]);
 
   return (
     <div
