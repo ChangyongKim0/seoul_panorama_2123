@@ -19,8 +19,8 @@
    1. [모델 업로드](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EB%AA%A8%EB%8D%B8-%EC%97%85%EB%A1%9C%EB%93%9C)
    1. [코드 수정이 필요한 경우](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%BD%94%EB%93%9C-%EC%88%98%EC%A0%95%EC%9D%B4-%ED%95%84%EC%9A%94%ED%95%9C-%EA%B2%BD%EC%9A%B0)
    1. [웹 브라우저에서 디버깅하기](https://github.com/ChangyongKim0/seoul_panorama_2123/tree/master#%EC%9B%B9-%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%EC%97%90%EC%84%9C-%EB%94%94%EB%B2%84%EA%B9%85%ED%95%98%EA%B8%B0)
-1. [유지보수하기]()
-   1. [인증서 갱신하기]()
+1. [유지보수하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%EC%9C%A0%EC%A7%80%EB%B3%B4%EC%88%98%ED%95%98%EA%B8%B0)
+   1. [인증서 갱신하기](https://github.com/ChangyongKim0/seoul_panorama_2123#%EC%9D%B8%EC%A6%9D%EC%84%9C-%EA%B0%B1%EC%8B%A0%ED%95%98%EA%B8%B0)
 
 ---
 
@@ -558,3 +558,11 @@ Object3D {isObject3D: true, uuid: '6bbaec4e-7931-41c5-b98f-9236cd8b1f15', name:
 # 유지보수하기
 
 ## 인증서 갱신하기
+
+- nginx 정지, certonly 갱신, nginx 재시작 한꺼번에 진행
+
+```bash
+sudo nginx -s stop
+certbot renew
+sudo service nginx start
+```
